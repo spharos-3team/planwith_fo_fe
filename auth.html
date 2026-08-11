@@ -10,10 +10,16 @@
   <link rel="stylesheet" href="signup-verify.css" />
   <link rel="stylesheet" href="signup-verify-modal.css" />
   <link rel="stylesheet" href="signup-profile.css" />
+  <link rel="stylesheet" href="find-id.css" />
+  <link rel="stylesheet" href="find-pw.css" />
+  <link rel="stylesheet" href="reset-pw.css" />
 </head>
 <body>
   <nav class="screen-tabs" aria-label="화면 전환">
     <button type="button" data-screen="login" class="active">로그인</button>
+    <button type="button" data-screen="find-id">아이디찾기</button>
+    <button type="button" data-screen="find-pw">비밀번호찾기</button>
+    <button type="button" data-screen="reset-pw">비밀번호재설정</button>
     <button type="button" data-screen="signup1">약관</button>
     <button type="button" data-screen="signup2">인증</button>
     <button type="button" data-screen="signup3">인증팝업</button>
@@ -71,12 +77,187 @@
       </div>
       <div class="footer-links">
         <div class="find-row">
-          <button class="find-link" type="button">아이디 찾기</button>
-          <button class="find-link" type="button">비밀번호 찾기</button>
+          <button class="find-link" type="button" data-go="find-id">아이디 찾기</button>
+          <button class="find-link" type="button" data-go="find-pw">비밀번호 찾기</button>
         </div>
         <div class="signup-row">
           <span>아직 회원이 아니신가요?</span>
           <button type="button" data-go="signup1">회원가입</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 아이디 찾기 -->
+    <section class="screen" id="find-id">
+      <div class="find-id-hero">
+        <div class="find-id-hero__heading">
+          <div class="find-id-hero__badge">Find Account</div>
+          <h1 class="find-id-hero__title">아이디 찾기</h1>
+        </div>
+        <div class="find-id-hero__sub-wrap">
+          <p class="find-id-hero__sub">가입 시 등록한 휴대폰 번호로 아이디를 찾아보세요</p>
+        </div>
+      </div>
+
+      <form class="find-id-form" id="form-find-id" novalidate>
+        <div class="find-id-form__fields">
+          <div class="field">
+            <div class="field-label">휴대폰 번호</div>
+            <input
+              class="input-destination"
+              name="phone"
+              type="tel"
+              inputmode="tel"
+              autocomplete="tel"
+              placeholder="010-0000-0000"
+              data-required="휴대폰 번호를 입력해주세요"
+            />
+            <p class="field-error" data-error-for="phone"></p>
+          </div>
+        </div>
+        <p class="form-error" id="find-id-form-error"></p>
+        <div class="find-id-result" id="find-id-result" aria-live="polite">
+          <p class="find-id-result__label">가입된 아이디(이메일)</p>
+          <p class="find-id-result__email" id="find-id-result-email"></p>
+        </div>
+        <button class="btn-find" type="submit">아이디 찾기</button>
+      </form>
+
+      <div class="find-id-footer">
+        <div class="find-id-footer__links">
+          <div class="find-id-footer__row">
+            <button class="find-id-footer__link" type="button" data-go="login">로그인으로 돌아가기</button>
+            <button class="find-id-footer__link" type="button" data-go="find-pw">비밀번호 찾기</button>
+          </div>
+        </div>
+        <div class="find-id-footer__signup">
+          <span>아직 회원이 아니신가요?</span>
+          <button type="button" data-go="signup1">회원가입</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 비밀번호 찾기 -->
+    <section class="screen" id="find-pw">
+      <div class="find-pw-hero">
+        <div class="find-pw-hero__heading">
+          <div class="find-pw-hero__badge">Voyage &amp; View</div>
+          <h1 class="find-pw-hero__title">비밀번호 찾기</h1>
+        </div>
+        <div class="find-pw-hero__sub-wrap">
+          <p class="find-pw-hero__sub">가입 시 등록한 이메일로 비밀번호를 재설정할 수 있습니다.</p>
+        </div>
+      </div>
+
+      <form class="find-pw-form" id="form-find-pw" novalidate>
+        <div class="find-pw-form__fields">
+          <div class="field">
+            <div class="field-label">이메일</div>
+            <input
+              class="input-destination"
+              name="email"
+              type="email"
+              autocomplete="email"
+              placeholder="example@email.com"
+              data-required="이메일을 입력해주세요"
+            />
+            <p class="field-error" data-error-for="email"></p>
+          </div>
+          <div class="field" id="find-pw-code-field" hidden>
+            <div class="field-label">인증번호</div>
+            <input
+              class="input-destination"
+              name="code"
+              type="text"
+              inputmode="numeric"
+              autocomplete="one-time-code"
+              placeholder="인증번호를 입력해주세요"
+            />
+            <p class="field-error" data-error-for="code"></p>
+          </div>
+        </div>
+        <p class="form-error" id="find-pw-form-error"></p>
+        <p class="form-ok" id="find-pw-form-ok"></p>
+        <button class="btn-send" type="submit" id="btn-find-pw-submit">인증 메일 보내기</button>
+        <div class="find-pw-hints">
+          <p>회원가입 시 이미 있는 이메일로 시도할 경우 비밀번호 찾기로 연결됩니다.</p>
+          <p>이메일 인증 성공 시 비밀번호 재설정이 가능합니다.</p>
+        </div>
+      </form>
+
+      <div class="find-pw-footer-wrap">
+        <div class="find-pw-footer">
+          <div class="find-pw-footer__links">
+            <div class="find-pw-footer__row">
+              <button class="find-pw-footer__link" type="button" data-go="login">로그인으로 돌아가기</button>
+              <button class="find-pw-footer__link" type="button" data-go="find-id">아이디 찾기</button>
+            </div>
+          </div>
+          <div class="find-pw-footer__signup">
+            <span>아직 회원이 아니신가요?</span>
+            <button type="button" data-go="signup1">회원가입</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 비밀번호 재설정 -->
+    <section class="screen" id="reset-pw">
+      <div class="reset-pw-hero">
+        <div class="reset-pw-hero__heading">
+          <div class="reset-pw-hero__badge">Voyage &amp; View</div>
+          <h1 class="reset-pw-hero__title">비밀번호 재설정</h1>
+        </div>
+        <div class="reset-pw-hero__sub-wrap">
+          <p class="reset-pw-hero__sub">이메일 인증이 완료되었습니다. 새로운 비밀번호를 설정해주세요.</p>
+        </div>
+      </div>
+
+      <form class="reset-pw-form" id="form-reset-pw" novalidate>
+        <div class="reset-pw-form__fields">
+          <div class="field">
+            <div class="field-label">새 비밀번호</div>
+            <input
+              class="input-destination"
+              name="newPassword"
+              type="password"
+              autocomplete="new-password"
+              placeholder="새 비밀번호 입력 (5자리 이상)"
+              data-required="새 비밀번호를 입력해주세요"
+            />
+            <p class="field-error" data-error-for="newPassword"></p>
+          </div>
+          <div class="field">
+            <div class="field-label">새 비밀번호 확인</div>
+            <input
+              class="input-destination"
+              name="confirmPassword"
+              type="password"
+              autocomplete="new-password"
+              placeholder="새 비밀번호 다시 입력"
+              data-required="새 비밀번호 확인을 입력해주세요"
+            />
+            <p class="field-error" data-error-for="confirmPassword"></p>
+          </div>
+        </div>
+        <p class="form-error" id="reset-pw-form-error"></p>
+        <button class="btn-reset" type="submit">비밀번호 변경하기</button>
+      </form>
+
+      <div class="reset-pw-back">
+        <button type="button" data-go="login">로그인으로 돌아가기</button>
+      </div>
+
+      <!-- 변경 성공 팝업 (인증팝업과 동일 스타일) -->
+      <div class="modal-backdrop" id="reset-pw-modal" hidden>
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="reset-pw-modal-title">
+          <div class="check-badge">✓</div>
+          <div class="title" id="reset-pw-modal-title">비밀번호가 변경되었습니다</div>
+          <div class="description">새 비밀번호로 로그인해 주세요</div>
+          <div class="actions-row">
+            <button class="btn-confirm primary" type="button" id="reset-pw-modal-ok" style="width:332px;background:#387BFF;color:#fff">확인</button>
+          </div>
+          <div class="hint">보안을 위해 다른 기기에서는 다시 로그인이 필요할 수 있습니다</div>
         </div>
       </div>
     </section>
@@ -151,22 +332,36 @@
               <div class="field-label">인증번호</div>
               <div class="input-row">
                 <input class="input-destination auth" name="code" type="text" placeholder="인증번호를 입력해주세요" data-required="인증번호를 입력해주세요" />
-                <button class="btn-confirm btn-confirm-code" type="button" id="btn-verify-code">확인</button>
+                <button class="btn-confirm btn-confirm-code" type="button" id="btn-verify-code">인증</button>
               </div>
               <p class="field-error" data-error-for="code"></p>
             </div>
             <div class="field">
               <div class="field-label">비밀번호</div>
-              <input class="input-destination wide" name="password" type="password" placeholder="소/대문자,특수 문자 포함8~20자로 입력하세요" data-required="비밀번호를 입력해주세요" />
+              <input class="input-destination wide" name="password" type="password" placeholder="영문, 특수문자 포함 8~20자로 입력하세요" data-required="비밀번호를 입력해주세요" />
               <p class="field-error" data-error-for="password"></p>
             </div>
             <p class="form-error" id="signup2-form-error"></p>
+            <p class="form-ok" id="signup2-form-ok"></p>
           </div>
           <div class="form-actions">
             <button class="btn-next is-disabled" type="submit" id="btn-signup2-next">다음</button>
             <p class="login-hint">이미 계정이 있으신가요? <a data-go="login">로그인</a></p>
           </div>
         </form>
+      </div>
+
+      <!-- 인증 메일 발송 알림 (사이트 내 alert 대신 이 팝업만 사용) -->
+      <div class="modal-backdrop" id="signup2-mail-modal" hidden>
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="signup2-mail-modal-title">
+          <div class="check-badge">✓</div>
+          <div class="title" id="signup2-mail-modal-title">인증 메일을 보냈습니다</div>
+          <div class="description">메일함에서 인증번호를 확인한 뒤 입력해 주세요</div>
+          <div class="actions-row">
+            <button class="btn-confirm primary" type="button" id="signup2-mail-modal-ok" style="width:332px;background:#387BFF;color:#fff">확인</button>
+          </div>
+          <div class="hint">메일이 오지 않으면 스팸함을 확인해 주세요</div>
+        </div>
       </div>
     </section>
 
@@ -286,6 +481,12 @@
       socialMode: false,
       socialEmail: "",
       socialNickname: "",
+      resetEmail: "",
+      resetCode: "",
+      resetVerified: false,
+      signupCodeSent: false,
+      signupCodeSending: false,
+      signupCodeReady: false,
     };
 
     function enterSocialSignupMode(pending) {
@@ -352,6 +553,15 @@
 
     function show(id) {
       if (id === "signup4") applyAuthEmailToProfile();
+      if (id === "reset-pw" && !state.resetVerified) {
+        id = "find-pw";
+      }
+      if (id !== "reset-pw") {
+        document.getElementById("reset-pw-modal")?.setAttribute("hidden", "");
+      }
+      if (id !== "signup2") {
+        document.getElementById("signup2-mail-modal")?.setAttribute("hidden", "");
+      }
       document.querySelectorAll(".screen").forEach((el) => el.classList.toggle("active", el.id === id));
       document.querySelectorAll(".screen-tabs button").forEach((btn) => {
         btn.classList.toggle("active", btn.dataset.screen === id);
@@ -629,6 +839,188 @@
       }
     });
 
+    // 비밀번호 찾기 — 1) 인증 메일 발송 2) 인증번호 확인 → 재설정 페이지
+    document.getElementById("form-find-pw").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const form = e.target;
+      const okEl = document.getElementById("find-pw-form-ok");
+      const codeField = document.getElementById("find-pw-code-field");
+      const submitBtn = document.getElementById("btn-find-pw-submit");
+      const codeSent = codeField && !codeField.hidden;
+
+      if (okEl) {
+        okEl.textContent = "";
+        okEl.classList.remove("show");
+      }
+      setFormError("find-pw-form-error", "");
+
+      const email = form.email.value.trim();
+      if (!email) {
+        setFormError("find-pw-form-error", "이메일을 입력해 주세요");
+        return;
+      }
+
+      if (submitBtn) submitBtn.disabled = true;
+      try {
+        if (!codeSent) {
+          await api("/api/v1/auth/email/send", {
+            method: "POST",
+            body: JSON.stringify({ email }),
+            auth: false,
+          });
+          state.resetEmail = email;
+          if (codeField) codeField.hidden = false;
+          form.code?.removeAttribute("data-required");
+          form.code?.setAttribute("data-required", "인증번호를 입력해주세요");
+          if (submitBtn) submitBtn.textContent = "인증 확인";
+          if (okEl) {
+            okEl.textContent = "인증 메일을 보냈습니다. 인증번호를 입력한 뒤 확인해 주세요.";
+            okEl.classList.add("show");
+          }
+          form.code?.focus();
+          return;
+        }
+
+        const code = String(form.code?.value || "").trim();
+        if (!code) {
+          setFormError("find-pw-form-error", "인증번호를 입력해 주세요");
+          return;
+        }
+        await api("/api/v1/auth/email/verify", {
+          method: "POST",
+          body: JSON.stringify({ email, code }),
+          auth: false,
+        });
+        state.resetEmail = email;
+        state.resetCode = code;
+        state.resetVerified = true;
+        show("reset-pw");
+      } catch (err) {
+        setFormError(
+          "find-pw-form-error",
+          err.message || (codeSent ? "인증에 실패했습니다" : "인증 메일 발송에 실패했습니다")
+        );
+      } finally {
+        if (submitBtn) submitBtn.disabled = false;
+      }
+    });
+
+    // 비밀번호 재설정
+    document.getElementById("form-reset-pw").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const form = e.target;
+      const modal = document.getElementById("reset-pw-modal");
+      setFormError("reset-pw-form-error", "");
+
+      if (!state.resetVerified || !state.resetEmail || !state.resetCode) {
+        setFormError("reset-pw-form-error", "이메일 인증을 먼저 완료해 주세요");
+        show("find-pw");
+        return;
+      }
+      if (!validateForm(form)) {
+        setFormError("reset-pw-form-error", "새 비밀번호를 입력해 주세요");
+        return;
+      }
+
+      const newPassword = form.newPassword.value;
+      const confirmPassword = form.confirmPassword.value;
+      if (newPassword.length < 5) {
+        setFormError("reset-pw-form-error", "새 비밀번호는 5자리 이상이어야 합니다");
+        return;
+      }
+      if (newPassword !== confirmPassword) {
+        setFormError("reset-pw-form-error", "새 비밀번호가 일치하지 않습니다");
+        return;
+      }
+      // BE 규칙: 영문+특수문자 포함 8~20자
+      if (!/^(?=.*[A-Za-z])(?=.*[!@#$%^&*(),.?":{}|<>]).{8,20}$/.test(newPassword)) {
+        setFormError(
+          "reset-pw-form-error",
+          "비밀번호는 영문, 특수문자를 포함해 8~20자로 입력해주세요"
+        );
+        return;
+      }
+
+      const btn = form.querySelector(".btn-reset");
+      if (btn) btn.disabled = true;
+      try {
+        await api("/api/v1/auth/password/reset", {
+          method: "POST",
+          body: JSON.stringify({
+            email: state.resetEmail,
+            code: state.resetCode,
+            newPassword,
+          }),
+          auth: false,
+        });
+        state.resetVerified = false;
+        state.resetCode = "";
+        modal?.removeAttribute("hidden");
+      } catch (err) {
+        setFormError(
+          "reset-pw-form-error",
+          err.message || "비밀번호 변경에 실패했습니다. 인증 후 다시 시도해 주세요"
+        );
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    });
+
+    document.getElementById("reset-pw-modal-ok")?.addEventListener("click", () => {
+      document.getElementById("reset-pw-modal")?.setAttribute("hidden", "");
+      const findForm = document.getElementById("form-find-pw");
+      const codeField = document.getElementById("find-pw-code-field");
+      const submitBtn = document.getElementById("btn-find-pw-submit");
+      if (findForm) findForm.reset();
+      if (codeField) codeField.hidden = true;
+      if (submitBtn) submitBtn.textContent = "인증 메일 보내기";
+      show("login");
+    });
+
+    // 아이디 찾기 (UI — API 연동 시 /api/v1/auth/find-email 사용)
+    document.getElementById("form-find-id").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const form = e.target;
+      const resultBox = document.getElementById("find-id-result");
+      const resultEmail = document.getElementById("find-id-result-email");
+      resultBox?.classList.remove("is-show");
+      if (resultEmail) resultEmail.textContent = "";
+      if (!validateForm(form)) {
+        setFormError("find-id-form-error", "휴대폰 번호를 입력해 주세요");
+        return;
+      }
+      const phone = form.phone.value.trim().replace(/[^\d]/g, "");
+      if (phone.length < 10) {
+        setFormError("find-id-form-error", "올바른 휴대폰 번호를 입력해 주세요");
+        return;
+      }
+      const btn = form.querySelector(".btn-find");
+      if (btn) btn.disabled = true;
+      setFormError("find-id-form-error", "");
+      try {
+        const data = await api("/api/v1/auth/find-email", {
+          method: "POST",
+          body: JSON.stringify({ phoneNumber: phone }),
+          auth: false,
+        });
+        if (resultEmail) resultEmail.textContent = data?.maskedEmail || data?.email || String(data || "");
+        resultBox?.classList.add("is-show");
+      } catch (err) {
+        if (err.code === "USER_NOT_FOUND") {
+          setFormError("find-id-form-error", "해당 번호로 가입된 아이디가 없습니다");
+        } else if (err.status === 404) {
+          setFormError("find-id-form-error", "아이디 찾기 API가 아직 연결되지 않았습니다");
+        } else {
+          setFormError(
+            "find-id-form-error",
+            err.message || "아이디 찾기에 실패했습니다. 잠시 후 다시 시도해 주세요"
+          );
+        }
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    });
+
     document.querySelector(".social.naver")?.addEventListener("click", () => {
       setFormError("login-form-error", "");
       startNaverLogin();
@@ -674,28 +1066,73 @@
       show("signup2");
     });
 
-    // 인증 화면 「다음」활성 — 필수 입력 채워지면 #002BFF
+    // 인증 화면 「다음」활성 — 필수 입력 + 비밀번호 규칙 충족 시 #002BFF
     const signup2Form = document.getElementById("form-signup2");
     const signup2Next = document.getElementById("btn-signup2-next");
+    const PASSWORD_RULE = /^(?=.*[A-Za-z])(?=.*[!@#$%^&*(),.?":{}|<>]).{8,20}$/;
+    const PASSWORD_RULE_MSG = "비밀번호는 영문, 특수문자를 포함해 8~20자로 입력해주세요.";
+
+    function isValidSignupPassword(password) {
+      return PASSWORD_RULE.test(String(password || ""));
+    }
+
+    function setSignup2PasswordError(message) {
+      const err = signup2Form?.querySelector('[data-error-for="password"]');
+      if (!err) return;
+      err.textContent = message || "";
+      err.classList.toggle("show", Boolean(message));
+    }
+
     function syncSignup2Next() {
       if (!signup2Form || !signup2Next) return;
       const email = signup2Form.email?.value?.trim();
       const code = signup2Form.code?.value?.trim();
-      const password = signup2Form.password?.value;
-      const ready = Boolean(email && code && password);
+      // 이메일 인증만 되면 「다음」 클릭 가능 — 비밀번호 검사는 클릭 시 붉은 문구로 안내
+      const ready = Boolean(email && code && state.emailVerified);
       signup2Next.classList.toggle("is-disabled", !ready);
       signup2Next.classList.toggle("is-ready", ready);
     }
+
     signup2Form?.querySelectorAll("input").forEach((el) => {
-      el.addEventListener("input", syncSignup2Next);
+      el.addEventListener("input", () => {
+        // 입력 중에는 비밀번호 경고를 띄우지 않음 — 「다음」 시에만 표시
+        if (el.name === "password") setSignup2PasswordError("");
+        syncSignup2Next();
+      });
     });
     syncSignup2Next();
 
-    // 인증코드 발송
-    document.getElementById("btn-send-code").addEventListener("click", async () => {
+    const signup2MailModal = document.getElementById("signup2-mail-modal");
+    const btnSendCode = document.getElementById("btn-send-code");
+
+    function openSignup2MailModal() {
+      signup2MailModal?.removeAttribute("hidden");
+    }
+
+    function closeSignup2MailModal() {
+      signup2MailModal?.setAttribute("hidden", "");
+    }
+
+    function markSignupCodeSentUi() {
+      state.signupCodeSent = true;
+      if (btnSendCode) {
+        btnSendCode.textContent = "재인증";
+        btnSendCode.classList.add("is-resend");
+      }
+    }
+
+    // 이메일 옆: 인증(최초) / 재인증 — 연속 발송 방지, 알림은 인증팝업만
+    btnSendCode?.addEventListener("click", async () => {
       const form = document.getElementById("form-signup2");
       const emailInput = form.querySelector('[name="email"]');
+      const codeInput = form.querySelector('[name="code"]');
+      const okEl = document.getElementById("signup2-form-ok");
+      if (okEl) {
+        okEl.textContent = "";
+        okEl.classList.remove("show");
+      }
       clearErrors(form);
+
       const email = String(emailInput.value || "").trim();
       if (!email) {
         const err = form.querySelector('[data-error-for="email"]');
@@ -703,6 +1140,30 @@
         err.classList.add("show");
         return;
       }
+
+      // 이미 발송된 뒤 「인증」이 아닌데 연타한 경우 → 재발송 없이 팝업만
+      const isResend = btnSendCode.classList.contains("is-resend");
+      if (state.signupCodeSent && !isResend) {
+        openSignup2MailModal();
+        return;
+      }
+      if (state.signupCodeSending) {
+        openSignup2MailModal();
+        return;
+      }
+
+      state.signupCodeSending = true;
+      state.signupCodeReady = false;
+      state.emailVerified = false;
+      // 이전 인증번호가 남아 새 코드와 엇갈리지 않게 비움
+      if (codeInput) {
+        codeInput.value = "";
+        syncFilled(codeInput);
+      }
+      // 요청 시작과 동시에 팝업 표시 (연달아 인증 못 받게)
+      openSignup2MailModal();
+      markSignupCodeSentUi();
+
       try {
         const dup = await api(`/api/v1/auth/check-email?email=${encodeURIComponent(email)}`);
         if (dup) throw new Error("이미 사용 중인 이메일입니다.");
@@ -712,29 +1173,35 @@
         });
         state.email = email;
         applyAuthEmailToProfile();
-        // mock 모드일 때만 dev API로 코드 자동 채움. 실제 발송 시에는 메일함 확인.
-        let autoFilled = false;
+        state.signupCodeReady = true;
         try {
           const code = await api(`/api/v1/dev/email-code?email=${encodeURIComponent(email)}`);
-          if (code) {
-            form.querySelector('[name="code"]').value = String(code);
-            syncFilled(form.querySelector('[name="code"]'));
-            autoFilled = true;
+          if (code != null && code !== "") {
+            codeInput.value = String(code).trim();
+            syncFilled(codeInput);
+            syncSignup2Next();
           }
         } catch {
-          /* real mail mode */
-        }
-        show("signup3");
-        if (!autoFilled) {
-          alert(`${email} 으로 인증번호를 보냈습니다.\n메일함(스팸함 포함)을 확인해 입력해 주세요.`);
+          /* real mail mode — 메일함의 최신 번호 입력 */
         }
       } catch (err) {
-        setFormError("signup2-form-error", err.message);
-        alert(err.message || "인증 메일 발송에 실패했습니다");
+        setFormError("signup2-form-error", err.message || "인증 메일 발송에 실패했습니다");
+        state.signupCodeSent = false;
+        state.signupCodeReady = false;
+        if (btnSendCode) {
+          btnSendCode.textContent = "인증";
+          btnSendCode.classList.remove("is-resend");
+        }
+      } finally {
+        state.signupCodeSending = false;
       }
     });
 
-    // 모달 확인 → 인증 화면으로
+    document.getElementById("signup2-mail-modal-ok")?.addEventListener("click", () => {
+      closeSignup2MailModal();
+    });
+
+    // 모달 확인 → 인증 화면으로 (구 signup3 스크린 탭용)
     document.querySelectorAll("#signup3 [data-go='signup2']").forEach((btn) => {
       btn.addEventListener("click", (e) => {
         e.preventDefault();
@@ -742,14 +1209,25 @@
       });
     });
 
-    // 인증번호 확인 버튼 (Figma 기본 숨김 — 필요 시 노출)
+    // 인증번호 옆 「인증」— 코드 일치 여부 확인
     document.getElementById("btn-verify-code")?.addEventListener("click", async () => {
       const form = document.getElementById("form-signup2");
-      const email = form.email.value.trim();
-      const code = form.code.value.trim();
+      const emailInput = form.querySelector('[name="email"]');
+      const codeInput = form.querySelector('[name="code"]');
+      const email = String(emailInput?.value || "").trim();
+      const code = String(codeInput?.value || "").trim().replace(/\s+/g, "");
+      const okEl = document.getElementById("signup2-form-ok");
       clearErrors(form);
+      if (okEl) {
+        okEl.textContent = "";
+        okEl.classList.remove("show");
+      }
       if (!email || !code) {
         setFormError("signup2-form-error", "이메일과 인증번호를 입력해주세요");
+        return;
+      }
+      if (state.signupCodeSending || !state.signupCodeReady) {
+        setFormError("signup2-form-error", "인증 메일 발송이 끝난 뒤 다시 확인해 주세요");
         return;
       }
       try {
@@ -759,40 +1237,54 @@
         });
         state.emailVerified = true;
         state.email = email;
+        if (codeInput) codeInput.value = code;
         setFormError("signup2-form-error", "");
-        document.getElementById("signup2-form-error").classList.remove("show");
-        alert("이메일 인증이 완료되었습니다");
+        document.getElementById("signup2-form-error")?.classList.remove("show");
+        if (okEl) {
+          okEl.textContent = "이메일 인증이 완료되었습니다";
+          okEl.classList.add("show");
+        }
+        syncSignup2Next();
       } catch (err) {
+        state.emailVerified = false;
         setFormError("signup2-form-error", err.message);
       }
     });
 
-    // 인증 다음 → 프로필
+    // 인증 다음 → 프로필 (비밀번호 문제는 「다음」 시에만 붉은 문구)
     document.getElementById("form-signup2").addEventListener("submit", async (e) => {
       e.preventDefault();
       const form = e.target;
-      if (!validateForm(form)) {
-        setFormError("signup2-form-error", "입력되지 않은 항목이 있습니다");
+      const email = String(form.querySelector('[name="email"]')?.value || "").trim();
+      const code = String(form.querySelector('[name="code"]')?.value || "").trim().replace(/\s+/g, "");
+      const password = String(form.password?.value || "");
+
+      setFormError("signup2-form-error", "");
+      setSignup2PasswordError("");
+
+      if (!state.emailVerified) {
+        setFormError("signup2-form-error", "이메일 인증을 먼저 완료해 주세요");
         return;
       }
-      const email = form.email.value.trim();
-      const code = form.code.value.trim();
-      const password = form.password.value;
-      try {
-        if (!state.emailVerified) {
-          await api("/api/v1/auth/email/verify", {
-            method: "POST",
-            body: JSON.stringify({ email, code }),
-          });
-          state.emailVerified = true;
-        }
-        state.email = email;
-        state.password = password;
-        applyAuthEmailToProfile();
-        show("signup4");
-      } catch (err) {
-        setFormError("signup2-form-error", err.message);
+      if (!email || !code) {
+        setFormError("signup2-form-error", "이메일 인증을 먼저 완료해 주세요");
+        return;
       }
+      if (!password) {
+        setSignup2PasswordError("비밀번호를 입력해주세요");
+        form.password?.focus();
+        return;
+      }
+      if (!isValidSignupPassword(password)) {
+        setSignup2PasswordError(PASSWORD_RULE_MSG);
+        form.password?.focus();
+        return;
+      }
+
+      state.email = email;
+      state.password = password;
+      applyAuthEmailToProfile();
+      show("signup4");
     });
 
     // 프로필 이미지

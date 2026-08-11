@@ -1,0 +1,238 @@
+/* 아이디찾기 — Figma CSS 기준 */
+
+.find-id-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 120px 0 0;
+  gap: 4px;
+  width: 1920px;
+  height: 226px;
+}
+
+.find-id-hero__heading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0;
+  gap: 20px;
+  width: 1920px;
+  height: 65px;
+}
+
+.find-id-hero__badge {
+  width: 107px;
+  height: 16px;
+  font: 400 16px/100% "Gothic A1", sans-serif;
+  text-transform: uppercase;
+  color: #FFFFFF;
+  text-shadow: 0px 3px 2.5px #216BFE;
+  text-align: center;
+}
+
+.find-id-hero__title {
+  width: 152px;
+  height: 29px;
+  margin: 0;
+  font: 700 29px/100% "Gothic A1", sans-serif;
+  text-transform: uppercase;
+  color: #FFFFFF;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.find-id-hero__sub-wrap {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  gap: 10px;
+  width: 362px;
+  height: 37px;
+}
+
+.find-id-hero__sub {
+  width: 342px;
+  height: 17px;
+  margin: 0;
+  font: 400 14px/120% "Gothic A1", sans-serif;
+  text-transform: uppercase;
+  color: #3A4F78;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.find-id-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 57px 0;
+  gap: 20px;
+  width: 1920px;
+  min-height: 298px;
+}
+
+.find-id-form__fields {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px 0;
+  gap: 15px;
+  width: 1920px;
+}
+
+.find-id-form .field {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0;
+  width: 330px;
+}
+
+.find-id-form .field-label {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 10px;
+  gap: 10px;
+  width: 330px;
+  height: 38px;
+  box-sizing: border-box;
+  font: 400 14px/18px "Gothic A1", sans-serif;
+  color: #5B5B5A;
+}
+
+.find-id-form .input-destination {
+  width: 330px;
+  height: 46px;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.54902);
+  border: 1.5px solid #E6EBF2;
+  border-radius: 8px;
+  font: 400 14px/18px "Gothic A1", sans-serif;
+  color: #5B5B5A;
+}
+
+.find-id-form .input-destination::placeholder {
+  color: #848484;
+}
+
+.find-id-form .btn-find {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 20px;
+  width: 124px;
+  height: 40px;
+  background: #002BFF;
+  box-shadow: 0px 4px 16px rgba(184, 166, 179, 0.4);
+  border-radius: 24px;
+  border: 0;
+  font: 700 16px/20px "Gothic A1", sans-serif;
+  text-transform: uppercase;
+  color: #FFFFFF;
+  cursor: pointer;
+}
+
+.find-id-form .btn-find:hover { filter: brightness(1.06); }
+.find-id-form .btn-find:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  filter: none;
+}
+
+.find-id-result {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 330px;
+  padding: 16px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid #E6EBF2;
+  text-align: center;
+}
+
+.find-id-result.is-show { display: flex; }
+
+.find-id-result__label {
+  font: 400 13px/16px "Gothic A1", sans-serif;
+  color: #5B5B5A;
+}
+
+.find-id-result__email {
+  font: 700 16px/20px "Gothic A1", sans-serif;
+  color: #002BFF;
+  word-break: break-all;
+}
+
+.find-id-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 10px 0;
+  gap: 6px;
+  width: 1920px;
+  height: 80px;
+}
+
+.find-id-footer__links {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+  gap: 7px;
+  width: 1920px;
+  height: 36px;
+}
+
+.find-id-footer__row {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+  width: 1920px;
+  height: 36px;
+}
+
+.find-id-footer__link {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  gap: 10px;
+  border: 0;
+  background: transparent;
+  font: 400 13px/16px "Gothic A1", sans-serif;
+  color: #8F8F8D;
+  cursor: pointer;
+}
+
+.find-id-footer__signup {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-end;
+  padding: 0;
+  gap: 4px;
+  width: 1920px;
+  height: 18px;
+  font: 400 12px/15px "Gothic A1", sans-serif;
+  color: #8F8F8D;
+}
+
+.find-id-footer__signup button {
+  border: 0;
+  background: none;
+  padding: 0;
+  font: 700 14px/18px "Gothic A1", sans-serif;
+  color: #8F8F8D;
+  cursor: pointer;
+}

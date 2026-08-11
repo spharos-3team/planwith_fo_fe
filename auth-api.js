@@ -21,6 +21,7 @@ const PUBLIC_AUTH_PATHS = [
   "/api/v1/auth/check-email",
   "/api/v1/auth/check-nickname",
   "/api/v1/auth/password/reset",
+  "/api/v1/auth/find-email",
   "/api/v1/auth/profile-image",
   "/api/v1/terms",
 ];

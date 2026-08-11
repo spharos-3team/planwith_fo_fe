@@ -1,0 +1,260 @@
+/* 비밀번호찾기 — Figma CSS 기준 */
+
+.find-pw-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 100px 0 0;
+  gap: 4px;
+  width: 1920px;
+  height: 206px;
+}
+
+.find-pw-hero__heading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0;
+  gap: 20px;
+  width: 1920px;
+  height: 65px;
+}
+
+.find-pw-hero__badge {
+  width: 115px;
+  height: 16px;
+  font: 400 16px/100% "Gothic A1", sans-serif;
+  text-transform: uppercase;
+  color: #FFFFFF;
+  text-shadow: 0px 3px 2.5px #216BFE;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.find-pw-hero__title {
+  width: 181px;
+  height: 29px;
+  margin: 0;
+  font: 700 29px/100% "Gothic A1", sans-serif;
+  text-transform: uppercase;
+  color: #FFFFFF;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.find-pw-hero__sub-wrap {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  gap: 10px;
+  width: 372px;
+  height: 37px;
+}
+
+.find-pw-hero__sub {
+  width: 352px;
+  height: 17px;
+  margin: 0;
+  font: 400 14px/120% "Gothic A1", sans-serif;
+  text-transform: uppercase;
+  color: #3A4F78;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.find-pw-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 64px 0;
+  gap: 38px;
+  width: 1920px;
+  min-height: 368px;
+}
+
+.find-pw-form__fields {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+  gap: 15px;
+  width: 1920px;
+}
+
+.find-pw-form .field {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0;
+  width: 330px;
+}
+
+.find-pw-form .field-label {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 10px;
+  gap: 10px;
+  width: 330px;
+  height: 38px;
+  box-sizing: border-box;
+  font: 400 14px/18px "Gothic A1", sans-serif;
+  color: #5B5B5A;
+}
+
+.find-pw-form .input-destination {
+  width: 330px;
+  height: 46px;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.54902);
+  border: 1.5px solid #E6EBF2;
+  border-radius: 8px;
+  font: 400 14px/18px "Gothic A1", sans-serif;
+  color: #5B5B5A;
+}
+
+.find-pw-form .input-destination::placeholder {
+  color: #848484;
+}
+
+.find-pw-form .btn-send {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 20px;
+  width: 160px;
+  height: 40px;
+  background: #002BFF;
+  box-shadow: 0px 4px 16px rgba(184, 166, 179, 0.4);
+  border-radius: 24px;
+  border: 0;
+  font: 700 16px/20px "Gothic A1", sans-serif;
+  text-transform: uppercase;
+  color: #FFFFFF;
+  cursor: pointer;
+}
+
+.find-pw-form .btn-send:hover { filter: brightness(1.06); }
+.find-pw-form .btn-send:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  filter: none;
+}
+
+.find-pw-form__fields .field[hidden] { display: none !important; }
+
+.find-pw-hints {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 10px;
+  gap: 4px;
+  width: 397px;
+  height: 40px;
+}
+
+.find-pw-hints p {
+  margin: 0;
+  font: 400 12px/150% "Gothic A1", sans-serif;
+  text-align: center;
+  color: #5B5B5A;
+}
+
+.find-pw-hints p:first-child {
+  width: 377px;
+}
+
+.find-pw-hints p:last-child {
+  width: 264px;
+}
+
+.find-pw-form .form-ok {
+  display: none;
+  margin: 0;
+  font: 500 14px/20px "Gothic A1", sans-serif;
+  color: #0E6632;
+  text-align: center;
+}
+
+.find-pw-form .form-ok.show { display: block; }
+
+.find-pw-footer-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 24px 0 40px;
+  gap: 12px;
+  width: 1920px;
+  min-height: 144px;
+}
+
+.find-pw-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 10px 0;
+  gap: 6px;
+  width: 1920px;
+  height: 80px;
+}
+
+.find-pw-footer__links {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+  gap: 7px;
+  width: 1920px;
+  height: 36px;
+}
+
+.find-pw-footer__row {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+  width: 1920px;
+  height: 36px;
+}
+
+.find-pw-footer__link {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  gap: 10px;
+  border: 0;
+  background: transparent;
+  font: 400 13px/16px "Gothic A1", sans-serif;
+  color: #8F8F8D;
+  cursor: pointer;
+}
+
+.find-pw-footer__signup {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-end;
+  padding: 0;
+  gap: 4px;
+  width: 1920px;
+  height: 18px;
+  font: 400 12px/15px "Gothic A1", sans-serif;
+  color: #8F8F8D;
+}
+
+.find-pw-footer__signup button {
+  border: 0;
+  background: none;
+  padding: 0;
+  font: 700 14px/18px "Gothic A1", sans-serif;
+  color: #8F8F8D;
+  cursor: pointer;
+}

@@ -143,10 +143,36 @@
   font-weight: 400;
 }
 
-/* Figma: 인증번호 옆 「확인」 기본 숨김 */
+/* 인증번호 옆 「인증」 확인 버튼 */
 .signup2 .btn-confirm-code {
-  display: none;
+  display: flex;
 }
+
+.signup2 .btn-confirm.is-resend {
+  width: auto;
+  min-width: 80px;
+  padding: 14px 12px;
+  white-space: nowrap;
+}
+
+#signup2 .modal-backdrop[hidden] {
+  display: none !important;
+}
+
+#signup2 .modal-backdrop:not([hidden]) {
+  display: flex;
+}
+
+.signup2 .form-ok {
+  display: none;
+  width: 600px;
+  margin: 0;
+  font: 500 14px/20px "Gothic A1", sans-serif;
+  color: #0E6632;
+  text-align: left;
+}
+
+.signup2 .form-ok.show { display: block; }
 
 /* Figma: 다음 — 비활성 #949494, 120×46 */
 .signup2 .btn-next,
