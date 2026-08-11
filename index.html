@@ -22,38 +22,38 @@
         <img class="home-header__logo" src="assets/logo-planwith.png" alt="PLAN &amp; WITH" width="80" height="80" />
       </a>
 
-      <!-- 비로그인 메뉴 -->
+      <!-- 비회원 메뉴 -->
       <nav class="home-nav home-nav--guest" aria-label="메인 메뉴">
         <div class="home-nav__indicator" data-nav-indicator aria-hidden="true"></div>
         <button class="home-nav__item is-active" type="button" data-nav="home">홈</button>
-        <button class="home-nav__item" type="button" data-nav="ai">AI 일정생성</button>
+        <button class="home-nav__item" type="button" data-nav="ai">AI 일정 생성</button>
         <div class="home-nav__dropdown">
           <button class="home-nav__item" type="button" data-nav="community">
             커뮤니티 <span class="caret" aria-hidden="true"></span>
           </button>
           <div class="home-nav__submenu" role="menu">
-            <button type="button" role="menuitem">여행 스토리</button>
+            <button type="button" role="menuitem">스토리</button>
             <button type="button" role="menuitem">모임</button>
           </div>
         </div>
-        <button class="home-nav__item" type="button" data-nav="search">검색</button>
+        <button class="home-nav__item" type="button" data-nav="country-search">국가검색</button>
       </nav>
 
       <div class="home-header__cta home-header__guest-only">
-        <a class="home-cta" href="/auth.html">여행 하기</a>
+        <a class="home-cta" href="/auth.html">시작하기</a>
       </div>
 
-      <!-- 로그인 메뉴 -->
-      <nav class="home-nav home-nav--user" aria-label="로그인 메뉴">
+      <!-- 회원 메뉴 -->
+      <nav class="home-nav home-nav--user" aria-label="회원 메뉴">
         <div class="home-nav__indicator" data-nav-indicator aria-hidden="true"></div>
         <button class="home-nav__item is-active" type="button" data-nav="home">홈</button>
         <div class="home-nav__dropdown">
           <button class="home-nav__item" type="button" data-nav="schedule">
-            일정관리 <span class="caret" aria-hidden="true"></span>
+            일정 관리 <span class="caret" aria-hidden="true"></span>
           </button>
           <div class="home-nav__submenu" role="menu">
-            <button type="button" role="menuitem">내 일정</button>
-            <button type="button" role="menuitem">공유 일정</button>
+            <button type="button" role="menuitem">AI 일정 생성</button>
+            <button type="button" role="menuitem">캘린더</button>
           </div>
         </div>
         <div class="home-nav__dropdown">
@@ -61,7 +61,7 @@
             커뮤니티 <span class="caret" aria-hidden="true"></span>
           </button>
           <div class="home-nav__submenu" role="menu">
-            <button type="button" role="menuitem">여행 스토리</button>
+            <button type="button" role="menuitem">스토리</button>
             <button type="button" role="menuitem">모임</button>
           </div>
         </div>
@@ -69,12 +69,16 @@
           <button class="home-nav__item" type="button" data-nav="mypage">
             마이페이지 <span class="caret" aria-hidden="true"></span>
           </button>
-          <div class="home-nav__submenu" role="menu">
-            <button type="button" role="menuitem">프로필</button>
+          <div class="home-nav__submenu home-nav__submenu--wide" role="menu">
+            <button type="button" role="menuitem">개인정보 수정</button>
+            <a href="/follow.html" role="menuitem">팔로워/팔로우 관리</a>
+            <button type="button" role="menuitem">멤버쉽 관리</button>
+            <button type="button" role="menuitem">결제 수단</button>
+            <button type="button" role="menuitem">좋아요</button>
             <button type="button" role="menuitem" id="btn-logout">로그아웃</button>
           </div>
         </div>
-        <button class="home-nav__item" type="button" data-nav="search">검색</button>
+        <button class="home-nav__item" type="button" data-nav="country-search">국가검색</button>
       </nav>
 
       <div class="home-userbar home-header__user-only">
@@ -82,19 +86,19 @@
           <img class="home-userbar__token-icon" src="assets/icon-token.png" alt="" width="24" height="24" />
           <span class="home-userbar__token-value" id="user-token">500</span>
         </div>
-        <div class="home-userbar__profile">
+        <div class="home-userbar__profile" title="프로필">
           <span class="home-userbar__name" id="user-nickname">회원님</span>
           <img
             class="home-userbar__avatar"
             id="user-avatar"
             src="assets/icon-user.png"
-            alt=""
+            alt="프로필"
             width="36"
             height="36"
           />
         </div>
         <div class="home-userbar__icons">
-          <button class="home-userbar__icon" type="button" aria-label="메시지">
+          <button class="home-userbar__icon" type="button" aria-label="채팅모아보기">
             <img src="assets/icon-message.png" alt="" width="30" height="30" />
           </button>
           <button class="home-userbar__icon" type="button" aria-label="알림">
@@ -276,6 +280,7 @@
             moveIndicator(item);
             return;
           }
+          if (item.tagName === "A" && item.getAttribute("href")) return;
           items.forEach((n) => n.classList.remove("is-active"));
           item.classList.add("is-active");
           moveIndicator(item);

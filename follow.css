@@ -1,0 +1,405 @@
+@import url("https://fonts.googleapis.com/css2?family=Gothic+A1:wght@400;500;600;700&display=swap");
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --follow-bg:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.2) 0%,
+      rgba(235, 244, 247, 0.190904) 77.88%,
+      rgba(159, 200, 217, 0.156) 100%
+    ),
+    #7DB5DA;
+  --follow-cta: #002BFF;
+  --follow-accent: #387BFF;
+  --follow-ink: #2F2F2F;
+  --follow-muted: #5B5B5A;
+  --follow-line: #E6EBF2;
+}
+
+body {
+  font-family: "Gothic A1", sans-serif;
+  background: #7DB5DA;
+  min-height: 100vh;
+  overflow-x: auto;
+  color: var(--follow-ink);
+}
+
+.follow-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  width: 1920px;
+  min-height: 1024px;
+  margin: 0 auto;
+  isolation: isolate;
+  background: var(--follow-bg);
+  overflow: hidden;
+}
+
+.follow-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 32px 125px;
+  width: 1920px;
+  height: 106px;
+  position: relative;
+  z-index: 2;
+}
+
+.follow-header__logo {
+  width: 80px;
+  height: 80px;
+  display: block;
+  object-fit: contain;
+}
+
+.follow-header__title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font: 600 18px/22px "Gothic A1", sans-serif;
+  color: #fff;
+  text-shadow: 0 1px 8px rgba(0, 43, 255, 0.25);
+}
+
+.follow-header__right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.follow-header__user {
+  font: 600 14px/17px "Gothic A1", sans-serif;
+  color: #fff;
+}
+
+.follow-header__home {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+  height: 40px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  color: #fff;
+  font: 500 14px/18px "Gothic A1", sans-serif;
+  text-decoration: none;
+}
+
+.follow-header__home:hover { background: rgba(255, 255, 255, 0.5); }
+
+.follow-main {
+  width: 720px;
+  padding: 24px 0 48px;
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.follow-card {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  border-radius: 20px;
+  padding: 24px 28px;
+  box-shadow: 0 12px 40px rgba(30, 94, 218, 0.12);
+}
+
+.follow-profile {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 20px;
+}
+
+.follow-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 24px;
+  object-fit: cover;
+  background: #fff;
+  flex: none;
+  display: grid;
+  place-items: center;
+  font: 700 28px/1 "Gothic A1", sans-serif;
+  color: var(--follow-accent);
+  overflow: hidden;
+}
+
+.follow-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.follow-profile__name {
+  font: 700 24px/30px "Gothic A1", sans-serif;
+  color: var(--follow-ink);
+}
+
+.follow-profile__meta {
+  margin-top: 4px;
+  font: 500 14px/18px "Gothic A1", sans-serif;
+  color: var(--follow-muted);
+}
+
+.follow-stats {
+  display: flex;
+  gap: 20px;
+  margin-top: 12px;
+}
+
+.follow-stats__item {
+  font: 700 16px/20px "Gothic A1", sans-serif;
+  color: var(--follow-ink);
+}
+
+.follow-stats__item span {
+  font-weight: 500;
+  color: var(--follow-muted);
+  margin-left: 4px;
+}
+
+.follow-find {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+}
+
+.follow-find__label {
+  grid-column: 1 / -1;
+  font: 600 15px/19px "Gothic A1", sans-serif;
+  color: var(--follow-ink);
+  margin-bottom: 2px;
+}
+
+.follow-find__hint {
+  grid-column: 1 / -1;
+  font: 400 13px/17px "Gothic A1", sans-serif;
+  color: var(--follow-muted);
+  margin-bottom: 4px;
+}
+
+.follow-find input {
+  height: 44px;
+  border: 1px solid var(--follow-line);
+  border-radius: 12px;
+  padding: 0 14px;
+  background: rgba(255, 255, 255, 0.9);
+  font: 500 14px/18px "Gothic A1", sans-serif;
+  color: var(--follow-ink);
+  outline: none;
+}
+
+.follow-find input:focus {
+  border-color: var(--follow-accent);
+}
+
+.follow-btn {
+  height: 44px;
+  padding: 0 22px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--follow-cta);
+  color: #fff;
+  font: 700 14px/18px "Gothic A1", sans-serif;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.follow-btn:hover { filter: brightness(1.06); }
+.follow-btn:disabled { opacity: 0.55; cursor: not-allowed; filter: none; }
+
+.follow-btn--ghost {
+  background: transparent;
+  border: 1px solid rgba(0, 43, 255, 0.35);
+  color: var(--follow-cta);
+}
+
+.follow-btn--danger {
+  background: transparent;
+  border: 1px solid rgba(180, 35, 24, 0.35);
+  color: #b42318;
+}
+
+.follow-tabs {
+  display: flex;
+  gap: 8px;
+  padding: 4px;
+  background: rgba(255, 255, 255, 0.45);
+  border-radius: 14px;
+}
+
+.follow-tabs__btn {
+  flex: 1;
+  height: 42px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  font: 600 15px/19px "Gothic A1", sans-serif;
+  color: var(--follow-muted);
+  cursor: pointer;
+}
+
+.follow-tabs__btn.is-active {
+  background: #fff;
+  color: var(--follow-cta);
+  box-shadow: 0 4px 14px rgba(0, 43, 255, 0.12);
+}
+
+.follow-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 220px;
+  max-height: 420px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.follow-list__empty,
+.follow-list__loading {
+  padding: 28px 8px;
+  text-align: center;
+  font: 500 14px/20px "Gothic A1", sans-serif;
+  color: var(--follow-muted);
+}
+
+.follow-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(230, 235, 242, 0.9);
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.follow-item:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(30, 94, 218, 0.1);
+}
+
+.follow-item__left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
+}
+
+.follow-item__avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  object-fit: cover;
+  background: #EAF1FF;
+  flex: none;
+  display: grid;
+  place-items: center;
+  font: 700 16px/1 "Gothic A1", sans-serif;
+  color: var(--follow-accent);
+  overflow: hidden;
+}
+
+.follow-item__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.follow-item__name {
+  font: 700 15px/19px "Gothic A1", sans-serif;
+  color: var(--follow-ink);
+}
+
+.follow-item__sub {
+  margin-top: 2px;
+  font: 400 13px/17px "Gothic A1", sans-serif;
+  color: var(--follow-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 360px;
+}
+
+.follow-item__count {
+  font: 500 13px/17px "Gothic A1", sans-serif;
+  color: var(--follow-muted);
+  flex: none;
+}
+
+.follow-item__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+}
+
+.follow-item__actions .follow-btn {
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 10px;
+  font-size: 13px;
+}
+
+.follow-msg {
+  min-height: 20px;
+  font: 500 13px/18px "Gothic A1", sans-serif;
+}
+
+.follow-msg.is-error { color: #b42318; }
+.follow-msg.is-ok { color: #0E6632; }
+
+.follow-refresh {
+  font: 400 12px/16px "Gothic A1", sans-serif;
+  color: rgba(47, 47, 47, 0.55);
+  text-align: right;
+}
+
+/* 임시 테스트용 UUID 표시 */
+.follow-uuid {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font: 500 12px/16px "Gothic A1", sans-serif;
+  color: var(--follow-muted);
+  word-break: break-all;
+}
+
+.follow-uuid code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  color: var(--follow-ink);
+  background: rgba(255, 255, 255, 0.7);
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+
+.follow-uuid__copy {
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid rgba(0, 43, 255, 0.3);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--follow-cta);
+  font: 600 12px/1 "Gothic A1", sans-serif;
+  cursor: pointer;
+}
+
+.follow-uuid__copy:hover { background: #f5f8ff; }

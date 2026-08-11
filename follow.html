@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>팔로워/팔로우 관리 | PLAN &amp; WITH</title>
+  <link rel="stylesheet" href="follow.css" />
+</head>
+<body>
+  <div class="follow-page">
+    <header class="follow-header">
+      <a href="/" aria-label="홈">
+        <img class="follow-header__logo" src="assets/logo-planwith.png" alt="PLAN &amp; WITH" width="80" height="80" />
+      </a>
+      <h1 class="follow-header__title">팔로워/팔로우 관리</h1>
+      <div class="follow-header__right">
+        <span class="follow-header__user" id="header-user">회원님</span>
+        <a class="follow-header__home" href="/">홈으로</a>
+      </div>
+    </header>
+
+    <main class="follow-main">
+      <section class="follow-card follow-profile" id="profile-card">
+        <div class="follow-avatar" id="me-avatar" aria-hidden="true">?</div>
+        <div>
+          <h2 class="follow-profile__name" id="me-nickname">불러오는 중…</h2>
+          <p class="follow-profile__meta" id="me-meta"></p>
+          <div class="follow-stats">
+            <div class="follow-stats__item"><strong id="me-followers">0</strong><span>팔로워</span></div>
+            <div class="follow-stats__item"><strong id="me-following">0</strong><span>팔로잉</span></div>
+          </div>
+          <p class="follow-uuid" id="me-uuid" title="테스트용 — 나중에 숨김">
+            memberUuid: <code id="me-uuid-value">—</code>
+            <button type="button" class="follow-uuid__copy" id="btn-copy-uuid">복사</button>
+          </p>
+        </div>
+      </section>
+
+      <section class="follow-card">
+        <div class="follow-find">
+          <label class="follow-find__label" for="lookup-uuid">다른 회원 찾아보기</label>
+          <p class="follow-find__hint">다른 계정의 memberUuid를 붙여넣으면 프로필을 열 수 있습니다.</p>
+          <input id="lookup-uuid" type="text" placeholder="memberUuid" autocomplete="off" />
+          <button class="follow-btn" type="button" id="btn-lookup">열기</button>
+        </div>
+      </section>
+
+      <section class="follow-card">
+        <div class="follow-tabs" role="tablist">
+          <button class="follow-tabs__btn is-active" type="button" role="tab" data-tab="followers" aria-selected="true">
+            팔로워 <span id="tab-followers-count">0</span>
+          </button>
+          <button class="follow-tabs__btn" type="button" role="tab" data-tab="following" aria-selected="false">
+            팔로잉 <span id="tab-following-count">0</span>
+          </button>
+        </div>
+        <p class="follow-msg" id="msg" aria-live="polite"></p>
+        <div class="follow-list" id="member-list" aria-live="polite">
+          <p class="follow-list__loading">불러오는 중…</p>
+        </div>
+        <p class="follow-refresh" id="refresh-hint">페이지를 새로고침하면 목록이 갱신됩니다</p>
+      </section>
+    </main>
+  </div>
+
+  <script type="module">
+    import { api, getAccessToken, setAccessToken } from "./auth-api.js";
+
+    const state = {
+      me: null,
+      tab: "followers",
+      followers: [],
+      following: [],
+      busyUuid: null,
+    };
+
+    const els = {
+      headerUser: document.getElementById("header-user"),
+      meAvatar: document.getElementById("me-avatar"),
+      meNickname: document.getElementById("me-nickname"),
+      meMeta: document.getElementById("me-meta"),
+      meFollowers: document.getElementById("me-followers"),
+      meFollowing: document.getElementById("me-following"),
+      meUuidValue: document.getElementById("me-uuid-value"),
+      tabFollowersCount: document.getElementById("tab-followers-count"),
+      tabFollowingCount: document.getElementById("tab-following-count"),
+      list: document.getElementById("member-list"),
+      msg: document.getElementById("msg"),
+      lookup: document.getElementById("lookup-uuid"),
+    };
+
+    function setMsg(text, type = "") {
+      els.msg.textContent = text || "";
+      els.msg.className = "follow-msg" + (type ? ` is-${type}` : "");
+    }
+
+    function initialOf(name) {
+      const t = (name || "?").trim();
+      return t ? t[0].toUpperCase() : "?";
+    }
+
+    function renderAvatar(host, nickname, profileImage) {
+      host.textContent = "";
+      if (profileImage) {
+        const img = document.createElement("img");
+        img.src = profileImage;
+        img.alt = "";
+        host.appendChild(img);
+      } else {
+        host.textContent = initialOf(nickname);
+      }
+    }
+
+    function renderProfile() {
+      const me = state.me;
+      if (!me) return;
+      els.headerUser.textContent = `${me.nickname || "회원"}님`;
+      els.meNickname.textContent = me.nickname || "회원";
+      els.meMeta.textContent = [me.grade, me.email].filter(Boolean).join(" · ");
+      els.meFollowers.textContent = String(me.followerCount ?? 0);
+      els.meFollowing.textContent = String(me.followingCount ?? 0);
+      els.meUuidValue.textContent = me.memberUuid || "—";
+      els.tabFollowersCount.textContent = String(state.followers.length);
+      els.tabFollowingCount.textContent = String(state.following.length);
+      renderAvatar(els.meAvatar, me.nickname, me.profileImage);
+    }
+
+    function renderList() {
+      const items = state.tab === "followers" ? state.followers : state.following;
+      const empty =
+        state.tab === "followers"
+          ? "아직 팔로워가 없습니다."
+          : "아직 팔로우한 회원이 없습니다.";
+
+      els.list.innerHTML = "";
+      if (!items.length) {
+        const p = document.createElement("p");
+        p.className = "follow-list__empty";
+        p.textContent = empty;
+        els.list.appendChild(p);
+        return;
+      }
+
+      items.forEach((m) => {
+        const row = document.createElement("div");
+        row.className = "follow-item";
+
+        const left = document.createElement("a");
+        left.className = "follow-item__left";
+        left.href = `/member.html?uuid=${encodeURIComponent(m.memberUuid)}`;
+
+        const av = document.createElement("div");
+        av.className = "follow-item__avatar";
+        renderAvatar(av, m.nickname, m.profileImage);
+
+        const text = document.createElement("div");
+        const name = document.createElement("div");
+        name.className = "follow-item__name";
+        name.textContent = m.nickname || "회원";
+        const sub = document.createElement("div");
+        sub.className = "follow-item__sub";
+        sub.textContent = m.profileIntro || m.grade || "";
+        text.append(name, sub);
+        left.append(av, text);
+
+        const actions = document.createElement("div");
+        actions.className = "follow-item__actions";
+
+        const count = document.createElement("span");
+        count.className = "follow-item__count";
+        count.textContent = `${m.followerCount ?? 0} 팔로워`;
+        actions.appendChild(count);
+
+        if (state.tab === "following") {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "follow-btn follow-btn--danger";
+          btn.textContent = "언팔로우";
+          btn.disabled = state.busyUuid === m.memberUuid;
+          btn.addEventListener("click", (e) => {
+            e.preventDefault();
+            unfollow(m.memberUuid);
+          });
+          actions.appendChild(btn);
+        }
+
+        row.append(left, actions);
+        els.list.appendChild(row);
+      });
+    }
+
+    async function syncFollows({ silent = false } = {}) {
+      if (!state.me?.memberUuid) return;
+      try {
+        const uuid = state.me.memberUuid;
+        const [followers, following, me] = await Promise.all([
+          api(`/api/v1/members/${uuid}/followers`),
+          api(`/api/v1/members/${uuid}/following`),
+          api("/api/v1/members/me"),
+        ]);
+        state.followers = followers || [];
+        state.following = following || [];
+        state.me = me;
+        renderProfile();
+        renderList();
+      } catch (err) {
+        if (!silent) setMsg(err.message || "목록을 불러오지 못했습니다.", "error");
+      }
+    }
+
+    async function unfollow(memberUuid) {
+      if (!confirm("이 회원을 언팔로우할까요?")) return;
+      state.busyUuid = memberUuid;
+      renderList();
+      setMsg("");
+      try {
+        await api(`/api/v1/members/${memberUuid}/follow`, { method: "DELETE" });
+        setMsg("언팔로우했습니다.", "ok");
+        await syncFollows();
+      } catch (err) {
+        setMsg(err.message || "언팔로우에 실패했습니다.", "error");
+      } finally {
+        state.busyUuid = null;
+        renderList();
+      }
+    }
+
+    document.querySelectorAll(".follow-tabs__btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        state.tab = btn.dataset.tab;
+        document.querySelectorAll(".follow-tabs__btn").forEach((b) => {
+          const on = b === btn;
+          b.classList.toggle("is-active", on);
+          b.setAttribute("aria-selected", on ? "true" : "false");
+        });
+        renderList();
+      });
+    });
+
+    document.getElementById("btn-copy-uuid")?.addEventListener("click", async () => {
+      const uuid = state.me?.memberUuid;
+      if (!uuid) return;
+      try {
+        await navigator.clipboard.writeText(uuid);
+        setMsg("UUID를 복사했습니다.", "ok");
+      } catch {
+        setMsg("복사에 실패했습니다. 직접 선택해 복사해 주세요.", "error");
+      }
+    });
+
+    document.getElementById("btn-lookup").addEventListener("click", () => {
+      const id = els.lookup.value.trim();
+      if (!id) {
+        els.lookup.focus();
+        setMsg("memberUuid를 입력해 주세요.", "error");
+        return;
+      }
+      location.href = `/member.html?uuid=${encodeURIComponent(id)}`;
+    });
+
+    els.lookup.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") document.getElementById("btn-lookup").click();
+    });
+
+    async function boot() {
+      if (!getAccessToken()) {
+        location.href = "/auth.html";
+        return;
+      }
+      try {
+        state.me = await api("/api/v1/members/me");
+        renderProfile();
+        await syncFollows();
+      } catch {
+        setAccessToken(null);
+        location.href = "/auth.html";
+      }
+    }
+
+    boot();
+  </script>
+</body>
+</html>

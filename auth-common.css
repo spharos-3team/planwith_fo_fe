@@ -1,11 +1,24 @@
 /* Shared auth UI tokens (login + signup screens) */
 @import url("https://fonts.googleapis.com/css2?family=Gothic+A1:wght@400;500;700;800&display=swap");
 
+:root {
+  /* Figma 로그인 배경 그대로 */
+  --auth-bg:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.2) 0%,
+      rgba(235, 244, 247, 0.190904) 77.88%,
+      rgba(159, 200, 217, 0.156) 100%
+    ),
+    #7DB5DA;
+  --auth-cta: #002BFF;
+}
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
   font-family: "Gothic A1", sans-serif;
-  background: #000;
+  background: #7DB5DA;
   min-height: 100vh;
   overflow-x: auto;
 }
@@ -14,28 +27,26 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding: 0;
   position: relative;
   width: 1920px;
+  height: 1024px;
   min-height: 1024px;
   margin: 0 auto;
   isolation: isolate;
   overflow: hidden;
+  background: var(--auth-bg);
 }
 
-/* background-photo */
+/* 배경 사진 제거 — Figma 그라데이션 + #7DB5DA */
 .background-photo {
   position: absolute;
-  width: 1920px;
-  height: 1024px;
-  left: 0;
-  top: 0;
-  background:
-    linear-gradient(0deg, rgba(224, 235, 255, 0.45), rgba(224, 235, 255, 0.45)),
-    url("assets/bg-airport.png") center / cover no-repeat,
-    #000;
-  filter: blur(5px);
-  transform: scale(1.02);
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--auth-bg);
   z-index: 0;
+  pointer-events: none;
 }
 
 .screen-tabs {
@@ -59,7 +70,7 @@ body {
   cursor: pointer;
 }
 
-.screen-tabs button.active { background: #387BFF; }
+.screen-tabs button.active { background: #002BFF; }
 
 .screen { display: none; width: 1920px; min-height: 1024px; position: relative; z-index: 1; }
 .screen.active { display: block; }
@@ -90,17 +101,20 @@ body {
   position: relative;
 }
 
+/* Figma: cta-button */
 .cta-travel {
   display: flex;
+  flex-direction: row;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
   padding: 12px 24px;
+  gap: 8px;
   width: 129px;
   height: 45px;
-  background: #387BFF;
+  background: rgba(255, 255, 255, 0.2);
   border-radius: 30px;
   border: 0;
-  color: #fff;
+  color: #FFFFFF;
   font: 500 15px/19px "Gothic A1", sans-serif;
   text-transform: uppercase;
   cursor: pointer;
@@ -189,10 +203,11 @@ body {
 }
 
 .airport-icon {
-  width: 14px;
-  height: 14px;
-  border: 2px solid rgba(255, 255, 255, 0.8);
+  width: 20px;
+  height: 20px;
+  border: 2px solid #FFFFFF;
   transform: rotate(45deg);
+  box-sizing: border-box;
 }
 
 .airport-icon.on {
@@ -202,58 +217,53 @@ body {
 
 .screen-title {
   font: 800 29px/36px "Gothic A1", sans-serif;
-  color: #fff;
+  color: #2F2F2F;
   text-align: center;
 }
 
 .screen-sub {
   font: 400 14px/18px "Gothic A1", sans-serif;
-  color: #fff;
+  color: #2F2F2F;
   text-align: center;
 }
 
 .field { width: 100%; }
 
-/* 라벨 — 원본 CSS: #5B5B5A */
 .field-label {
   font: 400 14px/18px "Gothic A1", sans-serif;
   color: #5B5B5A;
   padding: 0 0 8px 4px;
 }
 
-/* input-destination — 원본 CSS */
 .input-destination {
+  box-sizing: border-box;
   display: flex;
+  flex-direction: row;
   align-items: center;
   padding: 14px 16px;
   gap: 8px;
   width: 330px;
   height: 48px;
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.55);
   border: 1.5px solid #E6EBF2;
   border-radius: 8px;
   font: 400 16px/20px "Gothic A1", sans-serif;
   color: #5B5B5A;
   outline: none;
-  transition: background 0.15s ease;
 }
 
-/* placeholder — 원본: #848484 / rgba(143,143,141,0.8) */
 .input-destination::placeholder {
-  color: rgba(143, 143, 141, 0.8);
+  color: #848484;
 }
 
 .input-destination.wide { width: 507px; }
 .input-destination.auth { width: 420px; }
 
-/* 입력된 칸 — signup-profile: rgba(56,123,255,0.2) + #5B5B5A */
 .input-destination.is-filled,
 .input-destination:not(:placeholder-shown) {
-  background: rgba(56, 123, 255, 0.2);
+  background: rgba(255, 255, 255, 0.55);
   color: #5B5B5A;
 }
-
-/* 경고 시에도 입력창 배경/테두리는 유지 (문구만 빨강) */
 
 .field-error {
   display: none;
@@ -275,13 +285,14 @@ body {
 
 .form-error.show { display: block; }
 
-/* checkbox with white check */
+/* Figma: Rectangle checkbox */
 .check-box {
   appearance: none;
   -webkit-appearance: none;
+  box-sizing: border-box;
   width: 18px;
   height: 18px;
-  border: 1.5px solid #fff;
+  border: 1px solid rgba(58, 79, 120, 0.48);
   border-radius: 4px;
   background: transparent;
   cursor: pointer;
@@ -291,8 +302,8 @@ body {
 }
 
 .check-box:checked {
-  background: transparent;
-  border-color: #fff;
+  background: #002BFF;
+  border-color: #002BFF;
 }
 
 .check-box:checked::after {
@@ -307,30 +318,50 @@ body {
   transform: rotate(45deg);
 }
 
-.btn-next,
+/* Figma: 탑승 하기 cta-button #002BFF */
 .btn-board {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 20px;
+  width: 108px;
+  height: 40px;
+  min-width: 108px;
+  background: #002BFF;
+  box-shadow: 0px 4px 16px rgba(184, 166, 179, 0.4);
+  border-radius: 24px;
+  border: 0;
+  color: #FFFFFF;
+  font: 700 16px/20px "Gothic A1", sans-serif;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+/* 회원가입 다음 버튼 — 동일 CTA 색 */
+.btn-next {
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 15px 30px;
   min-width: 220px;
   height: 55px;
-  background: #387BFF;
+  background: #002BFF;
   box-shadow: 0px 4px 16px rgba(184, 166, 179, 0.4);
   border-radius: 24px;
   border: 0;
-  color: #fff;
+  color: #FFFFFF;
   font: 700 16px/20px "Gothic A1", sans-serif;
   cursor: pointer;
 }
 
 .btn-next.is-disabled,
 .btn-board.is-disabled {
-  background: rgba(120, 130, 140, 0.75);
+  background: #9AA3AD;
   box-shadow: none;
+  cursor: default;
 }
 
-/* 중복 확인 등 — signup-profile */
 .btn-confirm {
   display: flex;
   justify-content: center;
@@ -347,8 +378,8 @@ body {
 }
 
 .btn-confirm.primary {
-  background: #387BFF;
-  border-color: #387BFF;
+  background: #002BFF;
+  border-color: #002BFF;
   color: #fff;
   font-weight: 700;
 }
@@ -356,13 +387,13 @@ body {
 .login-hint {
   margin-top: 18px;
   text-align: center;
-  color: rgba(255, 255, 255, 0.9);
+  color: #8F8F8D;
   font: 400 14px/20px "Gothic A1", sans-serif;
 }
 
 .login-hint a {
-  color: #fff;
-  font-weight: 500;
+  color: #8F8F8D;
+  font-weight: 400;
   margin-left: 4px;
   text-decoration: underline;
   cursor: pointer;

@@ -1,11 +1,13 @@
-/* signup email verify — from figma-raw/signup-verify.figma-raw.css */
+/* 회원가입(2) 인증 — Figma CSS 기준 */
 
 .signup2 {
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding: 0;
   gap: 40px;
   width: 1920px;
+  height: 607px;
 }
 
 .signup2 .head {
@@ -14,19 +16,185 @@
   align-items: center;
   padding: 70px 0 0;
   gap: 35px;
+  width: 1920px;
+}
+
+/* Figma: 제목/부제 #2F2F2F */
+.signup2 .screen-title {
+  font: 800 29px/36px "Gothic A1", sans-serif;
+  color: #2F2F2F;
+  text-align: center;
+}
+
+.signup2 .screen-sub {
+  font: 400 14px/18px "Gothic A1", sans-serif;
+  color: #2F2F2F;
+  text-align: center;
+  width: 320px;
+}
+
+/* Figma: airport-icon 20px / #0044CA */
+.signup2 .airport-icon {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #FFFFFF;
+  transform: rotate(45deg);
+  box-sizing: border-box;
+}
+
+.signup2 .airport-icon.on {
+  background: #0044CA;
+  border-color: #0044CA;
+}
+
+.signup2 .airport-line .dash {
+  width: 130px;
+  margin: 0 10px;
+  border-top: 1.5px dashed rgba(255, 255, 255, 0.8);
+}
+
+.signup2 .airport-line .dash.on {
+  border-top-color: rgba(74, 135, 255, 0.83);
 }
 
 .signup2 .form {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 14px;
-  width: 600px;
-  margin: 0 auto;
-  padding: 20px 0 40px;
+  padding: 47px 0;
+  gap: 44px;
+  width: 1920px;
 }
 
-.signup2 .field { width: 600px; }
-.signup2 .input-destination.auth { width: 420px; }
-.signup2 .input-destination.wide { width: 540px; }
-.signup2 .btn-next { margin-top: 10px; }
+.signup2 .form-fields {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 15px;
+  width: 600px;
+}
+
+.signup2 .field {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0;
+  width: 600px;
+}
+
+.signup2 .field-label {
+  font: 400 14px/18px "Gothic A1", sans-serif;
+  color: #5B5B5A;
+  padding: 10px;
+}
+
+.signup2 .input-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0;
+  gap: 12px;
+  width: 600px;
+}
+
+/* Figma: input 480×43, rgba(255,255,255,0.55) */
+.signup2 .input-destination,
+.signup2 .input-destination.auth,
+.signup2 .input-destination.wide {
+  box-sizing: border-box;
+  width: 480px;
+  height: 43px;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1.5px solid #E6EBF2;
+  border-radius: 8px;
+  font: 400 12px/15px "Gothic A1", sans-serif;
+  color: #5B5B5A;
+}
+
+.signup2 .input-destination::placeholder {
+  color: rgba(143, 143, 141, 0.8);
+  font: 400 12px/15px "Gothic A1", sans-serif;
+}
+
+/* Figma: 이메일 옆 「인증」— 흰 버튼 */
+.signup2 .btn-confirm {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 14px 16px;
+  width: 80px;
+  height: 44px;
+  min-width: 80px;
+  background: #FFFFFF;
+  border: 1.5px solid #E6EBF2;
+  border-radius: 8px;
+  color: rgba(143, 143, 141, 0.8);
+  font: 400 13px/16px "Gothic A1", sans-serif;
+  cursor: pointer;
+}
+
+.signup2 .btn-confirm.primary {
+  background: #FFFFFF;
+  border: 1.5px solid #E6EBF2;
+  color: rgba(143, 143, 141, 0.8);
+  font-weight: 400;
+}
+
+/* Figma: 인증번호 옆 「확인」 기본 숨김 */
+.signup2 .btn-confirm-code {
+  display: none;
+}
+
+/* Figma: 다음 — 비활성 #949494, 120×46 */
+.signup2 .btn-next,
+.signup2 .btn-next.is-disabled {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 15px 30px;
+  width: 120px;
+  min-width: 120px;
+  height: 46px;
+  background: #949494;
+  box-shadow: none;
+  border-radius: 24px;
+  border: 0;
+  color: #FFFFFF;
+  font: 700 16px/20px "Gothic A1", sans-serif;
+  text-transform: uppercase;
+  cursor: default;
+}
+
+.signup2 .btn-next.is-ready {
+  background: #002BFF;
+  box-shadow: 0px 4px 16px rgba(184, 166, 179, 0.4);
+  cursor: pointer;
+}
+
+.signup2 .form-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0;
+  gap: 9px;
+  width: 1920px;
+}
+
+.signup2 .login-hint {
+  width: 1920px;
+  margin-top: 0;
+  font: 400 16px/20px "Gothic A1", sans-serif;
+  text-align: center;
+  color: #8F8F8D;
+}
+
+.signup2 .login-hint a {
+  color: #8F8F8D;
+  font: 400 16px/20px "Gothic A1", sans-serif;
+  text-decoration: none;
+  margin-left: 4px;
+}

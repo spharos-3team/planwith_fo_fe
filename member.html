@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>회원 프로필 | PLAN &amp; WITH</title>
+  <link rel="stylesheet" href="follow.css" />
+</head>
+<body>
+  <div class="follow-page">
+    <header class="follow-header">
+      <a href="/" aria-label="홈">
+        <img class="follow-header__logo" src="assets/logo-planwith.png" alt="PLAN &amp; WITH" width="80" height="80" />
+      </a>
+      <h1 class="follow-header__title">회원 프로필</h1>
+      <div class="follow-header__right">
+        <a class="follow-header__home" href="/follow.html">팔로우 관리</a>
+        <a class="follow-header__home" href="/">홈으로</a>
+      </div>
+    </header>
+
+    <main class="follow-main">
+      <p class="follow-msg" id="msg" aria-live="polite"></p>
+
+      <section class="follow-card follow-profile" id="profile-card" hidden>
+        <div class="follow-avatar" id="avatar" aria-hidden="true">?</div>
+        <div style="flex:1">
+          <h2 class="follow-profile__name" id="nickname">…</h2>
+          <p class="follow-profile__meta" id="meta"></p>
+          <p class="follow-profile__meta" id="intro"></p>
+          <div class="follow-stats">
+            <div class="follow-stats__item"><strong id="followers">0</strong><span>팔로워</span></div>
+            <div class="follow-stats__item"><strong id="following">0</strong><span>팔로잉</span></div>
+          </div>
+          <p class="follow-profile__meta" id="uuid" style="margin-top:10px;word-break:break-all"></p>
+          <div class="follow-item__actions" style="margin-top:14px" id="actions"></div>
+        </div>
+      </section>
+
+      <section class="follow-card" id="lists-card" hidden>
+        <div class="follow-tabs" role="tablist">
+          <button class="follow-tabs__btn is-active" type="button" role="tab" data-tab="followers" aria-selected="true">
+            팔로워 <span id="tab-followers-count">0</span>
+          </button>
+          <button class="follow-tabs__btn" type="button" role="tab" data-tab="following" aria-selected="false">
+            팔로잉 <span id="tab-following-count">0</span>
+          </button>
+        </div>
+        <div class="follow-list" id="member-list">
+          <p class="follow-list__loading">불러오는 중…</p>
+        </div>
+        <p class="follow-refresh">페이지를 새로고침하면 목록이 갱신됩니다</p>
+      </section>
+    </main>
+  </div>
+
+  <script type="module">
+    import { api, getAccessToken } from "./auth-api.js";
+
+    const params = new URLSearchParams(location.search);
+    const memberUuid = (params.get("uuid") || "").trim();
+
+    const state = {
+      me: null,
+      member: null,
+      tab: "followers",
+      followers: [],
+      following: [],
+      loading: false,
+    };
+
+    const els = {
+      msg: document.getElementById("msg"),
+      profile: document.getElementById("profile-card"),
+      lists: document.getElementById("lists-card"),
+      avatar: document.getElementById("avatar"),
+      nickname: document.getElementById("nickname"),
+      meta: document.getElementById("meta"),
+      intro: document.getElementById("intro"),
+      followers: document.getElementById("followers"),
+      following: document.getElementById("following"),
+      uuid: document.getElementById("uuid"),
+      actions: document.getElementById("actions"),
+      list: document.getElementById("member-list"),
+      tabFollowersCount: document.getElementById("tab-followers-count"),
+      tabFollowingCount: document.getElementById("tab-following-count"),
+    };
+
+    function setMsg(text, type = "") {
+      els.msg.textContent = text || "";
+      els.msg.className = "follow-msg" + (type ? ` is-${type}` : "");
+    }
+
+    function initialOf(name) {
+      const t = (name || "?").trim();
+      return t ? t[0].toUpperCase() : "?";
+    }
+
+    function renderAvatar(host, nickname, profileImage) {
+      host.textContent = "";
+      if (profileImage) {
+        const img = document.createElement("img");
+        img.src = profileImage;
+        img.alt = "";
+        host.appendChild(img);
+      } else {
+        host.textContent = initialOf(nickname);
+      }
+    }
+
+    function renderActions() {
+      els.actions.innerHTML = "";
+      const m = state.member;
+      if (!m) return;
+      const isMe = state.me?.memberUuid === m.memberUuid;
+      if (isMe) {
+        const note = document.createElement("span");
+        note.className = "follow-profile__meta";
+        note.textContent = "내 프로필입니다.";
+        els.actions.appendChild(note);
+        return;
+      }
+      if (!getAccessToken()) {
+        const a = document.createElement("a");
+        a.className = "follow-btn";
+        a.href = "/auth.html";
+        a.textContent = "로그인하고 팔로우";
+        a.style.display = "inline-flex";
+        a.style.alignItems = "center";
+        a.style.textDecoration = "none";
+        els.actions.appendChild(a);
+        return;
+      }
+
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.disabled = state.loading;
+      if (m.followedByMe) {
+        btn.className = "follow-btn follow-btn--danger";
+        btn.textContent = "언팔로우";
+        btn.addEventListener("click", () => toggleFollow(false));
+      } else {
+        btn.className = "follow-btn";
+        btn.textContent = "팔로우";
+        btn.addEventListener("click", () => toggleFollow(true));
+      }
+      els.actions.appendChild(btn);
+    }
+
+    function renderProfile() {
+      const m = state.member;
+      if (!m) return;
+      els.profile.hidden = false;
+      els.lists.hidden = false;
+      els.nickname.textContent = m.nickname || "회원";
+      els.meta.textContent = m.grade || "";
+      els.intro.textContent = m.profileIntro || "소개가 아직 없어요.";
+      els.followers.textContent = String(m.followerCount ?? 0);
+      els.following.textContent = String(m.followingCount ?? 0);
+      els.uuid.textContent = m.memberUuid;
+      els.tabFollowersCount.textContent = String(state.followers.length);
+      els.tabFollowingCount.textContent = String(state.following.length);
+      renderAvatar(els.avatar, m.nickname, m.profileImage);
+      renderActions();
+      document.title = `${m.nickname || "회원"} | PLAN & WITH`;
+    }
+
+    function renderList() {
+      const items = state.tab === "followers" ? state.followers : state.following;
+      els.list.innerHTML = "";
+      if (!items.length) {
+        const p = document.createElement("p");
+        p.className = "follow-list__empty";
+        p.textContent = "목록이 비어 있습니다.";
+        els.list.appendChild(p);
+        return;
+      }
+      items.forEach((m) => {
+        const a = document.createElement("a");
+        a.className = "follow-item";
+        a.href = `/member.html?uuid=${encodeURIComponent(m.memberUuid)}`;
+
+        const left = document.createElement("div");
+        left.className = "follow-item__left";
+        const av = document.createElement("div");
+        av.className = "follow-item__avatar";
+        renderAvatar(av, m.nickname, m.profileImage);
+        const text = document.createElement("div");
+        const name = document.createElement("div");
+        name.className = "follow-item__name";
+        name.textContent = m.nickname || "회원";
+        const sub = document.createElement("div");
+        sub.className = "follow-item__sub";
+        sub.textContent = m.profileIntro || m.grade || "";
+        text.append(name, sub);
+        left.append(av, text);
+
+        const count = document.createElement("span");
+        count.className = "follow-item__count";
+        count.textContent = `${m.followerCount ?? 0} 팔로워`;
+
+        a.append(left, count);
+        els.list.appendChild(a);
+      });
+    }
+
+    async function sync({ silent = false } = {}) {
+      try {
+        const [member, followers, following] = await Promise.all([
+          api(`/api/v1/members/${memberUuid}`),
+          api(`/api/v1/members/${memberUuid}/followers`),
+          api(`/api/v1/members/${memberUuid}/following`),
+        ]);
+        state.member = member;
+        state.followers = followers || [];
+        state.following = following || [];
+        renderProfile();
+        renderList();
+      } catch (err) {
+        if (!silent) setMsg(err.message || "회원을 불러오지 못했습니다.", "error");
+      }
+    }
+
+    async function toggleFollow(follow) {
+      state.loading = true;
+      renderActions();
+      setMsg("");
+      try {
+        await api(`/api/v1/members/${memberUuid}/follow`, {
+          method: follow ? "POST" : "DELETE",
+        });
+        setMsg(follow ? "팔로우했습니다." : "언팔로우했습니다.", "ok");
+        await sync();
+      } catch (err) {
+        setMsg(err.message || "요청에 실패했습니다.", "error");
+      } finally {
+        state.loading = false;
+        renderActions();
+      }
+    }
+
+    document.querySelectorAll(".follow-tabs__btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        state.tab = btn.dataset.tab;
+        document.querySelectorAll(".follow-tabs__btn").forEach((b) => {
+          const on = b === btn;
+          b.classList.toggle("is-active", on);
+          b.setAttribute("aria-selected", on ? "true" : "false");
+        });
+        renderList();
+      });
+    });
+
+    async function boot() {
+      if (!memberUuid) {
+        setMsg("memberUuid가 없습니다.", "error");
+        return;
+      }
+      if (getAccessToken()) {
+        try {
+          state.me = await api("/api/v1/members/me");
+        } catch {
+          state.me = null;
+        }
+      }
+      await sync();
+    }
+
+    boot();
+  </script>
+</body>
+</html>

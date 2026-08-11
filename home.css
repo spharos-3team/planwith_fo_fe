@@ -107,10 +107,10 @@ body {
   border: 0;
   border-radius: 30px;
   font: 500 15px/19px "Gothic A1", sans-serif;
-  text-transform: uppercase;
   color: #fff;
   text-decoration: none;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .home-cta:hover { filter: brightness(1.08); }
@@ -127,10 +127,13 @@ body {
   isolation: isolate;
 }
 
-.home-nav--guest { width: 389px; }
+.home-nav--guest {
+  left: 700px;
+  width: 460px;
+}
 .home-nav--user {
-  left: 707px;
-  width: 506px;
+  left: 620px;
+  width: 620px;
 }
 
 .home-header[data-auth="guest"] .home-header__user-only,
@@ -207,7 +210,10 @@ body {
 
 .home-nav__dropdown.is-open .home-nav__submenu { display: flex; }
 
-.home-nav__submenu button {
+.home-nav__submenu--wide { min-width: 160px; }
+
+.home-nav__submenu button,
+.home-nav__submenu a {
   border: 0;
   background: transparent;
   color: rgba(255, 255, 255, 0.85);
@@ -215,7 +221,12 @@ body {
   padding: 8px 16px;
   text-align: left;
   cursor: pointer;
+  white-space: nowrap;
+  text-decoration: none;
+  display: block;
 }
+
+.home-nav__submenu a:hover { color: #fff; }
 
 .home-nav__submenu button:hover { color: #fff; }
 

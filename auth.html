@@ -138,30 +138,34 @@
           <div class="screen-sub">안전한 서비스 이용을 위해 본인 인증을 진행해 주세요</div>
         </div>
         <form class="form" id="form-signup2" novalidate>
-          <div class="field">
-            <div class="field-label">이메일</div>
-            <div class="input-row">
-              <input class="input-destination auth" name="email" type="email" placeholder="이메일을 입력해주세요" data-required="이메일을 입력해주세요" />
-              <button class="btn-confirm primary" type="button" id="btn-send-code">인증</button>
+          <div class="form-fields">
+            <div class="field">
+              <div class="field-label">이메일</div>
+              <div class="input-row">
+                <input class="input-destination auth" name="email" type="email" placeholder="이메일을 입력해주세요" data-required="이메일을 입력해주세요" />
+                <button class="btn-confirm" type="button" id="btn-send-code">인증</button>
+              </div>
+              <p class="field-error" data-error-for="email"></p>
             </div>
-            <p class="field-error" data-error-for="email"></p>
-          </div>
-          <div class="field">
-            <div class="field-label">인증번호</div>
-            <div class="input-row">
-              <input class="input-destination auth" name="code" type="text" placeholder="인증번호를 입력해주세요" data-required="인증번호를 입력해주세요" />
-              <button class="btn-confirm" type="button">확인</button>
+            <div class="field">
+              <div class="field-label">인증번호</div>
+              <div class="input-row">
+                <input class="input-destination auth" name="code" type="text" placeholder="인증번호를 입력해주세요" data-required="인증번호를 입력해주세요" />
+                <button class="btn-confirm btn-confirm-code" type="button" id="btn-verify-code">확인</button>
+              </div>
+              <p class="field-error" data-error-for="code"></p>
             </div>
-            <p class="field-error" data-error-for="code"></p>
+            <div class="field">
+              <div class="field-label">비밀번호</div>
+              <input class="input-destination wide" name="password" type="password" placeholder="소/대문자,특수 문자 포함8~20자로 입력하세요" data-required="비밀번호를 입력해주세요" />
+              <p class="field-error" data-error-for="password"></p>
+            </div>
+            <p class="form-error" id="signup2-form-error"></p>
           </div>
-          <div class="field">
-            <div class="field-label">비밀번호</div>
-            <input class="input-destination wide" name="password" type="password" placeholder="영/대소문자,특수 문자 포함 8~20자로 입력하세요" data-required="비밀번호를 입력해주세요" />
-            <p class="field-error" data-error-for="password"></p>
+          <div class="form-actions">
+            <button class="btn-next is-disabled" type="submit" id="btn-signup2-next">다음</button>
+            <p class="login-hint">이미 계정이 있으신가요? <a data-go="login">로그인</a></p>
           </div>
-          <p class="form-error" id="signup2-form-error"></p>
-          <button class="btn-next" type="submit">다음</button>
-          <p class="login-hint">이미 계정이 있으신가요? <a data-go="login">로그인</a></p>
         </form>
       </div>
     </section>
@@ -670,6 +674,23 @@
       show("signup2");
     });
 
+    // 인증 화면 「다음」활성 — 필수 입력 채워지면 #002BFF
+    const signup2Form = document.getElementById("form-signup2");
+    const signup2Next = document.getElementById("btn-signup2-next");
+    function syncSignup2Next() {
+      if (!signup2Form || !signup2Next) return;
+      const email = signup2Form.email?.value?.trim();
+      const code = signup2Form.code?.value?.trim();
+      const password = signup2Form.password?.value;
+      const ready = Boolean(email && code && password);
+      signup2Next.classList.toggle("is-disabled", !ready);
+      signup2Next.classList.toggle("is-ready", ready);
+    }
+    signup2Form?.querySelectorAll("input").forEach((el) => {
+      el.addEventListener("input", syncSignup2Next);
+    });
+    syncSignup2Next();
+
     // 인증코드 발송
     document.getElementById("btn-send-code").addEventListener("click", async () => {
       const form = document.getElementById("form-signup2");
@@ -721,8 +742,8 @@
       });
     });
 
-    // 인증번호 확인 버튼
-    document.querySelector('#form-signup2 .input-row .btn-confirm:not(.primary)')?.addEventListener("click", async () => {
+    // 인증번호 확인 버튼 (Figma 기본 숨김 — 필요 시 노출)
+    document.getElementById("btn-verify-code")?.addEventListener("click", async () => {
       const form = document.getElementById("form-signup2");
       const email = form.email.value.trim();
       const code = form.code.value.trim();
