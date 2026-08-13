@@ -29,19 +29,15 @@
             <div class="follow-stats__item"><strong id="me-followers">0</strong><span>팔로워</span></div>
             <div class="follow-stats__item"><strong id="me-following">0</strong><span>팔로잉</span></div>
           </div>
-          <p class="follow-uuid" id="me-uuid" title="테스트용 — 나중에 숨김">
-            memberUuid: <code id="me-uuid-value">—</code>
-            <button type="button" class="follow-uuid__copy" id="btn-copy-uuid">복사</button>
-          </p>
         </div>
       </section>
 
       <section class="follow-card">
         <div class="follow-find">
-          <label class="follow-find__label" for="lookup-uuid">다른 회원 찾아보기</label>
-          <p class="follow-find__hint">다른 계정의 memberUuid를 붙여넣으면 프로필을 열 수 있습니다.</p>
-          <input id="lookup-uuid" type="text" placeholder="memberUuid" autocomplete="off" />
-          <button class="follow-btn" type="button" id="btn-lookup">열기</button>
+          <label class="follow-find__label" for="lookup-nickname">다른 회원 찾아보기</label>
+          <p class="follow-find__hint">닉네임을 입력하면 해당 회원 프로필을 열 수 있습니다.</p>
+          <input id="lookup-nickname" type="text" placeholder="닉네임" autocomplete="off" maxlength="10" />
+          <button class="follow-btn" type="button" id="btn-lookup">찾기</button>
         </div>
       </section>
 
@@ -64,7 +60,7 @@
   </div>
 
   <script type="module">
-    import { api, getAccessToken, setAccessToken } from "./auth-api.js";
+    import { api, getAccessToken, setAccessToken, ensureSession } from "./auth-api.js";
 
     const state = {
       me: null,
@@ -81,12 +77,11 @@
       meMeta: document.getElementById("me-meta"),
       meFollowers: document.getElementById("me-followers"),
       meFollowing: document.getElementById("me-following"),
-      meUuidValue: document.getElementById("me-uuid-value"),
       tabFollowersCount: document.getElementById("tab-followers-count"),
       tabFollowingCount: document.getElementById("tab-following-count"),
       list: document.getElementById("member-list"),
       msg: document.getElementById("msg"),
-      lookup: document.getElementById("lookup-uuid"),
+      lookup: document.getElementById("lookup-nickname"),
     };
 
     function setMsg(text, type = "") {
@@ -119,7 +114,6 @@
       els.meMeta.textContent = [me.grade, me.email].filter(Boolean).join(" · ");
       els.meFollowers.textContent = String(me.followerCount ?? 0);
       els.meFollowing.textContent = String(me.followingCount ?? 0);
-      els.meUuidValue.textContent = me.memberUuid || "—";
       els.tabFollowersCount.textContent = String(state.followers.length);
       els.tabFollowingCount.textContent = String(state.following.length);
       renderAvatar(els.meAvatar, me.nickname, me.profileImage);
@@ -147,7 +141,7 @@
 
         const left = document.createElement("a");
         left.className = "follow-item__left";
-        left.href = `/member.html?uuid=${encodeURIComponent(m.memberUuid)}`;
+        left.href = `/member.html?nickname=${encodeURIComponent(m.nickname || "")}`;
 
         const av = document.createElement("div");
         av.className = "follow-item__avatar";
@@ -209,7 +203,6 @@
     }
 
     async function unfollow(memberUuid) {
-      if (!confirm("이 회원을 언팔로우할까요?")) return;
       state.busyUuid = memberUuid;
       renderList();
       setMsg("");
@@ -237,25 +230,23 @@
       });
     });
 
-    document.getElementById("btn-copy-uuid")?.addEventListener("click", async () => {
-      const uuid = state.me?.memberUuid;
-      if (!uuid) return;
-      try {
-        await navigator.clipboard.writeText(uuid);
-        setMsg("UUID를 복사했습니다.", "ok");
-      } catch {
-        setMsg("복사에 실패했습니다. 직접 선택해 복사해 주세요.", "error");
-      }
-    });
-
-    document.getElementById("btn-lookup").addEventListener("click", () => {
-      const id = els.lookup.value.trim();
-      if (!id) {
+    document.getElementById("btn-lookup").addEventListener("click", async () => {
+      const nickname = els.lookup.value.trim();
+      if (!nickname) {
         els.lookup.focus();
-        setMsg("memberUuid를 입력해 주세요.", "error");
+        setMsg("닉네임을 입력해 주세요.", "error");
         return;
       }
-      location.href = `/member.html?uuid=${encodeURIComponent(id)}`;
+      const btn = document.getElementById("btn-lookup");
+      btn.disabled = true;
+      setMsg("회원을 찾는 중…");
+      try {
+        await api(`/api/v1/members/search?nickname=${encodeURIComponent(nickname)}`);
+        location.href = `/member.html?nickname=${encodeURIComponent(nickname)}`;
+      } catch (err) {
+        setMsg(err.message || "해당 닉네임의 회원을 찾지 못했습니다.", "error");
+        btn.disabled = false;
+      }
     });
 
     els.lookup.addEventListener("keydown", (e) => {
@@ -263,7 +254,8 @@
     });
 
     async function boot() {
-      if (!getAccessToken()) {
+      const signedIn = getAccessToken() ? true : await ensureSession();
+      if (!signedIn) {
         location.href = "/auth.html";
         return;
       }

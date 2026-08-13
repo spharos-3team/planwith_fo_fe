@@ -32,7 +32,6 @@
             <div class="follow-stats__item"><strong id="followers">0</strong><span>팔로워</span></div>
             <div class="follow-stats__item"><strong id="following">0</strong><span>팔로잉</span></div>
           </div>
-          <p class="follow-profile__meta" id="uuid" style="margin-top:10px;word-break:break-all"></p>
           <div class="follow-item__actions" style="margin-top:14px" id="actions"></div>
         </div>
       </section>
@@ -55,14 +54,16 @@
   </div>
 
   <script type="module">
-    import { api, getAccessToken } from "./auth-api.js";
+    import { api, getAccessToken, ensureSession } from "./auth-api.js";
 
     const params = new URLSearchParams(location.search);
-    const memberUuid = (params.get("uuid") || "").trim();
+    const lookupNickname = (params.get("nickname") || "").trim();
+    const legacyUuid = (params.get("uuid") || "").trim();
 
     const state = {
       me: null,
       member: null,
+      memberUuid: "",
       tab: "followers",
       followers: [],
       following: [],
@@ -79,7 +80,6 @@
       intro: document.getElementById("intro"),
       followers: document.getElementById("followers"),
       following: document.getElementById("following"),
-      uuid: document.getElementById("uuid"),
       actions: document.getElementById("actions"),
       list: document.getElementById("member-list"),
       tabFollowersCount: document.getElementById("tab-followers-count"),
@@ -157,7 +157,6 @@
       els.intro.textContent = m.profileIntro || "소개가 아직 없어요.";
       els.followers.textContent = String(m.followerCount ?? 0);
       els.following.textContent = String(m.followingCount ?? 0);
-      els.uuid.textContent = m.memberUuid;
       els.tabFollowersCount.textContent = String(state.followers.length);
       els.tabFollowingCount.textContent = String(state.following.length);
       renderAvatar(els.avatar, m.nickname, m.profileImage);
@@ -178,7 +177,7 @@
       items.forEach((m) => {
         const a = document.createElement("a");
         a.className = "follow-item";
-        a.href = `/member.html?uuid=${encodeURIComponent(m.memberUuid)}`;
+        a.href = `/member.html?nickname=${encodeURIComponent(m.nickname || "")}`;
 
         const left = document.createElement("div");
         left.className = "follow-item__left";
@@ -206,10 +205,12 @@
 
     async function sync({ silent = false } = {}) {
       try {
+        const uuid = state.memberUuid;
+        if (!uuid) throw new Error("회원 정보가 없습니다.");
         const [member, followers, following] = await Promise.all([
-          api(`/api/v1/members/${memberUuid}`),
-          api(`/api/v1/members/${memberUuid}/followers`),
-          api(`/api/v1/members/${memberUuid}/following`),
+          api(`/api/v1/members/${uuid}`),
+          api(`/api/v1/members/${uuid}/followers`),
+          api(`/api/v1/members/${uuid}/following`),
         ]);
         state.member = member;
         state.followers = followers || [];
@@ -226,7 +227,7 @@
       renderActions();
       setMsg("");
       try {
-        await api(`/api/v1/members/${memberUuid}/follow`, {
+        await api(`/api/v1/members/${state.memberUuid}/follow`, {
           method: follow ? "POST" : "DELETE",
         });
         setMsg(follow ? "팔로우했습니다." : "언팔로우했습니다.", "ok");
@@ -252,16 +253,28 @@
     });
 
     async function boot() {
-      if (!memberUuid) {
-        setMsg("memberUuid가 없습니다.", "error");
+      if (!lookupNickname && !legacyUuid) {
+        setMsg("닉네임이 없습니다.", "error");
         return;
       }
+      if (!getAccessToken()) await ensureSession();
       if (getAccessToken()) {
         try {
           state.me = await api("/api/v1/members/me");
         } catch {
           state.me = null;
         }
+      }
+      try {
+        if (lookupNickname) {
+          const found = await api(`/api/v1/members/search?nickname=${encodeURIComponent(lookupNickname)}`);
+          state.memberUuid = found.memberUuid;
+        } else {
+          state.memberUuid = legacyUuid;
+        }
+      } catch (err) {
+        setMsg(err.message || "해당 닉네임의 회원을 찾지 못했습니다.", "error");
+        return;
       }
       await sync();
     }

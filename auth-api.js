@@ -1,12 +1,33 @@
 const ACCESS_KEY = "planwith_access_token";
 
+function readStoredAccessToken() {
+  try {
+    const fromLocal = localStorage.getItem(ACCESS_KEY);
+    if (fromLocal) return fromLocal;
+    const fromSession = sessionStorage.getItem(ACCESS_KEY);
+    if (fromSession) {
+      localStorage.setItem(ACCESS_KEY, fromSession);
+      sessionStorage.removeItem(ACCESS_KEY);
+      return fromSession;
+    }
+  } catch (_) { /* ignore */ }
+  return null;
+}
+
 export function getAccessToken() {
-  return sessionStorage.getItem(ACCESS_KEY);
+  return readStoredAccessToken();
 }
 
 export function setAccessToken(token) {
-  if (token) sessionStorage.setItem(ACCESS_KEY, token);
-  else sessionStorage.removeItem(ACCESS_KEY);
+  try {
+    if (token) {
+      localStorage.setItem(ACCESS_KEY, token);
+      sessionStorage.removeItem(ACCESS_KEY);
+    } else {
+      localStorage.removeItem(ACCESS_KEY);
+      sessionStorage.removeItem(ACCESS_KEY);
+    }
+  } catch (_) { /* ignore */ }
 }
 
 /** 로그인 전 public API — 만료/재기동된 JWT를 붙이면 Gateway가 401을 낸다 */
@@ -31,6 +52,48 @@ function isPublicAuthPath(path) {
   return PUBLIC_AUTH_PATHS.some((prefix) => p === prefix || p.startsWith(prefix));
 }
 
+let refreshInFlight = null;
+
+async function refreshAccessToken() {
+  if (refreshInFlight) return refreshInFlight;
+  refreshInFlight = (async () => {
+    const res = await fetch("/api/v1/auth/refresh", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+    });
+    const json = await res.json().catch(() => null);
+    if (!res.ok || json?.success === false) {
+      setAccessToken(null);
+      const err = new Error(json?.error?.message || `요청 실패 (${res.status})`);
+      err.status = res.status;
+      err.code = json?.error?.code;
+      throw err;
+    }
+    const accessToken = json?.data?.accessToken;
+    if (!accessToken) {
+      setAccessToken(null);
+      throw new Error("세션을 갱신하지 못했습니다.");
+    }
+    setAccessToken(accessToken);
+    return accessToken;
+  })().finally(() => {
+    refreshInFlight = null;
+  });
+  return refreshInFlight;
+}
+
+/** refresh 쿠키가 있으면 access token을 복구한다 (로그아웃 전까지 유지) */
+export async function ensureSession() {
+  if (getAccessToken()) return true;
+  try {
+    await refreshAccessToken();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export async function api(path, options = {}) {
   const headers = new Headers(options.headers || {});
   if (!(options.body instanceof FormData) && !headers.has("Content-Type") && options.body) {
@@ -40,9 +103,6 @@ export async function api(path, options = {}) {
   if (token && !isPublicAuthPath(path) && options.auth !== false) {
     headers.set("Authorization", `Bearer ${token}`);
   }
-  if (options.auth === false) {
-    /* explicit no bearer */
-  }
 
   const res = await fetch(path, {
     ...options,
@@ -51,7 +111,24 @@ export async function api(path, options = {}) {
   });
 
   const json = await res.json().catch(() => null);
-  if (!res.ok || (json && json.success === false)) {
+  const failed = !res.ok || (json && json.success === false);
+
+  if (
+    failed
+    && res.status === 401
+    && !isPublicAuthPath(path)
+    && options.auth !== false
+    && !options._retried
+  ) {
+    try {
+      await refreshAccessToken();
+      return api(path, { ...options, _retried: true });
+    } catch {
+      /* fall through with original error */
+    }
+  }
+
+  if (failed) {
     const err = new Error(json?.error?.message || `요청 실패 (${res.status})`);
     err.code = json?.error?.code;
     err.fieldErrors = json?.error?.fieldErrors;

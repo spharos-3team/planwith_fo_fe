@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>개인정보 수정 | PLAN &amp; WITH</title>
+  <link rel="stylesheet" href="follow.css" />
+  <link rel="stylesheet" href="signup-profile.css" />
+  <link rel="stylesheet" href="auth-common.css" />
+  <style>
+    .profile-edit-card {
+      width: min(640px, calc(100% - 48px));
+      margin: 0 auto 48px;
+      padding: 36px 28px 40px;
+    }
+    .profile-edit-card .screen-title {
+      text-align: center;
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .profile-edit-card .screen-sub {
+      text-align: center;
+      color: var(--follow-muted);
+      font-size: 14px;
+      margin-bottom: 28px;
+    }
+    .profile-edit-card .form {
+      width: 100%;
+      max-width: 540px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+    .profile-edit-card .field { width: 100%; }
+    .profile-edit-card .input-destination.wide { width: 100%; }
+    .profile-edit-card .input-destination.auth { width: 100%; max-width: 420px; }
+    .profile-edit-card .input-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      width: 100%;
+    }
+    .profile-edit-card .btn-next { width: 280px; margin-top: 8px; }
+    .profile-edit-card .avatar-wrap { margin: 0 auto 8px; }
+    .profile-edit-meta {
+      text-align: center;
+      color: var(--follow-muted);
+      font-size: 13px;
+      margin-bottom: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="follow-page">
+    <header class="follow-header">
+      <a href="/" aria-label="홈">
+        <img class="follow-header__logo" src="assets/logo-planwith.png" alt="PLAN &amp; WITH" width="80" height="80" />
+      </a>
+      <h1 class="follow-header__title">개인정보 수정</h1>
+      <div class="follow-header__right">
+        <a class="follow-header__home" href="/follow.html">팔로우 관리</a>
+        <a class="follow-header__home" href="/">홈으로</a>
+      </div>
+    </header>
+
+    <main class="follow-main">
+      <section class="follow-card profile-edit-card">
+        <div class="screen-title">프로필 정보</div>
+        <p class="screen-sub">닉네임, 소개, 프로필 사진을 수정할 수 있습니다</p>
+        <p class="profile-edit-meta" id="profile-meta">불러오는 중…</p>
+
+        <div class="avatar-wrap">
+          <div class="avatar">
+            <img class="avatar-camera" id="avatar-preview" src="assets/icon-camera.png" alt="프로필 사진" />
+          </div>
+          <button class="camera-badge" type="button" id="btn-avatar" aria-label="프로필 사진 변경">
+            <img src="assets/icon-camera.png" alt="" />
+          </button>
+          <input type="file" id="avatar-file" accept="image/jpeg,image/png,image/webp" hidden />
+        </div>
+
+        <form class="form" id="form-profile-edit" novalidate>
+          <div class="field">
+            <div class="field-label">이메일</div>
+            <input class="input-destination wide" id="profile-email" name="email" type="email" readonly />
+          </div>
+          <div class="field">
+            <div class="field-label">닉네임 (10자 이내)</div>
+            <div class="input-row">
+              <input
+                class="input-destination auth"
+                id="profile-nickname"
+                name="nickname"
+                type="text"
+                maxlength="10"
+                placeholder="닉네임을 입력해주세요"
+                required
+              />
+              <button class="btn-confirm" type="button" id="btn-check-nickname">중복 확인</button>
+            </div>
+            <p class="field-error" id="nickname-error"></p>
+          </div>
+          <div class="field">
+            <div class="field-label">프로필 소개글 (20자 이내)</div>
+            <input
+              class="input-destination wide"
+              id="profile-intro"
+              name="intro"
+              type="text"
+              maxlength="20"
+              placeholder="나를 알리는 한줄 소개를 해주세요"
+            />
+            <p class="field-error" id="intro-error"></p>
+          </div>
+          <p class="form-error" id="form-error"></p>
+          <button class="btn-next" type="submit" id="btn-save">저장하기</button>
+        </form>
+      </section>
+    </main>
+  </div>
+
+  <script type="module">
+    import { api, getAccessToken, setAccessToken, ensureSession } from "./auth-api.js";
+
+    const state = {
+      me: null,
+      profileImage: null,
+      nicknameChecked: "",
+    };
+
+    const els = {
+      meta: document.getElementById("profile-meta"),
+      email: document.getElementById("profile-email"),
+      nickname: document.getElementById("profile-nickname"),
+      intro: document.getElementById("profile-intro"),
+      preview: document.getElementById("avatar-preview"),
+      nicknameError: document.getElementById("nickname-error"),
+      introError: document.getElementById("intro-error"),
+      formError: document.getElementById("form-error"),
+      save: document.getElementById("btn-save"),
+    };
+
+    function setMsg(el, message) {
+      if (!el) return;
+      el.textContent = message || "";
+      el.classList.toggle("show", Boolean(message));
+    }
+
+    function showAvatar(src) {
+      if (!src) {
+        els.preview.src = "assets/icon-camera.png";
+        els.preview.classList.remove("is-filled");
+        els.preview.alt = "프로필 사진";
+        return;
+      }
+      els.preview.src = src;
+      els.preview.classList.add("is-filled");
+      els.preview.alt = "선택한 프로필 사진";
+    }
+
+    async function toProfileImageBlob(file, size = 400) {
+      const bitmap = await createImageBitmap(file);
+      const side = Math.min(bitmap.width, bitmap.height);
+      const sx = Math.floor((bitmap.width - side) / 2);
+      const sy = Math.floor((bitmap.height - side) / 2);
+      const canvas = document.createElement("canvas");
+      canvas.width = size;
+      canvas.height = size;
+      canvas.getContext("2d").drawImage(bitmap, sx, sy, side, side, 0, 0, size, size);
+      bitmap.close?.();
+      const type = file.type === "image/png" ? "image/png" : "image/jpeg";
+      const blob = await new Promise((resolve, reject) => {
+        canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("이미지 변환에 실패했습니다."))), type, 0.92);
+      });
+      const ext = type === "image/png" ? "png" : "jpg";
+      return new File([blob], `profile.${ext}`, { type });
+    }
+
+    function isProfanityError(err) {
+      return err?.code === "PROFANITY_DETECTED"
+        || /사용 불가능한 단어|사용할 수 없는 표현/.test(String(err?.message || ""));
+    }
+
+    async function checkNickname(announceAvailable = false) {
+      const nickname = els.nickname.value.trim();
+      if (!nickname) {
+        setMsg(els.nicknameError, "닉네임을 입력해주세요");
+        return false;
+      }
+      if (nickname.length < 2 || nickname.length > 10) {
+        setMsg(els.nicknameError, "닉네임은 2~10자로 입력해주세요");
+        return false;
+      }
+      if (state.me?.nickname && nickname === state.me.nickname) {
+        state.nicknameChecked = nickname;
+        if (announceAvailable) setMsg(els.nicknameError, "현재 사용 중인 닉네임입니다");
+        else setMsg(els.nicknameError, "");
+        return true;
+      }
+      try {
+        const dup = await api(`/api/v1/auth/check-nickname?nickname=${encodeURIComponent(nickname)}`);
+        if (dup) {
+          setMsg(els.nicknameError, "이미 사용 중인 닉네임입니다.");
+          return false;
+        }
+        state.nicknameChecked = nickname;
+        if (announceAvailable) setMsg(els.nicknameError, "사용 가능한 닉네임입니다");
+        else setMsg(els.nicknameError, "");
+        return true;
+      } catch (err) {
+        setMsg(
+          els.nicknameError,
+          isProfanityError(err) ? "사용 불가능한 단어가 들어있습니다." : (err.message || "닉네임 확인에 실패했습니다.")
+        );
+        return false;
+      }
+    }
+
+    function fillForm(me) {
+      state.me = me;
+      state.profileImage = me.profileImage || null;
+      state.nicknameChecked = me.nickname || "";
+      els.email.value = me.email || "";
+      els.nickname.value = me.nickname || "";
+      els.intro.value = me.profileIntro || "";
+      showAvatar(me.profileImage);
+      els.meta.textContent = [me.grade, `팔로워 ${me.followerCount ?? 0}`, `팔로잉 ${me.followingCount ?? 0}`]
+        .filter(Boolean)
+        .join(" · ");
+    }
+
+    document.getElementById("btn-avatar").addEventListener("click", () => {
+      document.getElementById("avatar-file").click();
+    });
+
+    document.getElementById("avatar-file").addEventListener("change", async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      setMsg(els.formError, "");
+      const localUrl = URL.createObjectURL(file);
+      showAvatar(localUrl);
+      try {
+        const prepared = await toProfileImageBlob(file, 400);
+        const fd = new FormData();
+        fd.append("file", prepared);
+        const url = await api("/api/v1/auth/profile-image", { method: "POST", body: fd });
+        state.profileImage = url;
+        showAvatar(localUrl);
+      } catch (err) {
+        state.profileImage = state.me?.profileImage || null;
+        showAvatar(state.profileImage);
+        URL.revokeObjectURL(localUrl);
+        setMsg(els.formError, err.message || "프로필 사진 업로드에 실패했습니다.");
+      }
+    });
+
+    document.getElementById("btn-check-nickname").addEventListener("click", () => {
+      checkNickname(true);
+    });
+
+    let nickTimer = null;
+    els.nickname.addEventListener("input", () => {
+      clearTimeout(nickTimer);
+      state.nicknameChecked = "";
+      const value = els.nickname.value.trim();
+      if (!value) {
+        setMsg(els.nicknameError, "");
+        return;
+      }
+      nickTimer = setTimeout(() => checkNickname(false), 350);
+    });
+
+    document.getElementById("form-profile-edit").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      setMsg(els.formError, "");
+      setMsg(els.introError, "");
+      const nickname = els.nickname.value.trim();
+      const intro = els.intro.value.trim();
+      if (intro.length > 20) {
+        setMsg(els.introError, "소개는 20자 이내로 작성해주세요");
+        return;
+      }
+      const nickOk = await checkNickname(false);
+      if (!nickOk) {
+        setMsg(els.formError, "닉네임을 확인해 주세요");
+        return;
+      }
+      els.save.disabled = true;
+      try {
+        const updated = await api("/api/v1/members/me", {
+          method: "PATCH",
+          body: JSON.stringify({
+            nickname,
+            profileImage: state.profileImage,
+            profileIntro: intro || "",
+          }),
+        });
+        fillForm(updated);
+        els.formError.style.color = "#0E6632";
+        setMsg(els.formError, "저장되었습니다.");
+      } catch (err) {
+        els.formError.style.color = "";
+        if (isProfanityError(err)) {
+          setMsg(els.nicknameError, "사용 불가능한 단어가 들어있습니다.");
+        }
+        setMsg(els.formError, err.message || "저장에 실패했습니다.");
+      } finally {
+        els.save.disabled = false;
+      }
+    });
+
+    async function boot() {
+      const signedIn = getAccessToken() ? true : await ensureSession();
+      if (!signedIn) {
+        location.href = "/auth.html";
+        return;
+      }
+      try {
+        const me = await api("/api/v1/members/me");
+        fillForm(me);
+      } catch {
+        setAccessToken(null);
+        location.href = "/auth.html";
+      }
+    }
+
+    boot();
+  </script>
+</body>
+</html>

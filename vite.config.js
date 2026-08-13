@@ -21,6 +21,14 @@ export default defineConfig({
       "/files": {
         target: "http://localhost:8080",
         changeOrigin: true,
+        configure: (proxy) => {
+          proxy.on("proxyReq", (proxyReq) => {
+            proxyReq.setHeader(
+              "X-Gateway-Internal-Token",
+              process.env.GATEWAY_INTERNAL_TOKEN || "local-gateway-internal-token"
+            );
+          });
+        },
       },
     },
   },

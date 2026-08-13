@@ -70,7 +70,7 @@
             마이페이지 <span class="caret" aria-hidden="true"></span>
           </button>
           <div class="home-nav__submenu home-nav__submenu--wide" role="menu">
-            <button type="button" role="menuitem">개인정보 수정</button>
+            <a href="/profile-edit.html" role="menuitem">개인정보 수정</a>
             <a href="/follow.html" role="menuitem">팔로워/팔로우 관리</a>
             <button type="button" role="menuitem">멤버쉽 관리</button>
             <button type="button" role="menuitem">결제 수단</button>
@@ -162,7 +162,7 @@
   </div>
 
   <script type="module">
-    import { api, getAccessToken, setAccessToken } from "./auth-api.js";
+    import { api, getAccessToken, setAccessToken, ensureSession } from "./auth-api.js";
 
     const CITIES = {
       tokyo: {
@@ -324,7 +324,8 @@
     }
 
     async function resolveAuthHeader() {
-      if (!getAccessToken()) {
+      const signedIn = getAccessToken() ? true : await ensureSession();
+      if (!signedIn) {
         showGuestHeader();
         return;
       }

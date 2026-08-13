@@ -461,7 +461,7 @@
   </div>
 
   <script type="module">
-    import { api, setAccessToken, getAccessToken } from "./auth-api.js";
+    import { api, setAccessToken, getAccessToken, ensureSession } from "./auth-api.js";
     import {
       startGoogleLogin,
       startNaverLogin,
@@ -816,7 +816,6 @@
       const form = e.target;
       if (!validateForm(form)) {
         setFormError("login-form-error", "이메일과 비밀번호를 입력한 뒤 「탑승 하기」를 눌러주세요");
-        alert("이메일과 비밀번호를 입력한 뒤 「탑승 하기」를 눌러주세요");
         return;
       }
       const email = form.email.value.trim();
@@ -833,7 +832,6 @@
         return;
       } catch (err) {
         setFormError("login-form-error", err.message);
-        alert(err.message || "로그인에 실패했습니다");
       } finally {
         if (btn) btn.disabled = false;
       }
@@ -1287,6 +1285,33 @@
       show("signup4");
     });
 
+    /** 서버는 400x400 정사각형만 받음 — 중앙 크롭 후 리사이즈 */
+    async function toProfileImageBlob(file, size = 400) {
+      const bitmap = await createImageBitmap(file);
+      const side = Math.min(bitmap.width, bitmap.height);
+      const sx = Math.floor((bitmap.width - side) / 2);
+      const sy = Math.floor((bitmap.height - side) / 2);
+      const canvas = document.createElement("canvas");
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(bitmap, sx, sy, side, side, 0, 0, size, size);
+      bitmap.close?.();
+      const type = file.type === "image/png" ? "image/png" : "image/jpeg";
+      const blob = await new Promise((resolve, reject) => {
+        canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("이미지 변환에 실패했습니다."))), type, 0.92);
+      });
+      const ext = type === "image/png" ? "png" : "jpg";
+      return new File([blob], `profile.${ext}`, { type });
+    }
+
+    function showAvatarPreview(src) {
+      const preview = document.getElementById("avatar-preview");
+      preview.src = src;
+      preview.alt = "선택한 프로필 사진";
+      preview.classList.add("is-filled");
+    }
+
     // 프로필 이미지
     document.getElementById("btn-avatar").addEventListener("click", () => {
       document.getElementById("avatar-file").click();
@@ -1294,40 +1319,83 @@
     document.getElementById("avatar-file").addEventListener("change", async (e) => {
       const file = e.target.files?.[0];
       if (!file) return;
+      setFormError("signup4-form-error", "");
+      const localUrl = URL.createObjectURL(file);
+      showAvatarPreview(localUrl);
       try {
+        const prepared = await toProfileImageBlob(file, 400);
         const fd = new FormData();
-        fd.append("file", file);
+        fd.append("file", prepared);
         const url = await api("/api/v1/auth/profile-image", { method: "POST", body: fd });
         state.profileImage = url;
-        const preview = document.getElementById("avatar-preview");
-        preview.src = url.startsWith("http") ? url : url;
-        preview.style.width = "100%";
-        preview.style.height = "100%";
-        preview.style.objectFit = "cover";
-        preview.style.imageRendering = "auto";
+        // /files 는 업로드 직후 프록시/신뢰헤더 이슈로 깨질 수 있어 로컬 미리보기 유지
+        showAvatarPreview(localUrl);
       } catch (err) {
-        setFormError("signup4-form-error", err.message);
+        state.profileImage = null;
+        URL.revokeObjectURL(localUrl);
+        document.getElementById("avatar-preview").src = "assets/icon-camera.png";
+        document.getElementById("avatar-preview").classList.remove("is-filled");
+        document.getElementById("avatar-preview").alt = "프로필 사진";
+        setFormError("signup4-form-error", err.message || "프로필 사진 업로드에 실패했습니다.");
       }
+    });
+
+    function setNicknameFieldMessage(message) {
+      const form = document.getElementById("form-signup4");
+      const err = form?.querySelector('[data-error-for="nickname"]');
+      if (!err) return;
+      err.textContent = message || "";
+      err.classList.toggle("show", Boolean(message));
+    }
+
+    function isProfanityError(err) {
+      return err?.code === "PROFANITY_DETECTED"
+        || /사용 불가능한 단어|사용할 수 없는 표현/.test(String(err?.message || ""));
+    }
+
+    async function validateNicknameInput(nickname, { announceAvailable = false } = {}) {
+      const trimmed = (nickname || "").trim();
+      if (!trimmed) {
+        setNicknameFieldMessage("닉네임을 입력해주세요");
+        return false;
+      }
+      try {
+        const dup = await api(`/api/v1/auth/check-nickname?nickname=${encodeURIComponent(trimmed)}`);
+        if (dup) {
+          setNicknameFieldMessage("이미 사용 중인 닉네임입니다.");
+          return false;
+        }
+        if (announceAvailable) setNicknameFieldMessage("사용 가능한 닉네임입니다");
+        else setNicknameFieldMessage("");
+        return true;
+      } catch (err) {
+        setNicknameFieldMessage(
+          isProfanityError(err) ? "사용 불가능한 단어가 들어있습니다." : (err.message || "닉네임 확인에 실패했습니다.")
+        );
+        return false;
+      }
+    }
+
+    // 닉네임 입력 중 금칙어 검사
+    let nicknameCheckTimer = null;
+    document.querySelector('#form-signup4 [name="nickname"]')?.addEventListener("input", (e) => {
+      const value = e.target.value;
+      clearTimeout(nicknameCheckTimer);
+      if (!value.trim()) {
+        setNicknameFieldMessage("");
+        return;
+      }
+      nicknameCheckTimer = setTimeout(() => {
+        validateNicknameInput(value, { announceAvailable: false });
+      }, 350);
     });
 
     // 닉네임 중복 확인
     document.querySelector("#form-signup4 .btn-confirm")?.addEventListener("click", async () => {
       const form = document.getElementById("form-signup4");
-      const nickname = form.nickname.value.trim();
       clearErrors(form);
-      if (!nickname) {
-        const err = form.querySelector('[data-error-for="nickname"]');
-        err.textContent = "닉네임을 입력해주세요";
-        err.classList.add("show");
-        return;
-      }
-      try {
-        const dup = await api(`/api/v1/auth/check-nickname?nickname=${encodeURIComponent(nickname)}`);
-        if (dup) throw new Error("이미 사용 중인 닉네임입니다.");
-        alert("사용 가능한 닉네임입니다");
-      } catch (err) {
-        setFormError("signup4-form-error", err.message);
-      }
+      setFormError("signup4-form-error", "");
+      await validateNicknameInput(form.nickname.value, { announceAvailable: true });
     });
 
     // 회원가입 완료
@@ -1345,8 +1413,11 @@
       const nickname = form.nickname.value.trim();
       const introduction = form.intro.value.trim() || null;
       try {
-        const nickDup = await api(`/api/v1/auth/check-nickname?nickname=${encodeURIComponent(nickname)}`);
-        if (nickDup) throw new Error("이미 사용 중인 닉네임입니다.");
+        const nickOk = await validateNicknameInput(nickname, { announceAvailable: false });
+        if (!nickOk) {
+          setFormError("signup4-form-error", "닉네임을 확인해 주세요");
+          return;
+        }
 
         if (state.socialMode && loadSocialPending()) {
           await finishSocialSignup({
@@ -1382,6 +1453,9 @@
         goHomeAfterLogin();
         return;
       } catch (err) {
+        if (isProfanityError(err)) {
+          setNicknameFieldMessage("사용 불가능한 단어가 들어있습니다.");
+        }
         setFormError("signup4-form-error", err.message);
       }
     });
@@ -1394,10 +1468,17 @@
       history.replaceState({}, "", "/auth.html");
     } else if (qs.get("socialLogin") === "1") {
       goHomeAfterLogin();
-    } else if (getAccessToken()) {
-      api("/api/v1/members/me")
-        .then((me) => console.info("[PlanWith] logged in:", me?.nickname))
-        .catch(() => setAccessToken(null));
+    } else {
+      (async () => {
+        const signedIn = getAccessToken() ? true : await ensureSession();
+        if (!signedIn) return;
+        try {
+          const me = await api("/api/v1/members/me");
+          console.info("[PlanWith] logged in:", me?.nickname);
+        } catch {
+          setAccessToken(null);
+        }
+      })();
     }
   </script>
 </body>
