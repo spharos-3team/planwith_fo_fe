@@ -831,7 +831,11 @@
         goHomeAfterLogin();
         return;
       } catch (err) {
-        setFormError("login-form-error", err.message);
+        const msg =
+          err.code === "ACCOUNT_SUSPENDED" || /정지된 계정/.test(String(err.message || ""))
+            ? "정지된 계정입니다."
+            : (err.message || "이메일 또는 비밀번호가 일치하지 않습니다.");
+        setFormError("login-form-error", msg);
       } finally {
         if (btn) btn.disabled = false;
       }
