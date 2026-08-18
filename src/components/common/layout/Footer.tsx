@@ -17,22 +17,28 @@ const footerGroups = [
   },
   {
     title: "TEAM",
-    links: [{ label: "Jusock Matlib", href: "/team" }],
+    links: [{ label: "Juseok MatJib", href: "/team" }],
   },
   {
     title: "About Us",
     links: [
       { label: "PARK YEON HUI", href: "/about" },
-      { label: "YOON MIN HYUNG", href: "/about" },
+      { label: "YOON HWI MYUING", href: "/about" },
       { label: "GWAK JI EUN", href: "/about" },
       { label: "LEE KYUNG MIN", href: "/about" },
     ],
   },
 ];
 
-export function Footer() {
+interface FooterProps {
+  variant?: "overlay" | "solid";
+}
+
+export function Footer({ variant = "solid" }: FooterProps) {
+  const isOverlay = variant === "overlay";
+
   return (
-    <footer className="bg-black text-white" id="footer">
+    <footer className="bg-header-branded text-white" id="footer">
       <div className="mx-auto grid w-full max-w-7xl gap-12 px-6 py-16 sm:px-8 lg:grid-cols-[1.5fr_2fr] lg:py-20">
         <section aria-labelledby="footer-brand">
           <h2
@@ -41,7 +47,7 @@ export function Footer() {
           >
             PLAN &amp; WITH
           </h2>
-          <p className="mt-4 max-w-sm text-sm leading-6 text-white/55">
+          <p className="mt-4 max-w-sm text-sm leading-6 text-white/80">
             Your journey starts here. Plan, share, and explore travel stories
             with fellow travelers.
           </p>
@@ -77,7 +83,7 @@ export function Footer() {
           {footerGroups.map((group) => (
             <section key={group.title}>
               <h2 className="text-sm font-semibold">{group.title}</h2>
-              <ul className="mt-4 grid gap-3 text-xs text-white/52">
+              <ul className="mt-4 grid gap-3 text-xs text-white/75">
                 {group.links.map((link) => (
                   <li key={`${group.title}-${link.label}`}>
                     <Link
@@ -94,9 +100,11 @@ export function Footer() {
         </nav>
       </div>
 
-      <div className="bg-[#78b7f3] px-6 py-5 text-center text-xs text-white">
-        © 2026 PLAN&amp;WITH Inc. All rights reserved.
-      </div>
+      {!isOverlay ? (
+        <div className="bg-footer-bar px-6 py-5 text-center text-xs text-text-inverse">
+          © 2026 PLAN&amp;WITH Inc. All rights reserved.
+        </div>
+      ) : null}
     </footer>
   );
 }

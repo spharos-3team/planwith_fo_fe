@@ -93,7 +93,7 @@ export function DestinationHero() {
       >
         <Image
           alt=""
-          className={`${activeDestination.landmarkImageClass} drop-shadow-[0_24px_36px_rgba(0,0,0,0.28)]`}
+          className={`${activeDestination.landmarkImageClass} drop-shadow-landmark`}
           fill
           key={`${activeDestination.id}-landmark`}
           priority
@@ -138,7 +138,9 @@ export function DestinationHero() {
               <button
                 aria-pressed={active}
                 className={`relative shrink-0 py-0.5 pl-4 text-left transition lg:pl-5 lg:text-right ${
-                  active ? "text-[#78b7f3]" : "text-white hover:text-white/80"
+                  active
+                    ? "text-footer-bar"
+                    : "text-text-inverse hover:text-text-inverse/80"
                 }`}
                 key={destination.id}
                 onClick={() => setActiveDestinationId(destination.id)}
@@ -147,7 +149,7 @@ export function DestinationHero() {
                 {active && (
                   <span
                     aria-hidden="true"
-                    className="absolute bottom-0.5 left-0 top-0.5 w-0.5 bg-[#78b7f3]"
+                    className="absolute bottom-0.5 left-0 top-0.5 w-0.5 bg-footer-bar"
                   />
                 )}
                 <span className="block text-[clamp(1.125rem,1.35vw,1.5rem)] font-normal leading-tight">

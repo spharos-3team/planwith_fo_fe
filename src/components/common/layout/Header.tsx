@@ -7,6 +7,7 @@ import {
   Coins,
   Home,
   Menu,
+  MessageCircle,
   Search,
   Sparkles,
   UserRound,
@@ -21,24 +22,79 @@ import { BrandLogo } from "./BrandLogo";
 interface HeaderProps {
   authenticated?: boolean;
   variant?: "solid" | "overlay";
+  activeHref?: string;
 }
 
-const primaryNavigation = [
-  { href: "/schedules", label: "AI 일정생성", icon: Sparkles },
-  { href: "/community", label: "커뮤니티", icon: Users },
-  { href: "/mypage", label: "마이페이지", icon: UserRound, protected: true },
+const scheduleNavItems = [
+  {
+    href: "/schedules",
+    label: "일정관리",
+    hasDropdown: true,
+    icon: Sparkles,
+  },
+  { href: "/community", label: "커뮤니티", hasDropdown: true, icon: Users },
+  {
+    href: "/mypage",
+    label: "마이페이지",
+    hasDropdown: true,
+    icon: UserRound,
+    protected: true,
+  },
   { href: "/search", label: "검색", icon: Search },
 ];
+
+function NavLink({
+  activeHref,
+  href,
+  label,
+  hasDropdown,
+}: {
+  activeHref?: string;
+  href: string;
+  label: string;
+  hasDropdown?: boolean;
+}) {
+  const isActive = activeHref === href;
+
+  return (
+    <Link
+      className={`relative px-4 py-2 transition ${
+        isActive ? "text-text-inverse" : "text-white/80 hover:text-text-inverse"
+      }`}
+      href={href}
+    >
+      {isActive && (
+        <span
+          aria-hidden="true"
+          className="absolute inset-x-1 inset-y-0 -z-10 rounded-full bg-header-nav-active"
+        />
+      )}
+      <span className="inline-flex items-center gap-1">
+        {label}
+        {hasDropdown ? (
+          <ChevronDown aria-hidden="true" className="h-4 w-4" />
+        ) : null}
+      </span>
+    </Link>
+  );
+}
 
 export function Header({
   authenticated = true,
   variant = "solid",
+  activeHref,
 }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const positionClass =
-    variant === "overlay" ? "absolute left-0 top-0" : "sticky top-0";
-  const surfaceClass =
-    variant === "overlay" ? "bg-transparent" : "bg-black/88 backdrop-blur-sm";
+  const isOverlay = variant === "overlay";
+  const positionClass = isOverlay ? "absolute left-0 top-0" : "sticky top-0";
+  const surfaceClass = isOverlay ? "bg-transparent" : "bg-header-branded";
+  const mobileMenuSurfaceClass = isOverlay
+    ? "border-white/10 bg-black"
+    : "border-white/20 bg-header-branded";
+
+  const visibleNavItems = scheduleNavItems.filter(
+    (item) => !item.protected || authenticated
+  );
 
   return (
     <header
@@ -49,41 +105,35 @@ export function Header({
 
         <nav
           aria-label="주요 메뉴"
-          className="hidden items-center gap-9 text-base lg:flex"
+          className="relative hidden items-center gap-0 text-base lg:flex"
         >
-          <Link
-            aria-label="홈"
-            className="grid h-11 w-11 place-items-center rounded-full bg-blue-600 transition hover:bg-blue-500"
-            href="/"
-          >
-            <Home aria-hidden="true" className="h-5 w-5" />
-          </Link>
-
-          {primaryNavigation.map((item) => {
-            if (item.protected && !authenticated) {
-              return null;
-            }
-
-            return (
-              <Link
-                className="inline-flex items-center gap-1.5 text-white/82 transition hover:text-white"
-                href={item.href}
-                key={item.href}
-              >
-                {item.label}
-                {(item.label === "AI 일정생성" ||
-                  item.label === "커뮤니티" ||
-                  item.label === "마이페이지") && (
-                  <ChevronDown aria-hidden="true" className="h-4 w-4" />
-                )}
-              </Link>
-            );
-          })}
+          <NavLink activeHref={activeHref} href="/" label="홈" />
+          {visibleNavItems.map((item) => (
+            <NavLink
+              activeHref={activeHref}
+              hasDropdown={item.hasDropdown}
+              href={item.href}
+              key={item.href}
+              label={item.label}
+            />
+          ))}
         </nav>
 
         <div className="hidden items-center gap-3 lg:flex">
           {authenticated ? (
             <>
+              <Link aria-label="채팅" href="/chat">
+                <MessageCircle
+                  aria-hidden="true"
+                  className="h-5 w-5 text-white/85 transition hover:text-white"
+                />
+              </Link>
+              <Link aria-label="알림" href="/notifications">
+                <Bell
+                  aria-hidden="true"
+                  className="h-5 w-5 text-white/85 transition hover:text-white"
+                />
+              </Link>
               <span
                 aria-label="보유 토큰 500개"
                 className="inline-flex items-center gap-1.5 text-xs text-white/85"
@@ -91,17 +141,11 @@ export function Header({
                 <Coins aria-hidden="true" className="h-4 w-4 text-amber-300" />
                 500
               </span>
-              <span className="text-xs font-semibold">배고팡님</span>
+              <span className="text-xs font-semibold">태고왕님</span>
               <Link aria-label="사용자 프로필" href="/mypage">
                 <CircleUserRound
                   aria-hidden="true"
                   className="h-7 w-7 text-white"
-                />
-              </Link>
-              <Link aria-label="알림" href="/notifications">
-                <Bell
-                  aria-hidden="true"
-                  className="h-5 w-5 text-white/85 transition hover:text-white"
                 />
               </Link>
             </>
@@ -133,7 +177,7 @@ export function Header({
       {mobileMenuOpen && (
         <nav
           aria-label="모바일 메뉴"
-          className="border-t border-white/10 bg-black px-5 py-5 lg:hidden"
+          className={`border-t px-5 py-5 lg:hidden ${mobileMenuSurfaceClass}`}
         >
           <div className="mx-auto grid max-w-7xl gap-1">
             <Link
@@ -143,12 +187,9 @@ export function Header({
             >
               <Home aria-hidden="true" className="h-4 w-4" />홈
             </Link>
-            {primaryNavigation.map((item) => {
-              if (item.protected && !authenticated) {
-                return null;
-              }
-
+            {visibleNavItems.map((item) => {
               const Icon = item.icon;
+
               return (
                 <Link
                   className="flex items-center gap-3 rounded-lg px-3 py-3 hover:bg-white/10"
@@ -171,13 +212,22 @@ export function Header({
                   />
                   토큰 500
                 </span>
-                <Link
-                  aria-label="알림"
-                  href="/notifications"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <Bell aria-hidden="true" className="h-5 w-5" />
-                </Link>
+                <div className="flex items-center gap-3">
+                  <Link
+                    aria-label="채팅"
+                    href="/chat"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <MessageCircle aria-hidden="true" className="h-5 w-5" />
+                  </Link>
+                  <Link
+                    aria-label="알림"
+                    href="/notifications"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <Bell aria-hidden="true" className="h-5 w-5" />
+                  </Link>
+                </div>
               </div>
             ) : (
               <Link
