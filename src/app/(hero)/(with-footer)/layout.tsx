@@ -14,6 +14,7 @@ export default function HeroWithFooterLayout({
       authenticated={false}
       footerVariant="overlay"
       headerVariant="overlay"
+      showFooter={false}
     >
       {children}
     </SiteLayout>

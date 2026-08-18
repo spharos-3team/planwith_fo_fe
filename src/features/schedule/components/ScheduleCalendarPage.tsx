@@ -4,6 +4,7 @@ import { MapPin } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 
+import { Badge, type BadgeTone } from "@/components/common/Badge";
 import {
   type ActivityBadgeTone,
   mockScheduleDays,
@@ -13,28 +14,11 @@ import {
   scheduleTabs,
 } from "@/features/schedule/data/calendarMock";
 
-function ActivityBadge({
-  label,
-  tone = "default",
-}: {
-  label: string;
-  tone?: ActivityBadgeTone;
-}) {
-  const toneClass =
-    tone === "meal"
-      ? "bg-status-success-bg text-status-success"
-      : tone === "arrival"
-        ? "bg-blue-ice text-brand-primary"
-        : "bg-surface-page text-text-secondary";
-
-  return (
-    <span
-      className={`inline-flex rounded-xs px-2 py-0.5 text-caption-sm ${toneClass}`}
-    >
-      {label}
-    </span>
-  );
-}
+const activityBadgeToneMap: Record<ActivityBadgeTone, BadgeTone> = {
+  arrival: "blue",
+  meal: "green",
+  default: "gray",
+};
 
 function TripTicketCard() {
   return (
@@ -79,9 +63,9 @@ function ScheduleTimeline({ days }: { days: ScheduleDay[] }) {
       {days.map((day) => (
         <section key={day.id}>
           <div className="flex flex-wrap items-center gap-3">
-            <span className="inline-flex rounded-md bg-brand-primary px-4 py-1.5 text-caption-sm text-text-inverse">
+            <Badge size="md" tone="blue" variant="solid">
               {day.label}
-            </span>
+            </Badge>
             <p className="text-body-sm text-text-secondary">{day.theme}</p>
           </div>
 
@@ -100,10 +84,13 @@ function ScheduleTimeline({ days }: { days: ScheduleDay[] }) {
                     {activity.title}
                   </h3>
                   {activity.badge && (
-                    <ActivityBadge
-                      label={activity.badge}
-                      tone={activity.badgeTone}
-                    />
+                    <Badge
+                      tone={
+                        activityBadgeToneMap[activity.badgeTone ?? "default"]
+                      }
+                    >
+                      {activity.badge}
+                    </Badge>
                   )}
                 </div>
                 <p className="mt-2 text-body-sm leading-6 text-text-secondary">

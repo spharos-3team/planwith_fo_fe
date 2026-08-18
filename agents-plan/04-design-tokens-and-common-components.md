@@ -20,17 +20,20 @@
 | Typography `@utility` (`text-heading-*`, `text-body-*` 등)      | Gothic A1 단일 폰트 + 크기·굵기를 유틸로 통일               |
 | Radius `--radius-*`                                             | 버튼·카드·pill 반경을 `/design-system`과 일치               |
 | Spacing `--space-section-y`, `--space-card`, `--space-stack`    | 반복 간격(`py-16`, `p-6`, `gap-4`)을 semantic으로 승격      |
+| Modal overlay/surface (`overlay-modal`, `surface-modal-*`)      | alert/confirm/success Modal 시안 토큰화                     |
 | Legacy alias (`--primary`, `--muted` 등) **유지**               | 기존 화면 깨짐 없이 점진 마이그레이션                       |
 
 ### 1.2 공통 컴포넌트 (`src/components/common/`)
 
-| 컴포넌트        | 적용                                          | 이유                                                |
-| --------------- | --------------------------------------------- | --------------------------------------------------- |
-| `Button`        | sm/md/lg, primary/secondary/ghost, pill, icon | CTA·폼 버튼 스타일 중복 제거                        |
-| `InputField`    | label, error, icon, disabled                  | 폼 a11y(label 연결, `role="alert"`)와 스타일 일원화 |
-| `SelectField`   | InputField와 동일 API 패턴                    | select UI를 feature마다 복붙하지 않도록             |
-| `Dialog`        | portal, overlay, Escape, `aria-modal`         | 모달 a11y·동작 최소 공통화                          |
-| `StatusMessage` | semantic 토큰 연결                            | 빈/에러 UI를 `code-quality.mdc`와 맞춤              |
+| 컴포넌트        | 적용                                                         | 이유                                                |
+| --------------- | ------------------------------------------------------------ | --------------------------------------------------- |
+| `Button`        | sm/md/lg, primary/secondary/ghost/danger/inverse, pill, icon | CTA·폼·Modal 액션 스타일 중복 제거                  |
+| `InputField`    | label, error, icon, disabled                                 | 폼 a11y(label 연결, `role="alert"`)와 스타일 일원화 |
+| `SelectField`   | InputField와 동일 API 패턴                                   | select UI를 feature마다 복붙하지 않도록             |
+| `Dialog`        | portal, overlay, Escape, `aria-modal`                        | 범용 모달(제목+X+children) 최소 a11y                |
+| `Modal`         | alert/confirm/success, focus trap, Escape                    | 시안 패턴 모달(알림·확인·성공)                      |
+| `Badge`         | subtle/solid/dot, tone, size                                 | 캘린더·타임라인 카테고리/상태 라벨                  |
+| `StatusMessage` | semantic 토큰 연결                                           | 빈/에러 UI를 `code-quality.mdc`와 맞춤              |
 
 ### 1.3 쇼케이스 (`/design-system`)
 
@@ -68,18 +71,21 @@
 
 ## 3. 토큰 Quick reference
 
-| 용도                 | Tailwind               | CSS 변수              |
-| -------------------- | ---------------------- | --------------------- |
-| 본문                 | `text-text-primary`    | `--text-primary`      |
-| CTA                  | `bg-brand-primary`     | `--brand-primary`     |
-| Header/Footer shell  | `bg-header-branded`    | `--header-branded`    |
-| Footer copyright bar | `bg-footer-bar`        | `--footer-bar`        |
-| Nav active pill      | `bg-header-nav-active` | `--header-nav-active` |
-| 입력 테두리          | `border-line-default`  | `--line-default`      |
-| 에러                 | `text-status-error`    | `--status-error`      |
-| 섹션 여백            | `py-section-y`         | `--space-section-y`   |
-| 카드 패딩            | `p-card`               | `--space-card`        |
-| 스택 간격            | `gap-stack`            | `--space-stack`       |
+| 용도                 | Tailwind                 | CSS 변수                |
+| -------------------- | ------------------------ | ----------------------- |
+| 본문                 | `text-text-primary`      | `--text-primary`        |
+| CTA                  | `bg-brand-primary`       | `--brand-primary`       |
+| Header/Footer shell  | `bg-header-branded`      | `--header-branded`      |
+| Footer copyright bar | `bg-footer-bar`          | `--footer-bar`          |
+| Nav active pill      | `bg-header-nav-active`   | `--header-nav-active`   |
+| 입력 테두리          | `border-line-default`    | `--line-default`        |
+| 에러                 | `text-status-error`      | `--status-error`        |
+| Modal backdrop       | `bg-overlay-modal`       | `--overlay-modal`       |
+| Modal dark panel     | `bg-surface-modal-dark`  | `--surface-modal-dark`  |
+| Modal glass panel    | `bg-surface-modal-glass` | `--surface-modal-glass` |
+| 섹션 여백            | `py-section-y`           | `--space-section-y`     |
+| 카드 패딩            | `p-card`                 | `--space-card`          |
+| 스택 간격            | `gap-stack`              | `--space-stack`         |
 
 전체: `/design-system`, `DesignSystemShowcase.tsx`
 
@@ -87,14 +93,16 @@
 
 ## 4. 공통 컴포넌트 ↔ UI 매핑
 
-| UI           | 사용                                    |
-| ------------ | --------------------------------------- |
-| Primary CTA  | `<Button>`                              |
-| 텍스트 입력  | `<InputField>`                          |
-| 선택 입력    | `<SelectField>`                         |
-| 모달         | `<Dialog>`                              |
-| 빈/에러      | `<StatusMessage role="alert">`          |
-| 페이지 shell | `SiteLayout` (route group `layout.tsx`) |
+| UI             | 사용                                    |
+| -------------- | --------------------------------------- |
+| Primary CTA    | `<Button>`                              |
+| 텍스트 입력    | `<InputField>`                          |
+| 선택 입력      | `<SelectField>`                         |
+| 범용 모달      | `<Dialog>`                              |
+| 시안 패턴 모달 | `<Modal variant="alert                  | confirm | success">` |
+| 카테고리/상태  | `<Badge variant="subtle                 | solid   | dot">`     |
+| 빈/에러        | `<StatusMessage role="alert">`          |
+| 페이지 shell   | `SiteLayout` (route group `layout.tsx`) |
 
 Shell·Header/Footer 상세: `agents-plan/03-header-footer-sitelayout.md`
 
@@ -114,12 +122,12 @@ Shell·Header/Footer 상세: `agents-plan/03-header-footer-sitelayout.md`
 
 ## 6. 아직 하지 않은 것 (의도적)
 
-| 항목                       | 이유                                  |
-| -------------------------- | ------------------------------------- |
-| Legacy alias 일괄 삭제     | 기존 화면 regression 위험             |
-| Dialog focus trap 고도화   | 현재 최소 a11y만 — 필요 시 후속       |
-| spacing 토큰 추가          | 3회 이상 반복될 때만 `--space-*` 확장 |
-| shadow scale (landmark 외) | 사용처 생긴 뒤                        |
+| 항목                       | 이유                                   |
+| -------------------------- | -------------------------------------- |
+| Legacy alias 일괄 삭제     | 기존 화면 regression 위험              |
+| Dialog focus trap 고도화   | Modal에 적용 완료 — Dialog는 후속 유지 |
+| spacing 토큰 추가          | 3회 이상 반복될 때만 `--space-*` 확장  |
+| shadow scale (landmark 외) | 사용처 생긴 뒤                         |
 
 ---
 
@@ -131,7 +139,7 @@ npm run typecheck
 npm run build
 ```
 
-- [x] `/design-system` — spacing, SelectField, Dialog, StatusMessage
+- [x] `/design-system` — spacing, SelectField, Dialog, Modal, StatusMessage
 - [x] `StatusMessage` semantic 토큰
 - [x] `ScheduleApplicationForm` raw hex 제거
 

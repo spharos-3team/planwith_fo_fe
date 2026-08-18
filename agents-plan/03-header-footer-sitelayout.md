@@ -43,12 +43,12 @@ app/
       design-system/page.tsx           # /design-system
 ```
 
-| URL                   | group                | Header          | Footer  | showFooter |
-| --------------------- | -------------------- | --------------- | ------- | ---------- |
-| `/`                   | hero/(with-footer)   | overlay         | overlay | true       |
-| `/schedules`          | hero/schedules       | overlay         | —       | false      |
-| `/schedules/calendar` | main/(authenticated) | solid (branded) | solid   | true       |
-| `/design-system`      | main/(public)        | solid           | solid   | true       |
+| URL                   | group                | Header          | Footer | showFooter |
+| --------------------- | -------------------- | --------------- | ------ | ---------- |
+| `/`                   | hero/(with-footer)   | overlay         | —      | false      |
+| `/schedules`          | hero/schedules       | overlay         | —      | false      |
+| `/schedules/calendar` | main/(authenticated) | solid (branded) | solid  | true       |
+| `/design-system`      | main/(public)        | solid           | solid  | true       |
 
 삭제된 구 경로: `app/page.tsx`, `app/schedules/**`, `app/design-system/**`
 

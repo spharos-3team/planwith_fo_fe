@@ -3,9 +3,11 @@
 import { Calendar, MapPin } from "lucide-react";
 import { useState } from "react";
 
+import { Badge } from "@/components/common/Badge";
 import { Button } from "@/components/common/Button";
 import { Dialog } from "@/components/common/Dialog";
 import { InputField } from "@/components/common/InputField";
+import { Modal } from "@/components/common/Modal";
 import { SelectField } from "@/components/common/SelectField";
 import { StatusMessage } from "@/components/common/StatusMessage";
 
@@ -254,6 +256,85 @@ function DialogDemo() {
   );
 }
 
+function ModalDemo() {
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [successOpen, setSuccessOpen] = useState(false);
+
+  return (
+    <div className="flex flex-wrap gap-3">
+      <Button onClick={() => setAlertOpen(true)} size="md">
+        Alert Modal
+      </Button>
+      <Button
+        buttonStyle="secondary"
+        onClick={() => setConfirmOpen(true)}
+        size="md"
+      >
+        Confirm Modal
+      </Button>
+      <Button
+        buttonStyle="ghost"
+        onClick={() => setSuccessOpen(true)}
+        size="md"
+      >
+        Success Modal
+      </Button>
+
+      <Modal
+        confirmAction={{
+          label: "확인",
+          onClick: () => setAlertOpen(false),
+        }}
+        onClose={() => setAlertOpen(false)}
+        open={alertOpen}
+        title="일정이 삭제되었습니다"
+        variant="alert"
+      />
+
+      <Modal
+        cancelAction={{
+          label: "취소",
+          onClick: () => setConfirmOpen(false),
+        }}
+        confirmAction={{
+          label: "삭제하기",
+          onClick: () => setConfirmOpen(false),
+        }}
+        description="삭제된 일정은 복구할 수 없습니다"
+        onClose={() => setConfirmOpen(false)}
+        open={confirmOpen}
+        title="일정을 삭제하시겠습니까?"
+        variant="confirm"
+      />
+
+      <Modal
+        description="캘린더에서 언제든지 확인하실 수 있습니다"
+        detail={
+          <>
+            <p className="text-heading-sm text-text-primary">도쿄 6일 여행</p>
+            <p className="mt-1 text-body-sm text-text-secondary">
+              2026.8.1 ~ 2026.8.6 (5박 6일)
+            </p>
+          </>
+        }
+        onClose={() => setSuccessOpen(false)}
+        open={successOpen}
+        primaryAction={{
+          label: "캘린더에서 확인하기",
+          onClick: () => setSuccessOpen(false),
+        }}
+        secondaryAction={{
+          label: "다시 생성하기",
+          onClick: () => setSuccessOpen(false),
+        }}
+        title="일정이 캘린더에 저장되었습니다"
+        variant="success"
+      />
+    </div>
+  );
+}
+
 export function DesignSystemShowcase() {
   return (
     <div className="mx-auto w-full max-w-7xl px-6 py-16 sm:px-8 lg:py-20">
@@ -264,9 +345,9 @@ export function DesignSystemShowcase() {
         </h1>
         <p className="mt-4 max-w-3xl text-body-md text-text-secondary">
           Primitive → Semantic 토큰, Gothic A1 타이포그래피, Button / InputField
-          / SelectField / Dialog / StatusMessage 공통 컴포넌트를 정리한 내부
-          참고 페이지입니다. 신규 UI는 semantic 토큰과 common 컴포넌트를 우선
-          사용합니다.
+          / SelectField / Dialog / Modal / Badge / StatusMessage 공통 컴포넌트를
+          정리한 내부 참고 페이지입니다. 신규 UI는 semantic 토큰과 common
+          컴포넌트를 우선 사용합니다.
         </p>
         <dl className="mt-8 grid gap-4 sm:grid-cols-3">
           <div className="rounded-lg border border-line-light bg-surface-default p-4">
@@ -282,7 +363,8 @@ export function DesignSystemShowcase() {
           <div className="rounded-lg border border-line-light bg-surface-default p-4">
             <dt className="text-caption text-text-disabled">Components</dt>
             <dd className="mt-1 text-body-sm text-text-primary">
-              Button, InputField, SelectField, Dialog, StatusMessage
+              Button, InputField, SelectField, Dialog, Modal, Badge,
+              StatusMessage
             </dd>
           </div>
         </dl>
@@ -473,6 +555,61 @@ export function DesignSystemShowcase() {
         </Section>
 
         <Section
+          description="variant(subtle/solid/dot), tone(blue/green/purple/orange/gray), size(sm/md) — 캘린더·타임라인 카테고리/상태"
+          title="Badge"
+        >
+          <div className="grid gap-8">
+            <div>
+              <p className="mb-4 text-label-sm text-text-secondary">
+                Subtle — 타임라인 카테고리
+              </p>
+              <div className="flex flex-wrap items-center gap-3">
+                <Badge tone="blue">이동</Badge>
+                <Badge tone="green">관광</Badge>
+                <Badge tone="purple">식사</Badge>
+                <Badge tone="orange">AI 추천</Badge>
+                <Badge tone="gray">출발지</Badge>
+              </div>
+            </div>
+            <div>
+              <p className="mb-4 text-label-sm text-text-secondary">
+                Solid — 상태·DAY 라벨
+              </p>
+              <div className="flex flex-wrap items-center gap-3">
+                <Badge tone="blue" variant="solid">
+                  진행중
+                </Badge>
+                <Badge size="md" tone="blue" variant="solid">
+                  DAY 1
+                </Badge>
+                <Badge tone="green" variant="solid">
+                  완료
+                </Badge>
+              </div>
+            </div>
+            <div>
+              <p className="mb-4 text-label-sm text-text-secondary">
+                Dot — 캘린더 범례
+              </p>
+              <div className="flex flex-wrap items-center gap-4 text-body-sm text-text-secondary">
+                <span className="inline-flex items-center gap-2">
+                  <Badge tone="blue" variant="dot" />
+                  전체
+                </span>
+                <span className="inline-flex items-center gap-2">
+                  <Badge tone="green" variant="dot" />
+                  일정
+                </span>
+                <span className="inline-flex items-center gap-2">
+                  <Badge tone="purple" variant="dot" />
+                  맛집
+                </span>
+              </div>
+            </div>
+          </div>
+        </Section>
+
+        <Section
           description="label, icon, error, disabled 상태를 지원합니다."
           title="Input Field"
         >
@@ -551,6 +688,13 @@ export function DesignSystemShowcase() {
           title="Dialog"
         >
           <DialogDemo />
+        </Section>
+
+        <Section
+          description="alert / confirm / success — 시안 패턴 Modal (focus trap + Escape + overlay)"
+          title="Modal"
+        >
+          <ModalDemo />
         </Section>
 
         <Section

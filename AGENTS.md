@@ -33,7 +33,7 @@ Cursor 에이전트·팀원 공통: **`README.md` 「시안 퍼블리싱」** �
 
 - HTTP: `src/utils/apiClient.ts`, `src/types/api.ts`, `src/hooks/useApiError.ts`
 - 도메인: `src/features/<domain>/`, `src/services/<domain>/`
-- 공통 UI: `src/components/common/`, `src/app/globals.css`
+- 공통 UI: `src/components/common/` (`Button`, `InputField`, `SelectField`, `Dialog`, `Modal`, `Badge`, `StatusMessage`), `src/app/globals.css`
 - Shell: `src/components/common/layout/SiteLayout.tsx`, `app/(hero)/`, `app/(main)/`
 - 디자인 참고: `/design-system` (`src/app/design-system/`)
 

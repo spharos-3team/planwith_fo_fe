@@ -30,16 +30,18 @@ alwaysApply: false
 
 | UI | 컴포넌트 | 비고 |
 | --- | --- | --- |
-| 버튼 | `Button` | `size`, `buttonStyle`, `pill`, `icon` |
+| 버튼 | `Button` | `size`, `buttonStyle`(primary/secondary/ghost/danger/inverse), `pill`, `icon` |
 | 텍스트 입력 | `InputField` | `label`, `error`, `icon` |
 | 선택 입력 | `SelectField` | `label`, `error`, `options`, `placeholder` |
-| 모달 | `Dialog` | `open`, `onClose`, `title`, `children` |
+| 범용 모달 | `Dialog` | `open`, `onClose`, `title`, `children` — 제목+X+슬롯 |
+| 시안 패턴 모달 | `Modal` | `variant`: alert / confirm / success — focus trap + Escape |
+| 배지 | `Badge` | `variant`(subtle/solid/dot), `tone`, `size` |
 | 빈/에러/상태 | `StatusMessage` | API 에러는 `role="alert"` |
 | 페이지 shell | `SiteLayout` | route group `layout.tsx`에서만 |
 | 헤더/푸터 | `Header`, `Footer` | `SiteLayout` 경유, page에서 직접 import 금지 |
 | 로고 | `BrandLogo` | Header 내부 |
 
-**Select / Dialog:** `SelectField`, `Dialog` — `src/components/common/`에 추가됨. feature에 복붙 금지.
+**Select / Dialog / Modal:** `SelectField`, `Dialog`, `Modal` — `src/components/common/`에 추가됨. feature에 복붙 금지.
 
 ## 디자인 토큰 (있으면 raw 값 금지)
 
@@ -54,7 +56,9 @@ alwaysApply: false
 | Footer bar | `bg-footer-bar` |
 | 테두리 | `border-line-default`, `border-line-light` |
 | 표면 | `bg-surface-default`, `bg-surface-page` |
-| 상태 | `text-status-error`, `bg-status-success-bg` |
+| Modal overlay | `bg-overlay-modal` |
+| Modal panel | `bg-surface-modal-dark`, `bg-surface-modal-glass` |
+| 상태 | `text-status-error`, `bg-status-success-bg`, `bg-status-warning-bg` |
 
 Primitive(`bg-blue-600-token` 등)는 semantic에 매핑이 없을 때만.
 
@@ -101,7 +105,7 @@ Primitive(`bg-blue-600-token` 등)는 semantic에 매핑이 없을 때만.
 
 ## 완료 체크리스트
 
-- [ ] `Button` / `InputField` / `SelectField` / `Dialog` / `StatusMessage` / `SiteLayout` 검토했는가
+- [ ] `Button` / `InputField` / `SelectField` / `Dialog` / `Modal` / `Badge` / `StatusMessage` / `SiteLayout` 검토했는가
 - [ ] color·type·radius에 semantic/`text-*` utility를 썼는가
 - [ ] raw hex·불필요 arbitrary Tailwind가 없는가
 - [ ] `/design-system`에 없는 새 패턴이면 문서·토큰 후보를 남겼는가

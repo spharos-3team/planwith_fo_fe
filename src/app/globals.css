@@ -29,6 +29,10 @@
   --primitive-red: #ff4b4b;
   --primitive-green: #8fd790;
   --primitive-green-light: #eaf9f1;
+  --primitive-red-light: #fce8e8;
+  --primitive-purple-light: #f3effe;
+  --primitive-orange-light: #fef6e8;
+  --primitive-green-dark: #2d8a45;
 
   /* Semantic — Text */
   --text-primary: var(--primitive-gray-800);
@@ -36,11 +40,14 @@
   --text-tertiary: var(--primitive-gray-700);
   --text-disabled: var(--primitive-gray-500);
   --text-inverse: var(--primitive-white);
+  --text-on-dark-muted: rgb(255 255 255 / 0.6);
 
   /* Semantic — Surface */
   --surface-default: var(--primitive-white);
   --surface-overlay: rgb(255 255 255 / 0.8);
   --surface-page: #f8fafc;
+  --surface-modal-dark: rgb(47 47 47 / 0.92);
+  --surface-modal-glass: rgb(255 255 255 / 0.72);
   --header-surface: rgb(0 0 0 / 0.88);
   --header-branded: #7ab8ff;
   --header-nav-active: var(--primitive-blue-700);
@@ -53,11 +60,29 @@
   --status-error: var(--primitive-red);
   --status-success: var(--primitive-green);
   --status-success-bg: var(--primitive-green-light);
+  --status-warning-bg: var(--primitive-red-light);
   --footer-bar: #78b7f3;
 
   /* Semantic — Line */
   --line-default: var(--primitive-blue-gray);
   --line-light: var(--primitive-gray-300);
+  --line-modal-glass: rgb(255 255 255 / 0.35);
+
+  /* Semantic — Overlay / Modal */
+  --overlay-modal: rgb(11 14 20 / 0.85);
+  --icon-success-glow: 0 0 20px rgb(56 123 255 / 0.45);
+
+  /* Semantic — Badge (calendar / timeline category) */
+  --badge-blue-bg: var(--primitive-blue-ice);
+  --badge-blue-fg: var(--brand-primary);
+  --badge-green-bg: var(--status-success-bg);
+  --badge-green-fg: var(--primitive-green-dark);
+  --badge-purple-bg: var(--primitive-purple-light);
+  --badge-purple-fg: var(--accent-ai);
+  --badge-orange-bg: var(--primitive-orange-light);
+  --badge-orange-fg: var(--accent-gold);
+  --badge-gray-bg: var(--surface-page);
+  --badge-gray-fg: var(--text-secondary);
 
   /* Legacy aliases — existing screens keep current appearance */
   --background: var(--surface-page);
@@ -115,6 +140,10 @@
   --color-red: var(--primitive-red);
   --color-green: var(--primitive-green);
   --color-green-light: var(--primitive-green-light);
+  --color-red-light: var(--primitive-red-light);
+  --color-purple-light: var(--primitive-purple-light);
+  --color-orange-light: var(--primitive-orange-light);
+  --color-green-dark: var(--primitive-green-dark);
 
   /* Semantic colors */
   --color-text-primary: var(--text-primary);
@@ -122,9 +151,12 @@
   --color-text-tertiary: var(--text-tertiary);
   --color-text-disabled: var(--text-disabled);
   --color-text-inverse: var(--text-inverse);
+  --color-text-on-dark-muted: var(--text-on-dark-muted);
   --color-surface-default: var(--surface-default);
   --color-surface-overlay: var(--surface-overlay);
   --color-surface-page: var(--surface-page);
+  --color-surface-modal-dark: var(--surface-modal-dark);
+  --color-surface-modal-glass: var(--surface-modal-glass);
   --color-header-surface: var(--header-surface);
   --color-header-branded: var(--header-branded);
   --color-header-nav-active: var(--header-nav-active);
@@ -135,9 +167,22 @@
   --color-status-error: var(--status-error);
   --color-status-success: var(--status-success);
   --color-status-success-bg: var(--status-success-bg);
+  --color-status-warning-bg: var(--status-warning-bg);
   --color-footer-bar: var(--footer-bar);
   --color-line-default: var(--line-default);
   --color-line-light: var(--line-light);
+  --color-line-modal-glass: var(--line-modal-glass);
+  --color-overlay-modal: var(--overlay-modal);
+  --color-badge-blue-bg: var(--badge-blue-bg);
+  --color-badge-blue-fg: var(--badge-blue-fg);
+  --color-badge-green-bg: var(--badge-green-bg);
+  --color-badge-green-fg: var(--badge-green-fg);
+  --color-badge-purple-bg: var(--badge-purple-bg);
+  --color-badge-purple-fg: var(--badge-purple-fg);
+  --color-badge-orange-bg: var(--badge-orange-bg);
+  --color-badge-orange-fg: var(--badge-orange-fg);
+  --color-badge-gray-bg: var(--badge-gray-bg);
+  --color-badge-gray-fg: var(--badge-gray-fg);
 
   /* Legacy Tailwind utilities */
   --color-background: var(--background);
