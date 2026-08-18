@@ -22,7 +22,10 @@
 ## 다음 범위
 
 1. 데이터 패칭 본분리: 브라우저 `clientFetch` + React Query, 서버 `serverFetch` + `server-only`
-2. 디자인 토큰: primitive/semantic, spacing/radius/typography, 프로젝트 폰트, 공통 Button/Input/Select/Dialog
+2. 디자인 토큰·공통 UI — **대부분 완료** (color/radius/type/font/spacing/Button/Input/Select/Dialog/StatusMessage/layout)
+   - **잔여:** legacy alias 정리, 추가 spacing 토큰(필요 시)
+   - **팀 가이드:** `README.md` 「디자인 시스템」「시안 퍼블리싱」
+   - **에이전트 룰:** `.cursor/rules/design-system.mdc`
 3. `engines.node`와 `packageManager`로 npm/Node 버전 고정
 4. 커밋/PR 형식이 필요하면 `commit-style.mdc`, `pr-style.mdc`만 추가
 5. 테스트 러너(Vitest)와 Playwright는 핵심 로직·사용자 흐름이 생긴 뒤

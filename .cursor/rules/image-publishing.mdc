@@ -1,0 +1,58 @@
+---
+description: PLAN&WITH 사진·스크린샷 기반 UI 퍼블리싱
+globs: "src/**/*.tsx"
+alwaysApply: false
+---
+
+# 이미지 기반 퍼블리싱
+
+Figma MCP를 사용하지 않는다. `get_design_context`, Figma MCP 워크플로, MCP Tailwind 덤프를 그대로 커밋하지 않는다.
+
+**토큰·공통 컴포넌트 우선순위:** `design-system.mdc`를 반드시 함께 따른다.  
+**팀원 workflow·프롬프트:** `README.md` 「시안 퍼블리싱」
+
+## 작업 순서
+
+1. 사용자가 제공한 **시안 이미지/스크린샷**과 대상 라우트를 확인한다.
+2. **`design-system.mdc`** — 공통 컴포넌트·토큰 매핑 확인.
+3. `src/app/globals.css`, **`/design-system`**, `src/components/common/` 확인.
+4. **레이아웃 먼저** — `SiteLayout` route group(`(hero)` overlay / `(main)` solid) 유지 여부.
+5. 섹션 단위 구현 → 시안과 대조. **Button / InputField / SelectField / StatusMessage** 먼저 적용.
+6. `npm run lint`, `typecheck`, `build` — 브라우저 확인은 사용자.
+
+## 스타일 규칙
+
+- **1순위:** `Button`, `InputField`, `SelectField`, `Dialog`, `StatusMessage`, layout(`SiteLayout`, `Header`, `Footer`)
+- **2순위:** semantic token + `text-*` typography + `bg-*` / `rounded-*`
+- 신규 hex는 토큰·컴포넌트로 대체 불가할 때 **해당 feature 컴포넌트에만** — 전역 토큰 임의 변경 금지
+- 폰트: **Gothic A1** only
+- 글래스/히어로 등 화면 전용 스타일: `features/<domain>/components/`
+- **리디자인 금지**: 시안 대상 외 기존 라우트 레이아웃·크기 변경하지 않음
+
+## Shell · variant
+
+| 경로 | group | Header/Footer |
+| --- | --- | --- |
+| `/`, `/schedules` | `(hero)` | overlay (Header 투명, Footer overlay 또는 없음) |
+| 그 외 | `(main)` | solid (`bg-header-branded` Header/Footer + `bg-footer-bar` copyright) |
+
+`SiteLayout`은 segment `layout.tsx`에서만 — page에서 import하지 않는다.
+
+## 에셋
+
+- 경로: `public/images/<feature>/`
+- 아이콘·일러스트: 가능하면 SVG
+- 외부 MCP asset URL 커밋 금지
+
+## 금지
+
+- API 없는 영역에 더미 데이터
+- MCP/React+Tailwind 덤프 그대로 커밋
+- 공통 컴포넌트·토큰 있는데 raw HTML/CSS로 재구현
+
+## 완료 체크리스트
+
+- [ ] `design-system.mdc` 우선순위 준수
+- [ ] `SiteLayout` / Header / Footer props가 route group 패턴과 일치
+- [ ] `Button` / `InputField` / `SelectField` / `Dialog` / `StatusMessage` 검토·적용
+- [ ] lint / typecheck / build 통과
