@@ -1,16 +1,145 @@
 @import "tailwindcss";
 
+/* Primitive — Gray */
 :root {
-  --background: #f8fafc;
+  --primitive-white: #ffffff;
+  --primitive-gray-900: #202020;
+  --primitive-gray-800: #2f2f2f;
+  --primitive-gray-700: #5b5b5a;
+  --primitive-gray-600: #646464;
+  --primitive-gray-500: #8f8f8d;
+  --primitive-gray-300: #d9d9d9;
+  --primitive-gray-200: #ebebeb;
+  --primitive-black: #000000;
+
+  /* Primitive — Blue */
+  --primitive-blue-900: #003268;
+  --primitive-blue-700: #002bff;
+  --primitive-blue-600: #387bff;
+  --primitive-blue-500: #538dff;
+  --primitive-blue-400: #77a5ff;
+  --primitive-blue-200: #ade1ff;
+  --primitive-blue-gray: #89a3d9;
+  --primitive-blue-ice: #e6ebf2;
+  --primitive-blue-light: #d5e6f0;
+
+  /* Primitive — Accent / Status */
+  --primitive-orange: #e39a2e;
+  --primitive-purple: #8b5cf6;
+  --primitive-red: #ff4b4b;
+  --primitive-green: #8fd790;
+  --primitive-green-light: #eaf9f1;
+
+  /* Semantic — Text */
+  --text-primary: var(--primitive-gray-800);
+  --text-secondary: var(--primitive-gray-600);
+  --text-tertiary: var(--primitive-gray-700);
+  --text-disabled: var(--primitive-gray-500);
+  --text-inverse: var(--primitive-white);
+
+  /* Semantic — Surface */
+  --surface-default: var(--primitive-white);
+  --surface-overlay: rgb(255 255 255 / 0.8);
+  --surface-page: #f8fafc;
+  --header-surface: rgb(0 0 0 / 0.88);
+  --header-branded: #7ab8ff;
+  --header-nav-active: var(--primitive-blue-700);
+
+  /* Semantic — Brand / Accent / Status */
+  --brand-primary: var(--primitive-blue-600);
+  --brand-primary-hover: var(--primitive-blue-500);
+  --accent-gold: var(--primitive-orange);
+  --accent-ai: var(--primitive-purple);
+  --status-error: var(--primitive-red);
+  --status-success: var(--primitive-green);
+  --status-success-bg: var(--primitive-green-light);
+  --footer-bar: #78b7f3;
+
+  /* Semantic — Line */
+  --line-default: var(--primitive-blue-gray);
+  --line-light: var(--primitive-gray-300);
+
+  /* Legacy aliases — existing screens keep current appearance */
+  --background: var(--surface-page);
   --foreground: #172033;
-  --surface: #ffffff;
+  --surface: var(--surface-default);
   --border: #e2e8f0;
   --muted: #64748b;
   --primary: #2563eb;
   --primary-hover: #1d4ed8;
+
+  /* Radius */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 20px;
+  --radius-full: 30px;
+  --radius-circle: 9999px;
+
+  /* Effect */
+  --shadow-landmark: 0 24px 36px rgb(0 0 0 / 0.28);
+
+  /* Spacing — semantic */
+  --space-section-y: 4rem;
+  --space-card: 1.5rem;
+  --space-stack: 1rem;
+}
+
+@utility drop-shadow-landmark {
+  filter: drop-shadow(0 24px 36px rgb(0 0 0 / 0.28));
 }
 
 @theme inline {
+  /* Primitive colors */
+  --color-white: var(--primitive-white);
+  --color-gray-900: var(--primitive-gray-900);
+  --color-gray-800: var(--primitive-gray-800);
+  --color-gray-700: var(--primitive-gray-700);
+  --color-gray-600: var(--primitive-gray-600);
+  --color-gray-500: var(--primitive-gray-500);
+  --color-gray-300: var(--primitive-gray-300);
+  --color-gray-200: var(--primitive-gray-200);
+  --color-black: var(--primitive-black);
+  --color-blue-900: var(--primitive-blue-900);
+  --color-blue-700: var(--primitive-blue-700);
+  --color-blue-600-token: var(--primitive-blue-600);
+  --color-blue-500-token: var(--primitive-blue-500);
+  --color-blue-400: var(--primitive-blue-400);
+  --color-blue-200: var(--primitive-blue-200);
+  --color-blue-gray: var(--primitive-blue-gray);
+  --color-blue-ice: var(--primitive-blue-ice);
+  --color-blue-light: var(--primitive-blue-light);
+  --color-orange: var(--primitive-orange);
+  --color-purple: var(--primitive-purple);
+  --color-red: var(--primitive-red);
+  --color-green: var(--primitive-green);
+  --color-green-light: var(--primitive-green-light);
+
+  /* Semantic colors */
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
+  --color-text-disabled: var(--text-disabled);
+  --color-text-inverse: var(--text-inverse);
+  --color-surface-default: var(--surface-default);
+  --color-surface-overlay: var(--surface-overlay);
+  --color-surface-page: var(--surface-page);
+  --color-header-surface: var(--header-surface);
+  --color-header-branded: var(--header-branded);
+  --color-header-nav-active: var(--header-nav-active);
+  --color-brand-primary: var(--brand-primary);
+  --color-brand-primary-hover: var(--brand-primary-hover);
+  --color-accent-gold: var(--accent-gold);
+  --color-accent-ai: var(--accent-ai);
+  --color-status-error: var(--status-error);
+  --color-status-success: var(--status-success);
+  --color-status-success-bg: var(--status-success-bg);
+  --color-footer-bar: var(--footer-bar);
+  --color-line-default: var(--line-default);
+  --color-line-light: var(--line-light);
+
+  /* Legacy Tailwind utilities */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-surface: var(--surface);
@@ -18,7 +147,122 @@
   --color-muted: var(--muted);
   --color-primary: var(--primary);
   --color-primary-hover: var(--primary-hover);
-  --font-sans: Arial, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+
+  /* Radius */
+  --radius-xs: var(--radius-xs);
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+  --radius-full: var(--radius-full);
+  --radius-circle: var(--radius-circle);
+
+  /* Shadow */
+  --shadow-landmark: var(--shadow-landmark);
+
+  /* Spacing */
+  --spacing-section-y: var(--space-section-y);
+  --spacing-card: var(--space-card);
+  --spacing-stack: var(--space-stack);
+
+  --font-sans: var(--font-gothic-a1), "Apple SD Gothic Neo", sans-serif;
+}
+
+/* Typography utilities — Gothic A1 only */
+@utility text-heading-hero {
+  font-size: 48px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+@utility text-heading-xl {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+@utility text-heading-lg {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+@utility text-heading-md {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+@utility text-heading-sm {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+@utility text-body-lg {
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: 0.005em;
+}
+
+@utility text-body-md {
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.005em;
+}
+
+@utility text-body-sm {
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+@utility text-body-xs {
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+@utility text-caption {
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+@utility text-caption-sm {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+@utility text-label-md {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+@utility text-label-sm {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+@utility text-data-md {
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+@utility text-nav-md {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.005em;
+}
+
+@utility text-nav-lg {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 0;
 }
 
 * {

@@ -11,7 +11,7 @@ export function StatusMessage({
 }: StatusMessageProps) {
   return (
     <div
-      className="rounded-xl border border-border bg-surface px-5 py-8 text-center text-sm text-muted"
+      className="rounded-xl border border-line-light bg-surface-default px-5 py-8 text-center text-body-sm text-text-secondary"
       role={role}
     >
       {children}
