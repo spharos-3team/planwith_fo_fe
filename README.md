@@ -89,6 +89,8 @@ NEXT_PUBLIC_API_BASE_URL=/api/v1
 
 ```powershell
 npm run lint
+npm run typecheck
+npm run format:check
 npm run build
 ```
 
@@ -96,5 +98,7 @@ npm run build
 
 ```powershell
 node node_modules/eslint/bin/eslint.js .
+node node_modules/typescript/bin/tsc --noEmit
+node node_modules/prettier/bin/prettier.cjs --check .
 node node_modules/next/dist/bin/next build
 ```

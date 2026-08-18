@@ -35,7 +35,10 @@ export function Footer() {
     <footer className="bg-black text-white" id="footer">
       <div className="mx-auto grid w-full max-w-7xl gap-12 px-6 py-16 sm:px-8 lg:grid-cols-[1.5fr_2fr] lg:py-20">
         <section aria-labelledby="footer-brand">
-          <h2 className="text-base font-medium tracking-[0.12em]" id="footer-brand">
+          <h2
+            className="text-base font-medium tracking-[0.12em]"
+            id="footer-brand"
+          >
             PLAN &amp; WITH
           </h2>
           <p className="mt-4 max-w-sm text-sm leading-6 text-white/55">
@@ -77,7 +80,10 @@ export function Footer() {
               <ul className="mt-4 grid gap-3 text-xs text-white/52">
                 {group.links.map((link) => (
                   <li key={`${group.title}-${link.label}`}>
-                    <Link className="transition hover:text-white" href={link.href}>
+                    <Link
+                      className="transition hover:text-white"
+                      href={link.href}
+                    >
                       {link.label}
                     </Link>
                   </li>

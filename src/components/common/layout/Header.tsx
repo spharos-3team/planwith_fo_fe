@@ -38,9 +38,7 @@ export function Header({
   const positionClass =
     variant === "overlay" ? "absolute left-0 top-0" : "sticky top-0";
   const surfaceClass =
-    variant === "overlay"
-      ? "bg-transparent"
-      : "bg-black/88 backdrop-blur-sm";
+    variant === "overlay" ? "bg-transparent" : "bg-black/88 backdrop-blur-sm";
 
   return (
     <header
@@ -143,8 +141,7 @@ export function Header({
               href="/"
               onClick={() => setMobileMenuOpen(false)}
             >
-              <Home aria-hidden="true" className="h-4 w-4" />
-              홈
+              <Home aria-hidden="true" className="h-4 w-4" />홈
             </Link>
             {primaryNavigation.map((item) => {
               if (item.protected && !authenticated) {
