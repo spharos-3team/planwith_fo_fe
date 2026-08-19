@@ -184,10 +184,24 @@ npm run dev
 Browser → Next.js rewrite → Gateway(:8000) → Backend
 ```
 
+로컬:
+
 ```env
 GATEWAY_URL=http://localhost:8000
 NEXT_PUBLIC_API_BASE_URL=/api/v1
 ```
+
+Vercel은 브라우저에 AWS 주소를 넣지 않습니다. Dashboard → Settings →
+Environment Variables 에 다음을 넣습니다 (값은 커밋하지 않음).
+
+```env
+GATEWAY_URL=https://<AWS-GATEWAY-DOMAIN>
+NEXT_PUBLIC_API_BASE_URL=/api/v1
+```
+
+배포 흐름 (Organization `develop` → 개인 Fork → Vercel → AWS Gateway),
+GitHub Secret, CORS, JWT 헤더는 [docs/VERCEL-DEPLOY.md](docs/VERCEL-DEPLOY.md)
+를 따릅니다.
 
 ## 검증
 
