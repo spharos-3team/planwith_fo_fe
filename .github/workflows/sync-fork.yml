@@ -1,0 +1,71 @@
+# Organization develop → personal fork develop.
+# Vercel should watch the fork, not this Organization repository.
+#
+# Default GITHUB_TOKEN cannot push to another repository. Store a PAT
+# (or GitHub App token) as secret FORK_SYNC_TOKEN. Token values are never
+# committed. Setup: docs/VERCEL-DEPLOY.md
+#
+# Loop prevention: the push-to-fork job runs only on spharos-3team/planwith_fo_fe.
+# A push that lands on the fork does not run that job, so it cannot retrigger
+# Organization → fork sync.
+
+name: Sync fork
+
+on:
+  push:
+    branches:
+      - develop
+  schedule:
+    - cron: "17 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sync-fork-${{ github.repository }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sync-to-fork:
+    name: Organization develop → fork
+    if: github.repository == 'spharos-3team/planwith_fo_fe' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify FORK_SYNC_TOKEN
+        env:
+          FORK_SYNC_TOKEN: ${{ secrets.FORK_SYNC_TOKEN }}
+        run: |
+          if [ -z "$FORK_SYNC_TOKEN" ]; then
+            echo "::error::Secret FORK_SYNC_TOKEN is not set. See docs/VERCEL-DEPLOY.md"
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Push develop to the personal fork
+        env:
+          FORK_SYNC_TOKEN: ${{ secrets.FORK_SYNC_TOKEN }}
+          FORK_REPOSITORY: ${{ vars.FORK_REPOSITORY || 'bonobonocutie/planwith_fo_fe' }}
+        run: |
+          set -euo pipefail
+          git push "https://x-access-token:${FORK_SYNC_TOKEN}@github.com/${FORK_REPOSITORY}.git" \
+            "HEAD:refs/heads/develop"
+
+  sync-from-upstream:
+    name: Fork ← Organization (backup)
+    if: github.event.repository.fork == true && github.event_name != 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Merge upstream develop into this fork
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          gh api --method POST "repos/${GITHUB_REPOSITORY}/merge-upstream" \
+            -f branch=develop
