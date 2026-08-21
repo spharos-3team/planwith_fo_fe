@@ -2,15 +2,13 @@ import type { ReactNode } from "react";
 
 import { SiteLayout } from "@/components/common/layout/SiteLayout";
 
-interface MainPublicLayoutProps {
+interface AuthLayoutProps {
   children: ReactNode;
 }
 
-export default function MainPublicLayout({
-  children,
-}: Readonly<MainPublicLayoutProps>) {
+export default function AuthLayout({ children }: Readonly<AuthLayoutProps>) {
   return (
-    <SiteLayout footerVariant="solid" headerVariant="solid">
+    <SiteLayout authenticated={false} headerVariant="solid" showFooter={false}>
       {children}
     </SiteLayout>
   );

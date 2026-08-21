@@ -17,6 +17,8 @@ import {
 import Link from "next/link";
 import { useState } from "react";
 
+import { useOptionalAuth } from "@/features/auth/context/AuthProvider";
+
 import { BrandLogo } from "./BrandLogo";
 
 interface HeaderProps {
@@ -80,10 +82,13 @@ function NavLink({
 }
 
 export function Header({
-  authenticated = true,
+  authenticated,
   variant = "solid",
   activeHref,
 }: HeaderProps) {
+  const auth = useOptionalAuth();
+  const isAuthenticated = authenticated ?? auth?.isAuthenticated ?? false;
+  const nickname = auth?.profile?.nickname;
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const isOverlay = variant === "overlay";
   const positionClass = isOverlay ? "absolute left-0 top-0" : "sticky top-0";
@@ -93,7 +98,7 @@ export function Header({
     : "border-white/20 bg-header-branded";
 
   const visibleNavItems = scheduleNavItems.filter(
-    (item) => !item.protected || authenticated
+    (item) => !item.protected || isAuthenticated
   );
 
   return (
@@ -120,7 +125,7 @@ export function Header({
         </nav>
 
         <div className="hidden items-center gap-3 lg:flex">
-          {authenticated ? (
+          {isAuthenticated ? (
             <>
               <Link aria-label="채팅" href="/chat">
                 <MessageCircle
@@ -141,7 +146,9 @@ export function Header({
                 <Coins aria-hidden="true" className="h-4 w-4 text-amber-300" />
                 500
               </span>
-              <span className="text-xs font-semibold">태고왕님</span>
+              <span className="text-xs font-semibold">
+                {nickname ? `${nickname}님` : "회원님"}
+              </span>
               <Link aria-label="사용자 프로필" href="/mypage">
                 <CircleUserRound
                   aria-hidden="true"
@@ -150,12 +157,20 @@ export function Header({
               </Link>
             </>
           ) : (
-            <Link
-              className="rounded-full border border-white/35 bg-white/18 px-8 py-3 text-base font-medium transition hover:bg-white/28"
-              href="/schedules"
-            >
-              여행 하기
-            </Link>
+            <div className="flex items-center gap-3">
+              <Link
+                className="px-3 py-2 text-body-md text-white/90 transition hover:text-white"
+                href="/login"
+              >
+                로그인
+              </Link>
+              <Link
+                className="rounded-full border border-white/35 bg-white/18 px-8 py-3 text-base font-medium transition hover:bg-white/28"
+                href="/schedules"
+              >
+                여행 하기
+              </Link>
+            </div>
           )}
         </div>
 
@@ -203,7 +218,7 @@ export function Header({
               );
             })}
 
-            {authenticated ? (
+            {isAuthenticated ? (
               <div className="mt-3 flex items-center justify-between border-t border-white/10 px-3 pt-4">
                 <span className="inline-flex items-center gap-2 text-sm">
                   <Coins
@@ -230,13 +245,22 @@ export function Header({
                 </div>
               </div>
             ) : (
-              <Link
-                className="mt-3 rounded-full bg-white px-5 py-3 text-center font-semibold text-black"
-                href="/schedules"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                여행 하기
-              </Link>
+              <>
+                <Link
+                  className="mt-3 rounded-full border border-white/35 px-5 py-3 text-center font-semibold"
+                  href="/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  로그인
+                </Link>
+                <Link
+                  className="mt-2 rounded-full bg-white px-5 py-3 text-center font-semibold text-black"
+                  href="/schedules"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  여행 하기
+                </Link>
+              </>
             )}
           </div>
         </nav>

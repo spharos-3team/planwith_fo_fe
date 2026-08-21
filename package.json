@@ -17,10 +17,10 @@
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,mjs,cjs}": [
-      "eslint --fix",
-      "prettier --write"
+      "node ./node_modules/eslint/bin/eslint.js --fix",
+      "node ./node_modules/prettier/bin/prettier.cjs --write"
     ],
-    "*.{json,md,css,yml,yaml}": "prettier --write"
+    "*.{json,md,css,yml,yaml}": "node ./node_modules/prettier/bin/prettier.cjs --write"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",

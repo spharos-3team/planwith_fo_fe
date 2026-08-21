@@ -234,8 +234,8 @@ The frontend must:
 - **not** send `X-Auth-User-Id` / `X-Member-UUID` (Gateway ignores client values)
 
 `src/utils/apiClient.ts` attaches the Bearer header when
-`setAccessToken()` has stored a token (`src/utils/authToken.ts`, sessionStorage).
-Call `setAccessToken(accessToken)` after login and `clearAccessToken()` on logout.
+`setAccessToken()` has stored a token (`src/lib/auth/access-token.ts`, memory only).
+Call `setAccessToken(accessToken)` after login and `setAccessToken(null)` on logout.
 
 ---
 
@@ -283,5 +283,5 @@ npm run build
 | `.github/workflows/ci.yml`        | Unchanged PR CI                            |
 | `.env.example`                    | Local Gateway placeholder                  |
 | `docs/VERCEL-DEPLOY.md`           | This document                              |
-| `src/utils/authToken.ts`          | accessToken storage                        |
+| `src/lib/auth/access-token.ts`    | accessToken memory storage                 |
 | `src/utils/apiClient.ts`          | Optional `Authorization: Bearer`           |

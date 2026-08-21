@@ -10,3 +10,18 @@ export interface ApiResponse<T> {
   error: ApiError | null;
   timestamp: string;
 }
+
+export interface TokenUser {
+  userId: string;
+  roles: string[];
+  scopes: string[];
+}
+
+export interface TokenResponse {
+  tokenType: "Bearer" | string;
+  accessToken: string;
+  accessTokenExpiresIn: number;
+  user: TokenUser;
+}
+
+export type SocialProvider = "google" | "naver" | "kakao";
