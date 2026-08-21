@@ -11,7 +11,6 @@ export default function HeroWithFooterLayout({
 }: Readonly<HeroWithFooterLayoutProps>) {
   return (
     <SiteLayout
-      authenticated={false}
       footerVariant="overlay"
       headerVariant="overlay"
       showFooter={false}

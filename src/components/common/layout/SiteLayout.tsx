@@ -14,7 +14,7 @@ export interface SiteLayoutProps {
 
 export function SiteLayout({
   children,
-  authenticated = true,
+  authenticated,
   headerVariant = "solid",
   footerVariant,
   activeHref,

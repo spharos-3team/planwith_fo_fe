@@ -12,7 +12,6 @@ export default function HeroSchedulesLayout({
   return (
     <SiteLayout
       activeHref="/schedules"
-      authenticated={false}
       footerVariant="overlay"
       headerVariant="overlay"
       showFooter={false}
