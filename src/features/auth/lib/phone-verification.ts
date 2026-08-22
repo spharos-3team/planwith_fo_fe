@@ -134,17 +134,20 @@ function loadPortOneSdk(): Promise<PortOneSdk> {
   });
 }
 
-async function requestPortOneIdentity(prepared: {
-  storeId: string;
-  channelKey: string;
-  identityVerificationId: string;
-}): Promise<void> {
+async function requestPortOneIdentity(
+  prepared: {
+    storeId: string;
+    channelKey: string;
+    identityVerificationId: string;
+  },
+  redirectPath: string
+): Promise<void> {
   const portOne = await loadPortOneSdk();
   const response = await portOne.requestIdentityVerification({
     storeId: prepared.storeId,
     channelKey: prepared.channelKey,
     identityVerificationId: prepared.identityVerificationId,
-    redirectUrl: `${window.location.origin}/signup`,
+    redirectUrl: `${window.location.origin}${redirectPath}`,
   });
 
   if (response?.code) {
@@ -183,7 +186,7 @@ export async function resumePhoneVerificationIfRedirected(): Promise<PhoneVerifi
   const expected = peekExpectedIdentity();
   const confirmed = await confirmPhoneVerification(identityVerificationId);
   sessionStorage.removeItem(PHONE_VERIFICATION_ID_KEY);
-  window.history.replaceState({}, "", "/signup");
+  window.history.replaceState({}, "", window.location.pathname);
   assertMatchesVerifiedName(expected.name, confirmed.name);
   clearExpectedIdentity();
   return confirmed;
@@ -191,7 +194,8 @@ export async function resumePhoneVerificationIfRedirected(): Promise<PhoneVerifi
 
 export async function completePhoneVerification(
   phoneNumber: string,
-  name: string
+  name: string,
+  redirectPath = "/signup"
 ): Promise<PhoneVerificationConfirmResult> {
   rememberExpectedIdentity(name, phoneNumber);
   const prepared = await preparePhoneVerification(phoneNumber, name);
@@ -220,7 +224,7 @@ export async function completePhoneVerification(
     PHONE_VERIFICATION_ID_KEY,
     prepared.identityVerificationId
   );
-  await requestPortOneIdentity(prepared);
+  await requestPortOneIdentity(prepared, redirectPath);
   const confirmed = await confirmPhoneVerification(
     prepared.identityVerificationId
   );
