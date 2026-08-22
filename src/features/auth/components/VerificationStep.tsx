@@ -11,6 +11,7 @@ import {
   completePhoneVerification,
   hasPhoneVerificationRedirect,
   peekExpectedIdentity,
+  preloadPortOneSdk,
   resumePhoneVerificationIfRedirected,
 } from "@/features/auth/lib/phone-verification";
 import {
@@ -67,6 +68,10 @@ export function VerificationStep({
   const apiError = useApiError(request.error ? new Error(request.error) : null);
   const nameValid = nameSchema.safeParse(name).success;
   const phoneValid = phoneSchema.safeParse(phoneNumber).success;
+
+  useEffect(() => {
+    preloadPortOneSdk();
+  }, []);
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
   const codeValid = /^\d{4,10}$/.test(verificationCode.trim());
   const passwordValid = passwordSchema.safeParse(password).success;

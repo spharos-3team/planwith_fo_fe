@@ -110,7 +110,16 @@ export async function apiClient<T>(
     const fallbackMessage =
       response.status >= 500 || response.status === 0
         ? "게이트웨이에 연결할 수 없습니다. .env의 GATEWAY_URL과 개발 서버 재시작을 확인하세요."
-        : "요청 처리 중 오류가 발생했습니다.";
+        : `요청 처리 중 오류가 발생했습니다. (HTTP ${response.status}${
+            body?.error?.code ? ` ${body.error.code}` : ""
+          })`;
+
+    console.error(
+      "[apiClient]",
+      `${API_BASE_URL}${path}`,
+      response.status,
+      body
+    );
 
     throw new ApiClientError(
       response.status,
