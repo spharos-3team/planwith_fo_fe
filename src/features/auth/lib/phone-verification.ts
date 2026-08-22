@@ -59,6 +59,8 @@ interface PortOneSdk {
     channelKey: string;
     identityVerificationId: string;
     redirectUrl: string;
+    forceRedirect?: boolean;
+    customer?: { fullName?: string; phoneNumber?: string };
   }) => Promise<PortOneIdentityResponse | null | undefined>;
 }
 
@@ -78,6 +80,14 @@ function canUsePortOneSdk(storeId: string, channelKey: string): boolean {
     channelKey.startsWith("channel-key-") &&
     !isStubStore(storeId, channelKey)
   );
+}
+
+export function preloadPortOneSdk(): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  loadPortOneSdk().catch(() => undefined);
 }
 
 function loadPortOneSdk(): Promise<PortOneSdk> {
@@ -139,22 +149,33 @@ async function requestPortOneIdentity(
     storeId: string;
     channelKey: string;
     identityVerificationId: string;
+    name: string;
+    phoneNumber: string;
   },
   redirectPath: string
-): Promise<void> {
+): Promise<PortOneIdentityResponse | null | undefined> {
   const portOne = await loadPortOneSdk();
   const response = await portOne.requestIdentityVerification({
     storeId: prepared.storeId,
     channelKey: prepared.channelKey,
     identityVerificationId: prepared.identityVerificationId,
     redirectUrl: `${window.location.origin}${redirectPath}`,
+    forceRedirect: true,
+    customer: {
+      fullName: prepared.name.trim(),
+      phoneNumber: prepared.phoneNumber.replace(/\D/g, ""),
+    },
   });
 
   if (response?.code) {
     throw new Error(
-      response.message || "본인인증이 취소되었거나 실패했습니다."
+      response.message
+        ? `[${response.code}] ${response.message}`
+        : `본인인증이 취소되었거나 실패했습니다. (${response.code})`
     );
   }
+
+  return response;
 }
 
 export function hasPhoneVerificationRedirect(): boolean {
@@ -224,10 +245,25 @@ export async function completePhoneVerification(
     PHONE_VERIFICATION_ID_KEY,
     prepared.identityVerificationId
   );
-  await requestPortOneIdentity(prepared, redirectPath);
-  const confirmed = await confirmPhoneVerification(
-    prepared.identityVerificationId
+  const response = await requestPortOneIdentity(
+    {
+      ...prepared,
+      name,
+      phoneNumber,
+    },
+    redirectPath
   );
+
+  const identityVerificationId =
+    response?.identityVerificationId ?? prepared.identityVerificationId;
+
+  if (!response && !hasPhoneVerificationRedirect()) {
+    throw new Error(
+      "포트원 인증창을 열지 못했습니다. 팝업 차단을 해제하거나 인증을 다시 눌러주세요."
+    );
+  }
+
+  const confirmed = await confirmPhoneVerification(identityVerificationId);
   sessionStorage.removeItem(PHONE_VERIFICATION_ID_KEY);
   assertMatchesVerifiedName(name, confirmed.name);
   clearExpectedIdentity();
