@@ -29,6 +29,7 @@ interface AuthContextValue {
   profile: MemberProfile | null;
   login: (email: string, password: string) => Promise<void>;
   applySession: (tokens: TokenResponse) => Promise<void>;
+  refreshProfile: () => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -107,6 +108,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [applySession]
   );
 
+  const refreshProfile = useCallback(async () => {
+    const nextProfile = await loadProfile();
+    setProfile(nextProfile);
+  }, []);
+
   const logout = useCallback(async () => {
     try {
       await logoutRequest();
@@ -122,9 +128,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       profile,
       login,
       applySession,
+      refreshProfile,
       logout,
     }),
-    [applySession, login, logout, profile, status]
+    [applySession, login, logout, profile, refreshProfile, status]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

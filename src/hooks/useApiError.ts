@@ -1,6 +1,10 @@
 import { ApiClientError } from "@/utils/apiClient";
 
 export function useApiError(error: unknown): string {
+  if (error == null || error === "") {
+    return "";
+  }
+
   if (error instanceof ApiClientError) {
     return error.message;
   }
