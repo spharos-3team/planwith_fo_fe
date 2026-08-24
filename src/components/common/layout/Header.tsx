@@ -35,7 +35,7 @@ const scheduleNavItems = [
     label: "일정관리",
     icon: Sparkles,
   },
-  { href: "/community", label: "커뮤니티", hasDropdown: true, icon: Users },
+  { href: "/meetings", label: "커뮤니티", hasDropdown: true, icon: Users },
   {
     href: "/mypage",
     label: "마이페이지",
@@ -171,7 +171,12 @@ function NavLink({
   label: string;
   hasDropdown?: boolean;
 }) {
-  const isActive = activeHref === href;
+  const pathname = usePathname();
+  const current = activeHref ?? pathname;
+  const isActive =
+    href === "/"
+      ? current === "/"
+      : current === href || pathname.startsWith(`${href}/`);
 
   return (
     <Link
