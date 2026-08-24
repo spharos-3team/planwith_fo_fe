@@ -24,7 +24,7 @@ export function MeetingGridCard({
 
   return (
     <Link
-      className={`group flex h-full min-h-[28.5rem] flex-col overflow-hidden rounded-lg bg-surface-default shadow-[0_8px_24px_rgb(15_23_42/0.06)] transition hover:-translate-y-0.5 hover:shadow-[0_12px_28px_rgb(15_23_42/0.1)] ${
+      className={`group flex h-full min-h-[28.5rem] flex-col overflow-hidden rounded-lg bg-white shadow-[0_8px_24px_rgb(15_23_42/0.06)] transition hover:-translate-y-0.5 hover:shadow-[0_12px_28px_rgb(15_23_42/0.1)] ${
         wide ? "md:col-span-2" : "md:col-span-1"
       }`}
       href={`/meetings/${meeting.meetingUuid}`}
@@ -34,14 +34,15 @@ export function MeetingGridCard({
           // eslint-disable-next-line @next/next/no-img-element
           <img
             alt=""
-            className="h-full w-full object-cover transition group-hover:scale-[1.02]"
+            className="h-full w-full object-cover object-center transition duration-300 group-hover:scale-[1.03]"
             src={cover}
           />
         ) : (
-          <div className="flex h-full w-full items-end bg-gradient-to-br from-header-branded to-brand-primary p-4">
-            <p className="text-heading-md text-white">
-              {meeting.destination ?? "여행"}
-            </p>
+          <div
+            aria-hidden="true"
+            className="relative h-full w-full bg-[url('/images/meetings/hero.png')] bg-cover bg-center"
+          >
+            <div className="absolute inset-0 bg-gradient-to-t from-black/35 to-black/5" />
           </div>
         )}
         {meeting.status === "RECRUITING" || meeting.status === "FULL" ? (
@@ -55,12 +56,12 @@ export function MeetingGridCard({
           </Badge>
         ) : null}
       </div>
-      <div className="flex flex-1 flex-col gap-2 px-4 py-4">
+      <div className="flex flex-1 flex-col px-4 py-3.5">
         <h3 className="text-heading-lg text-text-primary">{meeting.title}</h3>
-        <p className="line-clamp-1 text-body-sm text-text-secondary">
+        <p className="mt-2 line-clamp-1 text-body-sm text-text-secondary">
           {meeting.intro ?? ""}
         </p>
-        <p className="mt-auto flex flex-wrap gap-4 pt-4 text-caption text-text-secondary">
+        <p className="mt-auto flex flex-wrap gap-4 pt-5 text-caption text-text-secondary">
           <span className="inline-flex items-center gap-1.5">
             <Users aria-hidden="true" className="size-4" />
             {meeting.currentMemberCount}/{meeting.maxMemberCount}명

@@ -7,11 +7,10 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Button } from "@/components/common/Button";
-import { InputField } from "@/components/common/InputField";
-import { SelectField } from "@/components/common/SelectField";
 import { StatusMessage } from "@/components/common/StatusMessage";
 import { useAuth } from "@/features/auth/context/AuthProvider";
 import { LoginRequiredDialog } from "@/features/meeting/components/LoginRequiredDialog";
+import { MeetingDateRangePicker } from "@/features/meeting/components/MeetingDateRangePicker";
 import { MeetingGridCard } from "@/features/meeting/components/MeetingGridCard";
 import { MeetingHero } from "@/features/meeting/components/MeetingHero";
 import { MeetingPagination } from "@/features/meeting/components/MeetingPagination";
@@ -21,18 +20,6 @@ import { useApiError } from "@/hooks/useApiError";
 import { listMeetings, listMyMeetings } from "@/services/meeting/meetings";
 
 type ListTab = "all" | "mine";
-
-const DESTINATIONS = [
-  { value: "", label: "전체지역" },
-  { value: "서울", label: "서울" },
-  { value: "부산", label: "부산" },
-  { value: "제주", label: "제주" },
-  { value: "전주", label: "전주" },
-  { value: "속초", label: "속초" },
-  { value: "경주", label: "경주" },
-  { value: "도쿄", label: "도쿄" },
-  { value: "방콕", label: "방콕" },
-];
 
 const MY_SECTIONS: {
   scope: MyMeetingScope;
@@ -75,10 +62,8 @@ export function MeetingsPage() {
   const [tab, setTab] = useState<ListTab>("all");
   const [loginOpen, setLoginOpen] = useState(false);
   const [recruitingOnly, setRecruitingOnly] = useState(false);
-  const [destinationDraft, setDestinationDraft] = useState("");
   const [fromDraft, setFromDraft] = useState("");
   const [toDraft, setToDraft] = useState("");
-  const [destination, setDestination] = useState("");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [page, setPage] = useState(0);
@@ -91,10 +76,9 @@ export function MeetingsPage() {
   });
 
   const listQuery = useQuery({
-    queryKey: ["meetings", destination, from, to, recruitingOnly, page],
+    queryKey: ["meetings", from, to, recruitingOnly, page],
     queryFn: () =>
       listMeetings({
-        destination: destination || undefined,
         from: from || undefined,
         to: to || undefined,
         status: recruitingOnly ? "RECRUITING" : undefined,
@@ -140,7 +124,6 @@ export function MeetingsPage() {
   };
 
   const applyFilters = () => {
-    setDestination(destinationDraft);
     setFrom(fromDraft);
     setTo(toDraft);
     setPage(0);
@@ -164,7 +147,7 @@ export function MeetingsPage() {
   return (
     <div className="bg-surface-page">
       <MeetingHero />
-      <section className="mx-auto w-full max-w-[1200px] px-6 py-16 sm:px-10">
+      <section className="mx-auto w-full max-w-[1200px] px-6 pb-20 pt-[6.25rem] sm:px-10">
         <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
           <div
             aria-label="모임 목록 탭"
@@ -243,35 +226,22 @@ export function MeetingsPage() {
         {tab === "all" ? (
           <>
             <form
-              className="mt-8 flex flex-col gap-4 rounded-lg bg-white p-6 lg:flex-row lg:items-end"
+              className="mt-12 flex flex-col gap-4 rounded-lg bg-white px-4 py-6 sm:flex-row sm:items-end sm:px-4"
               onSubmit={(event) => {
                 event.preventDefault();
                 applyFilters();
               }}
             >
-              <SelectField
-                className="lg:w-[22rem]"
-                label="지역"
-                onChange={(event) => setDestinationDraft(event.target.value)}
-                options={DESTINATIONS}
-                value={destinationDraft}
+              <MeetingDateRangePicker
+                from={fromDraft}
+                onChange={({ from: nextFrom, to: nextTo }) => {
+                  setFromDraft(nextFrom);
+                  setToDraft(nextTo);
+                }}
+                to={toDraft}
               />
-              <div className="grid w-full gap-4 sm:grid-cols-2 lg:max-w-[22rem]">
-                <InputField
-                  label="시작일"
-                  onChange={(event) => setFromDraft(event.target.value)}
-                  type="date"
-                  value={fromDraft}
-                />
-                <InputField
-                  label="종료일"
-                  onChange={(event) => setToDraft(event.target.value)}
-                  type="date"
-                  value={toDraft}
-                />
-              </div>
               <Button
-                className="lg:ml-auto"
+                className="h-[46px] w-full sm:ml-auto sm:w-[14.7rem]"
                 icon="left"
                 iconComponent={Search}
                 type="submit"
@@ -288,7 +258,7 @@ export function MeetingsPage() {
               ) : (listQuery.data?.content.length ?? 0) === 0 ? (
                 <StatusMessage>아직 표시할 모임이 없습니다.</StatusMessage>
               ) : (
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+                <div className="grid grid-cols-1 gap-x-14 gap-y-6 md:grid-cols-3">
                   {listQuery.data?.content.map((meeting, index) => (
                     <MeetingGridCard
                       key={meeting.meetingUuid}

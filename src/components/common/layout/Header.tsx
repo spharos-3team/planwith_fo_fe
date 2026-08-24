@@ -6,7 +6,6 @@ import {
   CircleUserRound,
   Coins,
   Home,
-  MapPinned,
   Menu,
   MessageCircle,
   Search,
@@ -36,8 +35,11 @@ const scheduleNavItems = [
     hasDropdown: true,
     icon: Sparkles,
   },
-  { href: "/meetings", label: "모임", icon: MapPinned },
-  { href: "/community", label: "커뮤니티", hasDropdown: true, icon: Users },
+  {
+    href: "/meetings",
+    label: "커뮤니티",
+    icon: Users,
+  },
   {
     href: "/mypage",
     label: "마이페이지",
@@ -47,6 +49,14 @@ const scheduleNavItems = [
   },
   { href: "/search", label: "검색", icon: Search },
 ];
+
+function isCurrentPath(href: string, current: string): boolean {
+  if (href === "/") {
+    return current === "/";
+  }
+
+  return current === href || current.startsWith(`${href}/`);
+}
 
 function NavLink({
   activeHref,
@@ -61,10 +71,7 @@ function NavLink({
 }) {
   const pathname = usePathname();
   const current = activeHref ?? pathname;
-  const isActive =
-    href === "/"
-      ? current === "/"
-      : current === href || current.startsWith(`${href}/`);
+  const isActive = isCurrentPath(href, current);
 
   return (
     <Link
