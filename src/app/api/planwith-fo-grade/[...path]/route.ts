@@ -7,7 +7,10 @@ async function handle(
   context: { params: Promise<{ path: string[] }> }
 ) {
   const { path } = await context.params;
-  return proxyGatewayRequest(request, `/api/v1/${path.join("/")}`);
+  return proxyGatewayRequest(
+    request,
+    `/api/planwith-fo-grade/${path.join("/")}`
+  );
 }
 
 export const GET = handle;
