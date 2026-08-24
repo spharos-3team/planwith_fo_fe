@@ -20,9 +20,15 @@ src/
 │  ├─ layout.tsx              # html, Providers (Header/Footer 없음)
 │  ├─ (hero)/                 # overlay shell — URL에 안 보임
 │  │  ├─ (with-footer)/page.tsx     → /
-│  │  └─ schedules/page.tsx         → /schedules
+│  │  └─ schedules/
+│  │     ├─ page.tsx                → /schedules (AI 일정 소개 진입)
+│  │     └─ ai/new/page.tsx         → /schedules/ai/new (AI 일정 정보 입력)
 │  ├─ (main)/                 # solid branded shell
-│  │  ├─ (authenticated)/schedules/calendar/  → /schedules/calendar
+│  │  ├─ (authenticated)/schedules/
+│  │  │  ├─ calendar/                → /schedules/calendar
+│  │  │  ├─ new/                     → /schedules/new
+│  │  │  ├─ [scheduleId]/            → /schedules/[scheduleId]
+│  │  │  └─ ai/[generationId]/       → /schedules/ai/[generationId]
 │  │  └─ (public)/design-system/              → /design-system
 │  └─ globals.css             # 디자인 토큰 (primitive → semantic)
 │
@@ -57,8 +63,8 @@ src/
 
 - **`SiteLayout`**: Header + `<main>` + Footer. **page에서 import하지 않고** route group `layout.tsx`에서만 사용.
 - **variant**
-  - `(hero)`: Header/Footer **overlay** (투명) — `/`, `/schedules`
-  - `(main)`: Header/Footer **solid** (`bg-header-branded`) — 그 외 페이지
+  - `(hero)`: Header **overlay** (투명), Footer 숨김 — `/`, `/schedules`, `/schedules/ai/new`
+  - `(main)`: Header **solid** (`bg-header-branded`) + 중립색 Footer — 그 외 페이지
 - 신규 페이지: `(main)/(authenticated)` 또는 `(main)/(public)` 하위에 `page.tsx` 추가 → shell 자동 상속
 
 ### 데이터 패칭

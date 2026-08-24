@@ -1,9 +1,11 @@
 "use client";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Search } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/common/Button";
+import { InputField } from "@/components/common/InputField";
 import { StatusMessage } from "@/components/common/StatusMessage";
 import type { MemberProfile } from "@/features/auth/types";
 import { MyPageCard } from "@/features/mypage/components/MyPageCard";
@@ -26,6 +28,7 @@ export function FollowersPage({ memberUuid }: { memberUuid: string }) {
   const [nextPage, setNextPage] = useState(1);
   const [pendingUuid, setPendingUuid] = useState<string | null>(null);
   const [actionError, setActionError] = useState("");
+  const [search, setSearch] = useState("");
   const apiError = useApiError(actionError ? new Error(actionError) : null);
 
   const countsQuery = useQuery({
@@ -42,6 +45,14 @@ export function FollowersPage({ memberUuid }: { memberUuid: string }) {
   });
 
   const items = [...(listQuery.data?.content ?? []), ...extraItems];
+  const normalizedSearch = search.trim().toLocaleLowerCase("ko");
+  const visibleItems = normalizedSearch
+    ? items.filter((item) =>
+        [item.nickname, item.profileIntro ?? ""].some((value) =>
+          value.toLocaleLowerCase("ko").includes(normalizedSearch)
+        )
+      )
+    : items;
   const totalPages = listQuery.data?.totalPages ?? 0;
   const loading = listQuery.isLoading;
 
@@ -50,6 +61,7 @@ export function FollowersPage({ memberUuid }: { memberUuid: string }) {
     setExtraItems([]);
     setNextPage(1);
     setActionError("");
+    setSearch("");
   };
 
   const refreshLists = async () => {
@@ -123,27 +135,30 @@ export function FollowersPage({ memberUuid }: { memberUuid: string }) {
   const shownError = apiError || listError;
 
   return (
-    <MyPageCard>
-      <div>
-        <h1 className="text-[18px] font-bold leading-[22px] text-[#1F1F1F]">
-          팔로워/팔로우 관리
-        </h1>
-        <p className="mt-1 text-[14px] leading-[18px] text-[#615E5B]">
-          나를 팔로우한 회원과 내가 팔로우하는 회원을 확인합니다.
-        </p>
-      </div>
-
-      <div className="flex w-full gap-6 border-b border-line-light">
-        <TabButton
-          active={tab === "followers"}
-          label={`팔로워 ${countsQuery.data?.followerCount ?? 0}`}
-          onClick={() => changeTab("followers")}
-        />
-        <TabButton
-          active={tab === "followings"}
-          label={`팔로잉 ${countsQuery.data?.followingCount ?? 0}`}
-          onClick={() => changeTab("followings")}
-        />
+    <MyPageCard className="min-h-[560px] gap-5">
+      <div className="flex w-full flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-1 rounded-md bg-surface-page p-1">
+          <TabButton
+            active={tab === "followers"}
+            label={`팔로워 ${countsQuery.data?.followerCount ?? 0}`}
+            onClick={() => changeTab("followers")}
+          />
+          <TabButton
+            active={tab === "followings"}
+            label={`팔로잉 ${countsQuery.data?.followingCount ?? 0}`}
+            onClick={() => changeTab("followings")}
+          />
+        </div>
+        <div className="w-full sm:max-w-[300px]">
+          <InputField
+            aria-label="닉네임 검색"
+            icon={Search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="닉네임 검색"
+            showLabel={false}
+            value={search}
+          />
+        </div>
       </div>
 
       {shownError ? (
@@ -152,11 +167,11 @@ export function FollowersPage({ memberUuid }: { memberUuid: string }) {
         </p>
       ) : null}
 
-      <ul className="grid w-full gap-3">
-        {items.map((item) => {
+      <ul className="grid w-full divide-y divide-blue-ice">
+        {visibleItems.map((item) => {
           return (
             <li
-              className="flex items-center justify-between gap-4 rounded-xl border border-line-light px-4 py-3"
+              className="flex items-center justify-between gap-4 px-1 py-4"
               key={item.memberUuid}
             >
               <div className="flex min-w-0 items-center gap-3">
@@ -203,12 +218,14 @@ export function FollowersPage({ memberUuid }: { memberUuid: string }) {
         })}
       </ul>
 
-      {!loading && items.length === 0 ? (
+      {!loading && visibleItems.length === 0 ? (
         <div className="mt-6">
           <StatusMessage>
-            {tab === "followers"
-              ? "아직 팔로워가 없습니다."
-              : "아직 팔로잉한 회원이 없습니다."}
+            {search
+              ? "검색 결과가 없습니다."
+              : tab === "followers"
+                ? "아직 팔로워가 없습니다."
+                : "아직 팔로잉한 회원이 없습니다."}
           </StatusMessage>
         </div>
       ) : null}
@@ -239,10 +256,10 @@ function TabButton({
 }) {
   return (
     <button
-      className={`border-b-2 pb-3 text-heading-sm transition ${
+      className={`rounded-sm px-4 py-2 text-caption font-semibold transition ${
         active
-          ? "border-brand-primary text-brand-primary"
-          : "border-transparent text-text-secondary hover:text-text-primary"
+          ? "bg-surface-default text-blue-700 shadow-sm"
+          : "text-text-secondary hover:text-text-primary"
       }`}
       onClick={onClick}
       type="button"
