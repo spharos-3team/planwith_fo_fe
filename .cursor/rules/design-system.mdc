@@ -53,7 +53,7 @@ alwaysApply: false
 | 반전(헤더 등) | `text-text-inverse` |
 | CTA | `bg-brand-primary`, `hover:bg-brand-primary-hover` |
 | Header branded | `bg-header-branded`, active `bg-header-nav-active` |
-| Footer bar | `bg-footer-bar` |
+| Footer | `bg-footer-surface`, `text-footer-text`, `text-footer-copyright` |
 | 테두리 | `border-line-default`, `border-line-light` |
 | 표면 | `bg-surface-default`, `bg-surface-page` |
 | Modal overlay | `bg-overlay-modal` |

@@ -6,9 +6,11 @@
   --primitive-gray-900: #202020;
   --primitive-gray-800: #2f2f2f;
   --primitive-gray-700: #5b5b5a;
+  --primitive-gray-650: #615e5b;
   --primitive-gray-600: #646464;
   --primitive-gray-500: #8f8f8d;
   --primitive-gray-300: #d9d9d9;
+  --primitive-gray-250: #e0e0e0;
   --primitive-gray-200: #ebebeb;
   --primitive-black: #000000;
 
@@ -49,7 +51,7 @@
   --surface-modal-dark: rgb(47 47 47 / 0.92);
   --surface-modal-glass: rgb(255 255 255 / 0.72);
   --header-surface: rgb(0 0 0 / 0.88);
-  --header-branded: #7ab8ff;
+  --header-branded: #7dbcff;
   --header-nav-active: var(--primitive-blue-700);
 
   /* Semantic — Brand / Accent / Status */
@@ -62,6 +64,9 @@
   --status-success-bg: var(--primitive-green-light);
   --status-warning-bg: var(--primitive-red-light);
   --footer-bar: #78b7f3;
+  --footer-surface: var(--primitive-gray-250);
+  --footer-text: var(--primitive-gray-650);
+  --footer-copyright: rgb(86 114 255 / 0.75);
 
   /* Semantic — Line */
   --line-default: var(--primitive-blue-gray);
@@ -121,9 +126,11 @@
   --color-gray-900: var(--primitive-gray-900);
   --color-gray-800: var(--primitive-gray-800);
   --color-gray-700: var(--primitive-gray-700);
+  --color-gray-650: var(--primitive-gray-650);
   --color-gray-600: var(--primitive-gray-600);
   --color-gray-500: var(--primitive-gray-500);
   --color-gray-300: var(--primitive-gray-300);
+  --color-gray-250: var(--primitive-gray-250);
   --color-gray-200: var(--primitive-gray-200);
   --color-black: var(--primitive-black);
   --color-blue-900: var(--primitive-blue-900);
@@ -169,6 +176,9 @@
   --color-status-success-bg: var(--status-success-bg);
   --color-status-warning-bg: var(--status-warning-bg);
   --color-footer-bar: var(--footer-bar);
+  --color-footer-surface: var(--footer-surface);
+  --color-footer-text: var(--footer-text);
+  --color-footer-copyright: var(--footer-copyright);
   --color-line-default: var(--line-default);
   --color-line-light: var(--line-light);
   --color-line-modal-glass: var(--line-modal-glass);
@@ -307,6 +317,18 @@
 @utility text-nav-lg {
   font-size: 20px;
   font-weight: 600;
+  letter-spacing: 0;
+}
+
+@utility text-footer-brand {
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+@utility text-footer-heading {
+  font-size: 18px;
+  font-weight: 500;
   letter-spacing: 0;
 }
 

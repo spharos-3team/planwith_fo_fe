@@ -14,13 +14,13 @@ export function BrandLogo({ inverse = false }: BrandLogoProps) {
     >
       <Image
         alt="PLAN & WITH"
-        className={`h-14 w-14 object-contain lg:h-[4.5rem] lg:w-[4.5rem] ${
+        className={`h-14 w-14 object-contain xl:h-20 xl:w-20 ${
           inverse ? "" : "invert"
         }`}
-        height={64}
+        height={80}
         priority
         src="/images/brand/logo.png"
-        width={64}
+        width={80}
       />
     </Link>
   );

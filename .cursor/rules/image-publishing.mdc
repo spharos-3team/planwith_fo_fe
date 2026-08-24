@@ -34,7 +34,7 @@ Figma MCP를 사용하지 않는다. `get_design_context`, Figma MCP 워크플�
 | 경로 | group | Header/Footer |
 | --- | --- | --- |
 | `/`, `/schedules` | `(hero)` | overlay (Header 투명, Footer overlay 또는 없음) |
-| 그 외 | `(main)` | solid (`bg-header-branded` Header/Footer + `bg-footer-bar` copyright) |
+| 그 외 | `(main)` | solid Header (`bg-header-branded`) + 중립색 Footer (`bg-footer-surface`) |
 
 `SiteLayout`은 segment `layout.tsx`에서만 — page에서 import하지 않는다.
 

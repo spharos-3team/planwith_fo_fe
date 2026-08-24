@@ -60,9 +60,11 @@ function ColorSwatch({
 const primitiveGray = [
   { name: "white", className: "bg-white", hex: "#FFFFFF" },
   { name: "gray-200", className: "bg-gray-200", hex: "#EBEBEB" },
+  { name: "gray-250", className: "bg-gray-250", hex: "#E0E0E0" },
   { name: "gray-300", className: "bg-gray-300", hex: "#D9D9D9" },
   { name: "gray-500", className: "bg-gray-500", hex: "#8F8F8D" },
   { name: "gray-600", className: "bg-gray-600", hex: "#646464" },
+  { name: "gray-650", className: "bg-gray-650", hex: "#615E5B" },
   { name: "gray-700", className: "bg-gray-700", hex: "#5B5B5A" },
   { name: "gray-800", className: "bg-gray-800", hex: "#2F2F2F" },
   { name: "gray-900", className: "bg-gray-900", hex: "#202020" },
@@ -163,9 +165,27 @@ const semanticColors = [
     textClass: "text-text-inverse",
   },
   {
+    name: "footer-surface",
+    className: "bg-footer-surface",
+    hex: "#E0E0E0",
+    textClass: "text-text-primary",
+  },
+  {
+    name: "footer-text",
+    className: "bg-footer-text",
+    hex: "#615E5B",
+    textClass: "text-text-inverse",
+  },
+  {
+    name: "footer-copyright",
+    className: "bg-footer-copyright",
+    hex: "#5672FF / 75%",
+    textClass: "text-text-inverse",
+  },
+  {
     name: "header-branded",
     className: "bg-header-branded",
-    hex: "#7AB8FF",
+    hex: "#7DBCFF",
     textClass: "text-text-inverse",
   },
   {
@@ -205,6 +225,16 @@ const typographySamples = [
   { token: "text-data-md", sample: "2026-08-18", label: "14px Regular" },
   { token: "text-nav-md", sample: "Navigation", label: "14px SemiBold" },
   { token: "text-nav-lg", sample: "Large Nav", label: "20px SemiBold" },
+  {
+    token: "text-footer-brand",
+    sample: "PLAN & WITH",
+    label: "20px Medium",
+  },
+  {
+    token: "text-footer-heading",
+    sample: "Footer Menu",
+    label: "18px Medium",
+  },
 ];
 
 const radiusSamples = [
@@ -714,9 +744,9 @@ export function DesignSystemShowcase() {
             </li>
             <li className="rounded-md border border-line-light bg-surface-default px-4 py-3">
               <strong className="text-text-primary">Footer</strong> —{" "}
-              <code className="text-caption">bg-header-branded</code> 본문 +{" "}
-              <code className="text-caption">bg-footer-bar</code> copyright
-              (solid) / overlay는 copyright bar 숨김
+              <code className="text-caption">bg-footer-surface</code> 본문 +{" "}
+              <code className="text-caption">text-footer-copyright</code>
+              copyright (solid) / overlay는 copyright 숨김
             </li>
             <li className="rounded-md border border-line-light bg-surface-default px-4 py-3">
               <strong className="text-text-primary">DestinationHero</strong> —
