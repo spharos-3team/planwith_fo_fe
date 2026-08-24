@@ -6,6 +6,7 @@ import {
   CircleUserRound,
   Coins,
   Home,
+  MapPinned,
   Menu,
   MessageCircle,
   Search,
@@ -15,6 +16,7 @@ import {
   X,
 } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 import { useOptionalAuth } from "@/features/auth/context/AuthProvider";
@@ -34,6 +36,7 @@ const scheduleNavItems = [
     hasDropdown: true,
     icon: Sparkles,
   },
+  { href: "/meetings", label: "모임", icon: MapPinned },
   { href: "/community", label: "커뮤니티", hasDropdown: true, icon: Users },
   {
     href: "/mypage",
@@ -56,7 +59,12 @@ function NavLink({
   label: string;
   hasDropdown?: boolean;
 }) {
-  const isActive = activeHref === href;
+  const pathname = usePathname();
+  const current = activeHref ?? pathname;
+  const isActive =
+    href === "/"
+      ? current === "/"
+      : current === href || current.startsWith(`${href}/`);
 
   return (
     <Link
