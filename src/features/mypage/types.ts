@@ -49,4 +49,11 @@ export interface PagedProfiles {
   totalPages: number;
 }
 
-export type MyPageSection = "profile" | "followers" | "payments";
+export type MyPageSection =
+  | "overview"
+  | "profile"
+  | "followers"
+  | "likes"
+  | "membership"
+  | "payments"
+  | "logout";

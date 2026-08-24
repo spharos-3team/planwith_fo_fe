@@ -21,7 +21,7 @@ export function ProfileAvatar({
 
   return (
     <div
-      className="grid shrink-0 place-items-center overflow-hidden rounded-full bg-[#EAF0F6] text-[#615E5B]"
+      className="grid shrink-0 place-items-center overflow-hidden rounded-circle bg-blue-ice text-text-secondary"
       style={{ width: size, height: size, fontSize: Math.max(14, size / 3) }}
     >
       {imageSrc ? (
