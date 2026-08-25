@@ -24,7 +24,6 @@ import type {
   CreatorRevenueSummary,
   CreatorSubscriberListItem,
   CreatorSubscribersSummary,
-  JoinedCreatorMembership,
   MyCreatorMembership,
   SubscribedCreatorListItem,
 } from "@/features/membership/types";
@@ -397,6 +396,7 @@ function SettlementRequestDialog({
 }) {
   return (
     <Dialog
+      closeOnOverlayClick={false}
       description={`현재 정산 가능액은 ${availableRevenue.toLocaleString("ko-KR")}원입니다.`}
       onClose={onClose}
       open={form.open}
@@ -430,7 +430,10 @@ function SettlementRequestDialog({
           >
             취소
           </Button>
-          <Button disabled={form.submitting} type="submit">
+          <Button
+            disabled={form.submitting || availableRevenue <= 0}
+            type="submit"
+          >
             {form.submitting ? "신청 중..." : "수익 신청하기"}
           </Button>
         </div>
@@ -646,6 +649,7 @@ function CreatorMembershipOperationCard({
   membership,
   revenue,
   subscribers,
+  isSettlementPending,
   onRevenueRequest,
   onTokenSetting,
 }: {
@@ -653,20 +657,19 @@ function CreatorMembershipOperationCard({
   membership?: MyCreatorMembership;
   revenue?: CreatorRevenueSummary;
   subscribers?: CreatorSubscribersSummary;
+  isSettlementPending: boolean;
   onRevenueRequest?: () => void;
   onTokenSetting: () => void;
 }) {
-  const [isRevenueRequesting, setIsRevenueRequesting] = useState(false);
-
   if (!isExplorerOrHigher || !hasApprovedCreatorMembership(membership)) {
     return null;
   }
 
+  const hasAvailableRevenue = (revenue?.availableRevenue ?? 0) > 0;
   const handleRevenueRequest = () => {
-    if (isRevenueRequesting) {
+    if (!hasAvailableRevenue || isSettlementPending) {
       return;
     }
-    setIsRevenueRequesting(true);
     onRevenueRequest?.();
   };
 
@@ -729,20 +732,28 @@ function CreatorMembershipOperationCard({
         </dl>
 
         <div className="mt-7 flex justify-end">
-          <Button
-            className={
-              isRevenueRequesting
-                ? "bg-gray-500 text-text-inverse hover:bg-gray-500 disabled:bg-gray-500 disabled:text-text-inverse"
+          <span
+            title={
+              !hasAvailableRevenue && !isSettlementPending
+                ? "수익 신청할 금액이 없습니다."
                 : undefined
             }
-            disabled={isRevenueRequesting}
-            icon="left"
-            iconComponent={WalletCards}
-            onClick={handleRevenueRequest}
-            size="sm"
           >
-            {isRevenueRequesting ? "신청중.." : "수익 신청하기"}
-          </Button>
+            <Button
+              className={
+                isSettlementPending
+                  ? "bg-gray-500 text-text-inverse hover:bg-gray-500 disabled:bg-gray-500 disabled:text-text-inverse"
+                  : undefined
+              }
+              disabled={!hasAvailableRevenue || isSettlementPending}
+              icon="left"
+              iconComponent={WalletCards}
+              onClick={handleRevenueRequest}
+              size="sm"
+            >
+              {isSettlementPending ? "BO에서 심사중" : "수익 신청하기"}
+            </Button>
+          </span>
         </div>
       </div>
     </MyPageCard>
@@ -753,210 +764,185 @@ function formatPriceUnit(priceUnit: string): string {
   return priceUnit === "TOKEN" ? "토큰" : priceUnit;
 }
 
-function CreatorMembershipSubscriptionsCard({
-  subscriptions,
-}: {
-  subscriptions?: JoinedCreatorMembership[];
-}) {
-  const activeSubscriptions = subscriptions?.filter(
-    (subscription) => subscription.status === "ACTIVE"
-  );
-
-  if (!activeSubscriptions?.length) {
-    return null;
-  }
-
-  return (
-    <MyPageCard>
-      <MyPageSectionHeading
-        description="구독 중인 크리에이터의 프리미엄 콘텐츠를 이용할 수 있어요."
-        title="크리에이터 멤버십 구독"
-      />
-
-      <ul className="grid w-full gap-4">
-        {activeSubscriptions.map((subscription) => (
-          <li
-            className="rounded-xl border border-blue-ice px-5 py-4"
-            key={subscription.subscriptionUuid}
-          >
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <p className="text-label-sm text-text-primary">
-                {subscription.membershipName}
-              </p>
-              <Badge tone="green">구독 중</Badge>
-            </div>
-            <dl className="mt-4 border-t border-blue-ice pt-4 text-body-sm">
-              <div className="flex items-center gap-4">
-                <dt className="text-text-secondary">월 구독 금액</dt>
-                <dd className="font-semibold text-text-primary">
-                  {subscription.monthlyPrice.toLocaleString("ko-KR")}
-                  {formatPriceUnit(subscription.priceUnit)} / 월
-                </dd>
-              </div>
-            </dl>
-          </li>
-        ))}
-      </ul>
-    </MyPageCard>
-  );
-}
-
-function SubscribedCreatorsCard({
-  subscriptions,
-  onCancel,
-}: {
-  subscriptions?: SubscribedCreatorListItem[];
-  onCancel?: (subscriptionUuid: string) => void;
-}) {
-  const [searchQuery, setSearchQuery] = useState("");
-  const normalizedQuery = searchQuery.trim().toLocaleLowerCase("ko-KR");
-  const activeSubscriptions = subscriptions?.filter(
-    (subscription) => subscription.status === "ACTIVE"
-  );
-  const filteredSubscriptions = activeSubscriptions?.filter((subscription) =>
-    [subscription.creatorNickname, subscription.membershipName].some((value) =>
-      value.toLocaleLowerCase("ko-KR").includes(normalizedQuery)
-    )
-  );
-
-  if (!activeSubscriptions?.length) {
-    return null;
-  }
-
-  return (
-    <MyPageCard>
-      <MyPageSectionHeading
-        description="현재 내가 구독하고 있는 크리에이터 목록이에요."
-        title="구독 중인 크리에이터"
-      />
-
-      <InputField
-        aria-label="구독 중인 크리에이터 검색"
-        icon={Search}
-        onChange={(event) => setSearchQuery(event.target.value)}
-        placeholder="크리에이터 검색"
-        value={searchQuery}
-      />
-
-      {filteredSubscriptions?.length === 0 ? (
-        <StatusMessage>
-          {searchQuery.trim()
-            ? "검색 결과가 없습니다."
-            : "현재 구독 중인 크리에이터가 없습니다."}
-        </StatusMessage>
-      ) : (
-        <ul className="w-full divide-y divide-blue-ice border-y border-blue-ice">
-          {filteredSubscriptions?.map((subscription) => (
-            <li
-              className="flex flex-wrap items-center gap-4 px-4 py-3"
-              key={subscription.subscriptionUuid}
-            >
-              <ProfileAvatar
-                nickname={subscription.creatorNickname}
-                size={40}
-                src={subscription.creatorProfileImage}
-              />
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-label-sm text-text-primary">
-                  {subscription.creatorNickname}
-                </p>
-                <p className="mt-0.5 text-caption text-text-secondary">
-                  {formatDate(subscription.startedAt)} 구독 시작 ·{" "}
-                  {subscription.monthlyPrice.toLocaleString("ko-KR")}
-                  {formatPriceUnit(subscription.priceUnit)}/월
-                </p>
-              </div>
-              <Button
-                buttonStyle="ghost"
-                disabled={!onCancel}
-                onClick={() => onCancel?.(subscription.subscriptionUuid)}
-                size="sm"
-              >
-                구독 해지
-              </Button>
-            </li>
-          ))}
-        </ul>
-      )}
-    </MyPageCard>
-  );
-}
-
 function SubscriberManagementCard({
   isExplorerOrHigher,
   membership,
   subscribers,
+  subscriptions,
+  onCancel,
 }: {
   isExplorerOrHigher: boolean;
   membership?: MyCreatorMembership;
   subscribers?: CreatorSubscriberListItem[];
+  subscriptions?: SubscribedCreatorListItem[];
+  onCancel?: (subscriptionUuid: string) => void;
 }) {
+  const [activeTab, setActiveTab] = useState<"subscribers" | "subscriptions">(
+    "subscribers"
+  );
   const [searchQuery, setSearchQuery] = useState("");
   const normalizedQuery = searchQuery.trim().toLocaleLowerCase("ko-KR");
-  const activeSubscribers = subscribers?.filter(
+  const activeSubscribers = (subscribers ?? []).filter(
     (subscriber) => subscriber.status === "ACTIVE"
   );
-  const filteredSubscribers = activeSubscribers?.filter((subscriber) =>
+  const activeSubscriptions = (subscriptions ?? []).filter(
+    (subscription) => subscription.status === "ACTIVE"
+  );
+  const filteredSubscribers = activeSubscribers.filter((subscriber) =>
     subscriber.subscriberNickname
       .toLocaleLowerCase("ko-KR")
       .includes(normalizedQuery)
   );
+  const filteredSubscriptions = activeSubscriptions.filter((subscription) =>
+    subscription.creatorNickname
+      .toLocaleLowerCase("ko-KR")
+      .includes(normalizedQuery)
+  );
+  const hasCreatorMembership =
+    isExplorerOrHigher && hasApprovedCreatorMembership(membership);
+  const canViewSubscribers = isExplorerOrHigher;
+  const selectedTab = canViewSubscribers ? activeTab : "subscriptions";
+  const selectedItemsLoading =
+    selectedTab === "subscribers"
+      ? hasCreatorMembership && subscribers === undefined
+      : subscriptions === undefined;
+  const selectedItems =
+    selectedTab === "subscribers" ? filteredSubscribers : filteredSubscriptions;
 
-  if (!isExplorerOrHigher || !hasApprovedCreatorMembership(membership)) {
-    return null;
-  }
+  const changeTab = (tab: "subscribers" | "subscriptions") => {
+    setActiveTab(tab);
+    setSearchQuery("");
+  };
 
   return (
     <MyPageCard>
-      <MyPageSectionHeading
-        description="현재 나를 구독하고 프리미엄 스토리 서비스를 이용하고 있는 팬 리스트입니다."
-        title="구독자 관리"
-      />
+      <div
+        aria-label="구독자 관리 목록"
+        className="flex w-full gap-7 border-b border-blue-ice"
+        role="tablist"
+      >
+        {canViewSubscribers ? (
+          <button
+            aria-controls="subscription-management-panel"
+            aria-selected={selectedTab === "subscribers"}
+            className={`border-b-2 px-1 pb-3 text-label-sm transition ${
+              selectedTab === "subscribers"
+                ? "border-text-primary text-text-primary"
+                : "border-transparent text-text-secondary"
+            }`}
+            onClick={() => changeTab("subscribers")}
+            role="tab"
+            type="button"
+          >
+            내 구독자 ({activeSubscribers.length})
+          </button>
+        ) : null}
+        <button
+          aria-controls="subscription-management-panel"
+          aria-selected={selectedTab === "subscriptions"}
+          className={`border-b-2 px-1 pb-3 text-label-sm transition ${
+            selectedTab === "subscriptions"
+              ? "border-text-primary text-text-primary"
+              : "border-transparent text-text-secondary"
+          }`}
+          onClick={() => changeTab("subscriptions")}
+          role="tab"
+          type="button"
+        >
+          구독 중 ({activeSubscriptions.length})
+        </button>
+      </div>
 
+      <p className="w-full text-body-sm text-text-secondary">
+        {selectedTab === "subscribers"
+          ? "현재 나를 구독하고 프리미엄 스토리 서비스를 이용하고 있는 팬 리스트입니다."
+          : "현재 내가 구독하고 있는 크리에이터 목록입니다."}
+      </p>
       <InputField
         aria-label="구독자 닉네임 검색"
-        disabled={subscribers === undefined}
+        disabled={selectedItemsLoading}
         icon={Search}
         onChange={(event) => setSearchQuery(event.target.value)}
-        placeholder="구독자 닉네임 검색"
+        placeholder="구독자 닉네임으로 검색"
         value={searchQuery}
       />
 
-      {subscribers === undefined ? (
-        <StatusMessage>구독자 정보를 불러오는 중입니다.</StatusMessage>
-      ) : filteredSubscribers?.length === 0 ? (
-        <StatusMessage>
-          {searchQuery.trim()
-            ? "검색 결과가 없습니다."
-            : "현재 구독 중인 팬이 없습니다."}
-        </StatusMessage>
-      ) : (
-        <ul className="w-full divide-y divide-blue-ice border-y border-blue-ice">
-          {filteredSubscribers?.map((subscriber) => (
-            <li
-              className="flex items-center gap-4 px-4 py-3"
-              key={subscriber.subscriptionUuid}
-            >
-              <ProfileAvatar
-                nickname={subscriber.subscriberNickname}
-                size={40}
-                src={subscriber.subscriberProfileImage}
-              />
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-label-sm text-text-primary">
-                  {subscriber.subscriberNickname}
-                </p>
-                <p className="mt-0.5 text-caption text-text-secondary">
-                  {formatDate(subscriber.startedAt)} 구독 시작 ·{" "}
-                  {membership.monthlyPrice === null || !membership.priceUnit
-                    ? "구독 금액 미정"
-                    : `${membership.monthlyPrice.toLocaleString("ko-KR")}${formatPriceUnit(membership.priceUnit)}/월`}
-                </p>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
+      <div
+        className="w-full"
+        id="subscription-management-panel"
+        role="tabpanel"
+      >
+        {selectedItemsLoading ? (
+          <StatusMessage>구독 정보를 불러오는 중입니다.</StatusMessage>
+        ) : selectedItems.length === 0 ? (
+          <StatusMessage>
+            {searchQuery.trim()
+              ? "검색 결과가 없습니다."
+              : selectedTab === "subscribers"
+                ? "현재 나를 구독 중인 구독자가 없습니다."
+                : "현재 구독 중인 크리에이터가 없습니다."}
+          </StatusMessage>
+        ) : selectedTab === "subscribers" ? (
+          <ul className="w-full divide-y divide-blue-ice border-y border-blue-ice">
+            {filteredSubscribers.map((subscriber) => (
+              <li
+                className="flex items-center gap-4 px-4 py-3"
+                key={subscriber.subscriptionUuid}
+              >
+                <ProfileAvatar
+                  nickname={subscriber.subscriberNickname}
+                  size={40}
+                  src={subscriber.subscriberProfileImage}
+                />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-label-sm text-text-primary">
+                    {subscriber.subscriberNickname}
+                  </p>
+                  <p className="mt-0.5 text-caption text-text-secondary">
+                    {formatDate(subscriber.startedAt)} 구독 시작 ·{" "}
+                    {membership?.monthlyPrice === null || !membership?.priceUnit
+                      ? "구독 금액 미정"
+                      : `${membership.monthlyPrice.toLocaleString("ko-KR")}${formatPriceUnit(membership.priceUnit)}/월`}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <ul className="w-full divide-y divide-blue-ice border-y border-blue-ice">
+            {filteredSubscriptions.map((subscription) => (
+              <li
+                className="flex flex-wrap items-center gap-4 px-4 py-3"
+                key={subscription.subscriptionUuid}
+              >
+                <ProfileAvatar
+                  nickname={subscription.creatorNickname}
+                  size={40}
+                  src={subscription.creatorProfileImage}
+                />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-label-sm text-text-primary">
+                    {subscription.creatorNickname}
+                  </p>
+                  <p className="mt-0.5 text-caption text-text-secondary">
+                    {formatDate(subscription.startedAt)} 구독 시작 ·{" "}
+                    {subscription.monthlyPrice.toLocaleString("ko-KR")}
+                    {formatPriceUnit(subscription.priceUnit)}/월
+                  </p>
+                </div>
+                <Button
+                  buttonStyle="ghost"
+                  disabled={!onCancel}
+                  onClick={() => onCancel?.(subscription.subscriptionUuid)}
+                  size="sm"
+                >
+                  구독 해지
+                </Button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </MyPageCard>
   );
 }
@@ -1175,6 +1161,14 @@ export function MembershipPage() {
     const amount = Number(settlementForm.amount);
     const availableRevenue = membershipDashboard.revenue?.availableRevenue ?? 0;
 
+    if (availableRevenue <= 0) {
+      setSettlementForm((current) => ({
+        ...current,
+        error: "정산 가능한 수익이 없습니다.",
+      }));
+      return;
+    }
+
     if (!Number.isInteger(amount) || amount <= 0) {
       setSettlementForm((current) => ({
         ...current,
@@ -1197,14 +1191,22 @@ export function MembershipPage() {
       error: "",
     }));
     try {
-      await requestMembershipSettlement(amount);
-      await queryClient.invalidateQueries({
-        queryKey: membershipQueryKeys.revenue,
-      });
+      const settlement = await requestMembershipSettlement(amount);
+      queryClient.setQueryData<CreatorRevenueSummary>(
+        membershipQueryKeys.revenue,
+        (current) =>
+          current
+            ? {
+                ...current,
+                availableRevenue: settlement.availableRevenue,
+                reservedRevenue: settlement.reservedRevenue,
+              }
+            : current
+      );
       setSettlementForm(initialSettlementForm);
       setAction((current) => ({
         ...current,
-        message: "멤버십 수익 신청이 접수되었습니다.",
+        message: "수익 신청이 접수되어 관리자가 심사 중입니다.",
         error: "",
       }));
     } catch (settlementError) {
@@ -1292,6 +1294,9 @@ export function MembershipPage() {
 
       <CreatorMembershipOperationCard
         isExplorerOrHigher={isExplorerOrHigher}
+        isSettlementPending={
+          (membershipDashboard.revenue?.reservedRevenue ?? 0) > 0
+        }
         membership={membershipDashboard.membership}
         onRevenueRequest={() =>
           setSettlementForm((current) => ({ ...current, open: true }))
@@ -1301,11 +1306,9 @@ export function MembershipPage() {
         subscribers={membershipDashboard.subscribers}
       />
 
-      <CreatorMembershipSubscriptionsCard
-        subscriptions={membershipDashboard.subscriptions}
-      />
-
-      <SubscribedCreatorsCard
+      <SubscriberManagementCard
+        isExplorerOrHigher={isExplorerOrHigher}
+        membership={membershipDashboard.membership}
         onCancel={(subscriptionUuid) =>
           setAction((current) => ({
             ...current,
@@ -1314,13 +1317,8 @@ export function MembershipPage() {
             message: "",
           }))
         }
-        subscriptions={membershipDashboard.subscribedCreators}
-      />
-
-      <SubscriberManagementCard
-        isExplorerOrHigher={isExplorerOrHigher}
-        membership={membershipDashboard.membership}
         subscribers={membershipDashboard.subscriberItems}
+        subscriptions={membershipDashboard.subscribedCreators}
       />
 
       <MembershipApplicationDialog
