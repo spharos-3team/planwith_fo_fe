@@ -24,8 +24,10 @@ type ModalBase = {
   onClose: () => void;
   title: string;
   description?: string;
+  appearance?: "dark" | "glass";
   closeOnOverlayClick?: boolean;
   closeOnEscape?: boolean;
+  showIcon?: boolean;
 };
 
 export type AlertModalProps = ModalBase & {
@@ -37,6 +39,8 @@ export type ConfirmModalProps = ModalBase & {
   variant: "confirm";
   cancelAction: ModalAction;
   confirmAction: ModalAction;
+  confirmTone?: "primary" | "danger";
+  detail?: ReactNode;
 };
 
 export type SuccessModalProps = ModalBase & {
@@ -192,14 +196,14 @@ function ModalActions({
       <div className="mt-stack flex w-full gap-2">
         <Button
           buttonStyle="inverse"
-          className="flex-1"
+          className="flex-1 border border-line-light"
           onClick={props.cancelAction.onClick}
           size="md"
         >
           {props.cancelAction.label}
         </Button>
         <Button
-          buttonStyle="danger"
+          buttonStyle={props.confirmTone === "primary" ? "primary" : "danger"}
           className="flex-1"
           onClick={props.confirmAction.onClick}
           ref={initialFocusRef}
@@ -240,17 +244,17 @@ export function Modal(props: ModalProps): ReactElement | null {
     onClose,
     title,
     description,
+    variant,
+    appearance = variant === "success" ? "glass" : "dark",
     closeOnOverlayClick = true,
     closeOnEscape = true,
-    variant,
+    showIcon = true,
   } = props;
 
   const titleId = useId();
   const descriptionId = useId();
   const panelRef = useRef<HTMLDivElement>(null);
   const initialFocusRef = useRef<HTMLButtonElement>(null);
-  const appearance = variant === "success" ? "glass" : "dark";
-
   useModalLayer({
     closeOnEscape,
     initialFocusRef,
@@ -271,7 +275,7 @@ export function Modal(props: ModalProps): ReactElement | null {
 
   const panelClass =
     appearance === "glass"
-      ? "w-full max-w-[400px] rounded-xl border border-line-modal-glass bg-surface-modal-glass p-8 text-center shadow-landmark outline-none backdrop-blur-xl"
+      ? "w-full max-w-[440px] rounded-xl border border-line-light bg-surface-default p-8 text-center shadow-landmark outline-none"
       : "w-full max-w-[340px] rounded-xl border border-white/10 bg-surface-modal-dark p-8 text-center outline-none backdrop-blur-md";
 
   const titleClass =
@@ -279,10 +283,12 @@ export function Modal(props: ModalProps): ReactElement | null {
       ? "text-heading-lg text-text-primary"
       : "text-body-lg font-bold text-text-inverse";
 
+  const descriptionMargin =
+    variant === "confirm" && props.detail ? "mt-stack" : "mt-2";
   const descriptionClass =
     appearance === "glass"
-      ? "mt-2 text-body-sm text-text-secondary"
-      : "mt-2 text-body-sm text-text-on-dark-muted";
+      ? `${descriptionMargin} whitespace-pre-line text-body-sm text-text-secondary`
+      : `${descriptionMargin} whitespace-pre-line text-body-sm text-text-on-dark-muted`;
 
   return createPortal(
     <div
@@ -298,10 +304,15 @@ export function Modal(props: ModalProps): ReactElement | null {
         tabIndex={-1}
         {...(description ? { "aria-describedby": descriptionId } : {})}
       >
-        <ModalIcon variant={variant} />
+        {showIcon ? <ModalIcon variant={variant} /> : null}
         <h2 className={titleClass} id={titleId}>
           {title}
         </h2>
+        {variant === "confirm" && props.detail ? (
+          <div className="mt-stack rounded-lg bg-blue-ice/70 px-4 py-3 text-left">
+            {props.detail}
+          </div>
+        ) : null}
         {description ? (
           <p className={descriptionClass} id={descriptionId}>
             {description}

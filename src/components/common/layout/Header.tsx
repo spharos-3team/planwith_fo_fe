@@ -20,6 +20,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { useOptionalAuth } from "@/features/auth/context/AuthProvider";
+import { useTokenBalance } from "@/features/payment/hooks/usePaymentSummary";
 
 import { BrandLogo } from "./BrandLogo";
 import { ContentContainer, HeroContentContainer } from "./ContentContainer";
@@ -217,6 +218,16 @@ export function Header({
   const pathname = usePathname();
   const isAuthenticated = authenticated ?? auth?.isAuthenticated ?? false;
   const nickname = auth?.profile?.nickname;
+  const memberUuid = isAuthenticated ? (auth?.profile?.memberUuid ?? "") : "";
+  const tokenBalanceQuery = useTokenBalance(memberUuid);
+  const tokenBalance = tokenBalanceQuery.data?.totalBalance;
+  const formattedTokenBalance =
+    tokenBalance === undefined ? "—" : tokenBalance.toLocaleString("ko-KR");
+  const tokenBalanceLabel = tokenBalanceQuery.isError
+    ? "보유 토큰 조회 실패"
+    : tokenBalance === undefined
+      ? "보유 토큰 조회 중"
+      : `보유 토큰 ${formattedTokenBalance}개`;
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const isOverlay = variant === "overlay";
   const positionClass = isOverlay ? "absolute left-0 top-0" : "sticky top-0";
@@ -295,7 +306,7 @@ export function Header({
                   </Link>
                 </div>
                 <span
-                  aria-label="보유 토큰 500개"
+                  aria-label={tokenBalanceLabel}
                   className="inline-flex items-center gap-[7px] text-label-sm text-text-inverse"
                 >
                   <Image
@@ -305,7 +316,7 @@ export function Header({
                     src={headerAssets.token}
                     width={24}
                   />
-                  500
+                  {formattedTokenBalance}
                 </span>
                 <Link
                   aria-label="사용자 프로필"
@@ -430,7 +441,7 @@ export function Header({
                     aria-hidden="true"
                     className="h-4 w-4 text-amber-300"
                   />
-                  토큰 500
+                  토큰 {formattedTokenBalance}
                 </span>
                 <div className="flex items-center gap-3">
                   <Link

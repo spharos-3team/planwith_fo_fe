@@ -17,6 +17,8 @@ const HOP_BY_HOP = new Set([
   "upgrade",
 ]);
 
+const NULL_BODY_STATUSES = new Set([101, 204, 205, 304]);
+
 function gatewayOrigin(): string {
   const raw = (process.env.GATEWAY_URL ?? "http://127.0.0.1:8000").replace(
     /\/$/,
@@ -135,7 +137,11 @@ export async function proxyGatewayRequest(
       responseHeaders.set(key, value);
     });
 
-    const response = new NextResponse(await upstream.arrayBuffer(), {
+    const responseBody =
+      request.method === "HEAD" || NULL_BODY_STATUSES.has(upstream.status)
+        ? null
+        : await upstream.arrayBuffer();
+    const response = new NextResponse(responseBody, {
       status: upstream.status,
       headers: responseHeaders,
     });
