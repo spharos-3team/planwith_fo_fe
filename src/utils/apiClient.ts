@@ -109,6 +109,7 @@ export async function authenticatedFetch(
   const response = await fetch(resolveApiUrl(path), {
     ...init,
     credentials: "include",
+    keepalive: false,
     headers,
   });
 
@@ -116,6 +117,7 @@ export async function authenticatedFetch(
     const nextToken = await refreshAccessToken();
 
     if (nextToken) {
+      await response.arrayBuffer();
       const retryHeaders = new Headers(init.headers);
       retryHeaders.delete("Authorization");
       retryHeaders.delete("X-Planwith-Access-Token");
@@ -147,6 +149,7 @@ export async function apiClient<T>(
     headers.set("Content-Type", "application/json");
   }
 
+  const started = Date.now();
   const response = await authenticatedFetch(
     path,
     {
@@ -154,6 +157,9 @@ export async function apiClient<T>(
       headers,
     },
     options
+  );
+  console.info(
+    `[apiClient] ${init.method ?? "GET"} ${requestUrl} ${response.status} ${Date.now() - started}ms`
   );
 
   if (response.status === 204 || options.allowEmpty) {
@@ -164,10 +170,10 @@ export async function apiClient<T>(
 
   const body = await parseJson<T>(response);
 
-  if (!response.ok || !body?.success || body.data === null) {
+  if (!response.ok || !body?.success) {
     const fallbackMessage =
-      response.status >= 500 || response.status === 0
-        ? "게이트웨이에 연결할 수 없습니다. .env의 GATEWAY_URL과 개발 서버 재시작을 확인하세요."
+      response.status === 0 || body?.error?.code === "GATEWAY_UNREACHABLE"
+        ? "게이트웨이에 연결할 수 없습니다. Gateway가 8000에서 실행 중인지 확인하세요."
         : `요청 처리 중 오류가 발생했습니다. (HTTP ${response.status}${
             body?.error?.code ? ` ${body.error.code}` : ""
           })`;
@@ -179,6 +185,18 @@ export async function apiClient<T>(
       body?.error?.code ?? "UNKNOWN_ERROR",
       body?.error?.message ?? fallbackMessage,
       body?.error?.fieldErrors
+    );
+  }
+
+  if (body.data === null) {
+    if (options.allowEmpty || response.status === 204) {
+      return undefined as T;
+    }
+
+    throw new ApiClientError(
+      response.status,
+      "INVALID_RESPONSE",
+      "서버 응답을 읽을 수 없습니다."
     );
   }
 
