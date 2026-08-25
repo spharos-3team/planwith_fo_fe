@@ -8,6 +8,7 @@ import { type FormEvent, useState } from "react";
 import { Badge } from "@/components/common/Badge";
 import { Button } from "@/components/common/Button";
 import { InputField } from "@/components/common/InputField";
+import { ContentContainer } from "@/components/common/layout/ContentContainer";
 import { Modal } from "@/components/common/Modal";
 
 type EditorMode = "create" | "edit";
@@ -42,14 +43,16 @@ function EditorHero() {
         src="/images/schedules/editor-hero.jpg"
       />
       <div aria-hidden="true" className="absolute inset-0 bg-black/30" />
-      <div className="absolute inset-x-0 bottom-[16%] mx-auto w-full max-w-6xl px-6 sm:px-10">
-        <h1 className="text-[clamp(2.25rem,3vw,3.5rem)] font-medium text-text-inverse">
-          ADD PLAN
-        </h1>
-        <p className="mt-2 text-body-sm text-white/90">
-          나만의 새로운 추억, 자유롭게 채워보는 일정
-        </p>
-      </div>
+      <ContentContainer className="absolute inset-x-0 bottom-[16%]">
+        <div className="mx-auto w-full max-w-6xl">
+          <h1 className="text-[clamp(2.25rem,3vw,3.5rem)] font-medium text-text-inverse">
+            ADD PLAN
+          </h1>
+          <p className="mt-2 text-body-sm text-white/90">
+            나만의 새로운 추억, 자유롭게 채워보는 일정
+          </p>
+        </div>
+      </ContentContainer>
     </section>
   );
 }
@@ -103,181 +106,187 @@ export function ScheduleEditorPage({ mode }: ScheduleEditorPageProps) {
     <div className="bg-surface-default">
       <EditorHero />
 
-      <form
-        className="mx-auto w-full max-w-6xl px-6 py-section-y sm:px-10"
-        onSubmit={submit}
-      >
-        <section>
-          <h2 className="text-heading-lg text-text-primary">기본정보</h2>
-          <div className="mt-6 grid gap-8 md:grid-cols-2 md:gap-16">
-            <InputField
-              error={
-                !editor.destination && error
-                  ? "여행 목적지를 입력해주세요."
-                  : undefined
-              }
-              label="여행 목적지 *"
-              onChange={(event) => update("destination", event.target.value)}
-              placeholder="예) 도쿄, 교토, 제주도"
-              value={editor.destination}
-            />
-            <fieldset>
-              <legend className="mb-1.5 text-label-sm text-text-primary">
-                여행 기간 *
-              </legend>
-              <div className="grid grid-cols-2 gap-3">
-                <InputField
-                  aria-label="출발일"
-                  onChange={(event) => update("startDate", event.target.value)}
-                  type="date"
-                  value={editor.startDate}
-                />
-                <InputField
-                  aria-label="도착일"
-                  min={editor.startDate}
-                  onChange={(event) => update("endDate", event.target.value)}
-                  type="date"
-                  value={editor.endDate}
-                />
-              </div>
-            </fieldset>
-          </div>
-        </section>
-
-        <section className="mt-12">
-          <h2 className="text-heading-lg text-text-primary">세부 정보</h2>
-          <div className="mt-6 grid gap-8 md:grid-cols-2 md:gap-16">
-            <InputField
-              error={
-                !editor.title && error ? "일정 제목을 입력해주세요." : undefined
-              }
-              label="일정 제목"
-              onChange={(event) => update("title", event.target.value)}
-              placeholder="예) 도쿄 5일 자유여행"
-              value={editor.title}
-            />
-
-            <fieldset>
-              <legend className="text-label-sm text-text-primary">
-                캘린더 표시 색상
-              </legend>
-              <div className="mt-3 flex flex-wrap gap-3">
-                {scheduleColors.map((color, index) => (
-                  <button
-                    aria-label={`${index + 1}번 일정 색상`}
-                    aria-pressed={editor.colorIndex === index}
-                    className={`size-6 rounded-circle ${color} ${
-                      editor.colorIndex === index
-                        ? "ring-2 ring-brand-primary ring-offset-2"
-                        : ""
-                    }`}
-                    key={color}
-                    onClick={() => update("colorIndex", index)}
-                    type="button"
+      <ContentContainer>
+        <form
+          className="mx-auto w-full max-w-6xl py-section-y"
+          onSubmit={submit}
+        >
+          <section>
+            <h2 className="text-heading-lg text-text-primary">기본정보</h2>
+            <div className="mt-6 grid gap-8 md:grid-cols-2 md:gap-16">
+              <InputField
+                error={
+                  !editor.destination && error
+                    ? "여행 목적지를 입력해주세요."
+                    : undefined
+                }
+                label="여행 목적지 *"
+                onChange={(event) => update("destination", event.target.value)}
+                placeholder="예) 도쿄, 교토, 제주도"
+                value={editor.destination}
+              />
+              <fieldset>
+                <legend className="mb-1.5 text-label-sm text-text-primary">
+                  여행 기간 *
+                </legend>
+                <div className="grid grid-cols-2 gap-3">
+                  <InputField
+                    aria-label="출발일"
+                    onChange={(event) =>
+                      update("startDate", event.target.value)
+                    }
+                    type="date"
+                    value={editor.startDate}
                   />
-                ))}
-              </div>
-            </fieldset>
-          </div>
+                  <InputField
+                    aria-label="도착일"
+                    min={editor.startDate}
+                    onChange={(event) => update("endDate", event.target.value)}
+                    type="date"
+                    value={editor.endDate}
+                  />
+                </div>
+              </fieldset>
+            </div>
+          </section>
 
-          <div className="mt-8">
-            <div className="mb-2 flex flex-wrap items-end justify-between gap-3">
-              <label
-                className="text-label-sm text-text-primary"
-                htmlFor="schedule-content"
-              >
-                일정 내용 / 메모
-              </label>
-              {editing ? (
-                <div className="flex flex-wrap gap-2">
-                  <Button
-                    buttonStyle="secondary"
-                    className="h-9 border-accent-gold text-badge-orange-fg"
-                    icon="left"
-                    iconComponent={Sparkles}
-                    onClick={startAiReview}
-                    size="sm"
-                    type="button"
-                  >
-                    {editor.reviewActive ? "AI 첨삭 재수정" : "AI 첨삭 수정"}
-                  </Button>
-                  {editor.reviewActive ? (
+          <section className="mt-12">
+            <h2 className="text-heading-lg text-text-primary">세부 정보</h2>
+            <div className="mt-6 grid gap-8 md:grid-cols-2 md:gap-16">
+              <InputField
+                error={
+                  !editor.title && error
+                    ? "일정 제목을 입력해주세요."
+                    : undefined
+                }
+                label="일정 제목"
+                onChange={(event) => update("title", event.target.value)}
+                placeholder="예) 도쿄 5일 자유여행"
+                value={editor.title}
+              />
+
+              <fieldset>
+                <legend className="text-label-sm text-text-primary">
+                  캘린더 표시 색상
+                </legend>
+                <div className="mt-3 flex flex-wrap gap-3">
+                  {scheduleColors.map((color, index) => (
+                    <button
+                      aria-label={`${index + 1}번 일정 색상`}
+                      aria-pressed={editor.colorIndex === index}
+                      className={`size-6 rounded-circle ${color} ${
+                        editor.colorIndex === index
+                          ? "ring-2 ring-brand-primary ring-offset-2"
+                          : ""
+                      }`}
+                      key={color}
+                      onClick={() => update("colorIndex", index)}
+                      type="button"
+                    />
+                  ))}
+                </div>
+              </fieldset>
+            </div>
+
+            <div className="mt-8">
+              <div className="mb-2 flex flex-wrap items-end justify-between gap-3">
+                <label
+                  className="text-label-sm text-text-primary"
+                  htmlFor="schedule-content"
+                >
+                  일정 내용 / 메모
+                </label>
+                {editing ? (
+                  <div className="flex flex-wrap gap-2">
                     <Button
-                      className="h-9 bg-accent-gold hover:bg-accent-gold/90"
-                      onClick={() => setModal("reviewSaved")}
+                      buttonStyle="secondary"
+                      className="h-9 border-accent-gold text-badge-orange-fg"
+                      icon="left"
+                      iconComponent={Sparkles}
+                      onClick={startAiReview}
                       size="sm"
                       type="button"
                     >
-                      AI 첨삭 저장
+                      {editor.reviewActive ? "AI 첨삭 재수정" : "AI 첨삭 수정"}
                     </Button>
-                  ) : null}
-                </div>
+                    {editor.reviewActive ? (
+                      <Button
+                        className="h-9 bg-accent-gold hover:bg-accent-gold/90"
+                        onClick={() => setModal("reviewSaved")}
+                        size="sm"
+                        type="button"
+                      >
+                        AI 첨삭 저장
+                      </Button>
+                    ) : null}
+                  </div>
+                ) : null}
+              </div>
+              {editor.reviewActive ? (
+                <p className="mb-2 text-caption text-brand-primary">
+                  AI 첨삭 시 ‘AI 첨삭 저장’을 눌러야 해당 내용이 저장됩니다.
+                </p>
               ) : null}
+              <textarea
+                className="min-h-44 w-full resize-y rounded-sm border border-line-default bg-surface-default px-4 py-3 text-body-sm text-text-primary outline-none transition placeholder:text-text-disabled focus:border-brand-primary"
+                id="schedule-content"
+                onChange={(event) => update("content", event.target.value)}
+                placeholder="예) 도착 후 체크인 → 시부야 탐방 → 저녁 식사"
+                value={editor.content}
+              />
             </div>
-            {editor.reviewActive ? (
-              <p className="mb-2 text-caption text-brand-primary">
-                AI 첨삭 시 ‘AI 첨삭 저장’을 눌러야 해당 내용이 저장됩니다.
+
+            <div className="mt-7">
+              <p className="text-label-sm text-text-primary">
+                일정 생성 유형 (자동 지정)
               </p>
-            ) : null}
-            <textarea
-              className="min-h-44 w-full resize-y rounded-sm border border-line-default bg-surface-default px-4 py-3 text-body-sm text-text-primary outline-none transition placeholder:text-text-disabled focus:border-brand-primary"
-              id="schedule-content"
-              onChange={(event) => update("content", event.target.value)}
-              placeholder="예) 도착 후 체크인 → 시부야 탐방 → 저녁 식사"
-              value={editor.content}
-            />
-          </div>
-
-          <div className="mt-7">
-            <p className="text-label-sm text-text-primary">
-              일정 생성 유형 (자동 지정)
-            </p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <Badge tone="gray">AI 생성 일정</Badge>
-              <Badge
-                tone={editor.reviewActive ? "gray" : "blue"}
-                variant="solid"
-              >
-                내 일정
-              </Badge>
-              <Badge tone="gray">공유 일정</Badge>
-              <Badge
-                tone={editor.reviewActive ? "orange" : "gray"}
-                variant={editor.reviewActive ? "solid" : "subtle"}
-              >
-                AI 첨삭
-              </Badge>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Badge tone="gray">AI 생성 일정</Badge>
+                <Badge
+                  tone={editor.reviewActive ? "gray" : "blue"}
+                  variant="solid"
+                >
+                  내 일정
+                </Badge>
+                <Badge tone="gray">공유 일정</Badge>
+                <Badge
+                  tone={editor.reviewActive ? "orange" : "gray"}
+                  variant={editor.reviewActive ? "solid" : "subtle"}
+                >
+                  AI 첨삭
+                </Badge>
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
 
-        {error ? (
-          <p className="mt-6 text-body-sm text-status-error" role="alert">
-            {error}
-          </p>
-        ) : null}
+          {error ? (
+            <p className="mt-6 text-body-sm text-status-error" role="alert">
+              {error}
+            </p>
+          ) : null}
 
-        <div className="mt-16 flex flex-wrap justify-end gap-3">
-          <Button
-            buttonStyle="secondary"
-            onClick={() => router.back()}
-            type="button"
-          >
-            취소
-          </Button>
-          {editing ? (
+          <div className="mt-16 flex flex-wrap justify-end gap-3">
             <Button
-              buttonStyle="danger"
-              className="border border-status-error bg-transparent text-status-error hover:bg-status-error/10"
-              onClick={() => setModal("delete")}
+              buttonStyle="secondary"
+              onClick={() => router.back()}
               type="button"
             >
-              삭제
+              취소
             </Button>
-          ) : null}
-          <Button type="submit">{editing ? "일정 저장" : "일정 생성"}</Button>
-        </div>
-      </form>
+            {editing ? (
+              <Button
+                buttonStyle="danger"
+                className="border border-status-error bg-transparent text-status-error hover:bg-status-error/10"
+                onClick={() => setModal("delete")}
+                type="button"
+              >
+                삭제
+              </Button>
+            ) : null}
+            <Button type="submit">{editing ? "일정 저장" : "일정 생성"}</Button>
+          </div>
+        </form>
+      </ContentContainer>
 
       <Modal
         description={

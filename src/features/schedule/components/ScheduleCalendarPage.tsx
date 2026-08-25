@@ -16,6 +16,7 @@ import { useState } from "react";
 
 import { Badge, type BadgeTone } from "@/components/common/Badge";
 import { Button } from "@/components/common/Button";
+import { ContentContainer } from "@/components/common/layout/ContentContainer";
 import { SelectField } from "@/components/common/SelectField";
 import { StatusMessage } from "@/components/common/StatusMessage";
 import {
@@ -99,14 +100,14 @@ function ScheduleHero() {
         src="/images/schedules/calendar-hero.png"
       />
       <div aria-hidden="true" className="absolute inset-0 bg-black/20" />
-      <div className="absolute inset-x-0 bottom-[16%] mx-auto w-full max-w-[1780px] px-6 sm:px-10 xl:px-16">
+      <ContentContainer className="absolute inset-x-0 bottom-[16%]">
         <h1 className="text-[clamp(2.25rem,3vw,3.5rem)] font-medium text-text-inverse">
           CALENDAR
         </h1>
         <p className="mt-2 text-body-sm text-white/90">
           손 쉬운 주별부터 AI 자동 계획까지 한번에
         </p>
-      </div>
+      </ContentContainer>
     </section>
   );
 }
@@ -421,7 +422,7 @@ export function ScheduleCalendarPage({
     <div className="bg-surface-default">
       <ScheduleHero />
 
-      <div className="mx-auto grid w-full max-w-[1780px] gap-8 px-6 py-10 sm:px-10 xl:grid-cols-[292px_minmax(0,1fr)_340px] xl:px-16">
+      <ContentContainer className="grid gap-8 py-10 xl:grid-cols-[292px_minmax(0,1fr)_340px]">
         <aside className="grid content-start gap-8">
           <MiniCalendar />
           <CategoryFilter
@@ -511,7 +512,7 @@ export function ScheduleCalendarPage({
             />
           )}
         </aside>
-      </div>
+      </ContentContainer>
     </div>
   );
 }

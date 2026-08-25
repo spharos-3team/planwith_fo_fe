@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Badge } from "@/components/common/Badge";
+import { ContentContainer } from "@/components/common/layout/ContentContainer";
 import { Modal } from "@/components/common/Modal";
 import {
   type AiScheduleActivity,
@@ -172,70 +173,72 @@ export function AiScheduleResultPage({
 
   return (
     <div className="bg-surface-default pb-20 text-text-primary">
-      <div className="mx-auto w-full max-w-[1340px] px-6 pt-10 sm:px-10 2xl:px-0">
-        <Hero />
+      <ContentContainer className="pt-10">
+        <div className="mx-auto w-full max-w-[1340px]">
+          <Hero />
 
-        <div className="mt-[100px] flex flex-wrap justify-end gap-1 border-b border-line-light pb-5">
-          <button
-            className="rounded-[5px] bg-blue-400/70 px-2.5 py-2.5 text-body-sm font-medium transition hover:bg-blue-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary"
-            onClick={() => setSaved(true)}
-            type="button"
-          >
-            내 캘린더 저장
-          </button>
-          <button
-            className="px-2.5 py-2.5 text-body-sm font-medium transition hover:text-brand-primary"
-            onClick={() => router.push("/schedules/ai/new")}
-            type="button"
-          >
-            정보 다시 입력
-          </button>
-          <button
-            className="px-2.5 py-2.5 text-body-sm font-medium transition hover:text-brand-primary"
-            onClick={regenerate}
-            type="button"
-          >
-            재생성
-          </button>
-        </div>
-
-        <div className="mt-5 grid gap-[20px]">
-          {aiScheduleResultDays.map((day, index) => (
-            <DaySchedule day={day} key={day.id} showSummary={index === 0} />
-          ))}
-        </div>
-
-        <nav
-          aria-label="일정 페이지"
-          className="mt-[70px] flex justify-center border-t border-line-light pt-5"
-        >
-          {[1, 2, 3, 4, 5].map((pageNumber) => (
+          <div className="mt-[100px] flex flex-wrap justify-end gap-1 border-b border-line-light pb-5">
             <button
-              aria-current={page === pageNumber ? "page" : undefined}
-              aria-label={`${pageNumber}페이지`}
-              className={`grid size-[30px] place-items-center rounded-md text-caption transition ${
-                page === pageNumber
-                  ? "bg-brand-primary font-bold text-text-inverse"
-                  : "text-text-secondary hover:bg-surface-page"
-              }`}
-              key={pageNumber}
-              onClick={() => setPage(pageNumber)}
+              className="rounded-[5px] bg-blue-400/70 px-2.5 py-2.5 text-body-sm font-medium transition hover:bg-blue-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary"
+              onClick={() => setSaved(true)}
               type="button"
             >
-              {pageNumber}
+              내 캘린더 저장
             </button>
-          ))}
-          <button
-            aria-label="다음 일정 페이지"
-            className="grid size-[30px] place-items-center text-text-disabled transition hover:text-brand-primary disabled:cursor-not-allowed disabled:opacity-40"
-            disabled={page === 5}
-            onClick={() => setPage((current) => Math.min(5, current + 1))}
-            type="button"
+            <button
+              className="px-2.5 py-2.5 text-body-sm font-medium transition hover:text-brand-primary"
+              onClick={() => router.push("/schedules/ai/new")}
+              type="button"
+            >
+              정보 다시 입력
+            </button>
+            <button
+              className="px-2.5 py-2.5 text-body-sm font-medium transition hover:text-brand-primary"
+              onClick={regenerate}
+              type="button"
+            >
+              재생성
+            </button>
+          </div>
+
+          <div className="mt-5 grid gap-[20px]">
+            {aiScheduleResultDays.map((day, index) => (
+              <DaySchedule day={day} key={day.id} showSummary={index === 0} />
+            ))}
+          </div>
+
+          <nav
+            aria-label="일정 페이지"
+            className="mt-[70px] flex justify-center border-t border-line-light pt-5"
           >
-            <ChevronRight aria-hidden="true" className="size-4" />
-          </button>
-        </nav>
-      </div>
+            {[1, 2, 3, 4, 5].map((pageNumber) => (
+              <button
+                aria-current={page === pageNumber ? "page" : undefined}
+                aria-label={`${pageNumber}페이지`}
+                className={`grid size-[30px] place-items-center rounded-md text-caption transition ${
+                  page === pageNumber
+                    ? "bg-brand-primary font-bold text-text-inverse"
+                    : "text-text-secondary hover:bg-surface-page"
+                }`}
+                key={pageNumber}
+                onClick={() => setPage(pageNumber)}
+                type="button"
+              >
+                {pageNumber}
+              </button>
+            ))}
+            <button
+              aria-label="다음 일정 페이지"
+              className="grid size-[30px] place-items-center text-text-disabled transition hover:text-brand-primary disabled:cursor-not-allowed disabled:opacity-40"
+              disabled={page === 5}
+              onClick={() => setPage((current) => Math.min(5, current + 1))}
+              type="button"
+            >
+              <ChevronRight aria-hidden="true" className="size-4" />
+            </button>
+          </nav>
+        </div>
+      </ContentContainer>
 
       <Modal
         description="캘린더에 언제든지 확인하실 수 있습니다"

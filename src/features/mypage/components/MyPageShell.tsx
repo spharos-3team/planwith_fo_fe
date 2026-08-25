@@ -14,6 +14,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { type ReactNode } from "react";
 
+import { ContentContainer } from "@/components/common/layout/ContentContainer";
 import type { MyPageSection } from "@/features/mypage/types";
 
 const itemClass =
@@ -130,61 +131,63 @@ export function MyPageShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="bg-surface-default">
-      <div className="mx-auto flex w-full max-w-[1562px] justify-center gap-8 px-6 py-10 pb-[60px] lg:px-10">
-        <aside className="hidden h-fit w-[340px] shrink-0 flex-col items-start gap-3 rounded-[24px] border-[1.5px] border-blue-ice bg-surface-default p-6 lg:flex">
-          <p className="text-heading-lg text-text-primary">마이페이지 메뉴</p>
+      <ContentContainer className="py-10 pb-[60px]">
+        <div className="mx-auto flex w-full max-w-[1562px] justify-center gap-8">
+          <aside className="hidden h-fit w-[340px] shrink-0 flex-col items-start gap-3 rounded-[24px] border-[1.5px] border-blue-ice bg-surface-default p-6 lg:flex">
+            <p className="text-heading-lg text-text-primary">마이페이지 메뉴</p>
 
-          <nav aria-label="마이페이지 메뉴" className="grid w-full gap-3">
-            {menuItems.map((item) => {
-              const isActive = active === item.section;
+            <nav aria-label="마이페이지 메뉴" className="grid w-full gap-3">
+              {menuItems.map((item) => {
+                const isActive = active === item.section;
 
-              return (
-                <Link
-                  className={`${itemClass} ${
-                    isActive
-                      ? "bg-blue-700 font-semibold text-text-inverse"
-                      : "font-medium text-text-primary hover:bg-surface-page"
-                  }`}
-                  href={item.href}
-                  key={item.href}
-                >
-                  <MenuLabel
-                    active={isActive}
-                    icon={item.icon}
-                    label={item.label}
-                  />
-                </Link>
-              );
-            })}
-          </nav>
-        </aside>
+                return (
+                  <Link
+                    className={`${itemClass} ${
+                      isActive
+                        ? "bg-blue-700 font-semibold text-text-inverse"
+                        : "font-medium text-text-primary hover:bg-surface-page"
+                    }`}
+                    href={item.href}
+                    key={item.href}
+                  >
+                    <MenuLabel
+                      active={isActive}
+                      icon={item.icon}
+                      label={item.label}
+                    />
+                  </Link>
+                );
+              })}
+            </nav>
+          </aside>
 
-        <div className="flex min-w-0 w-full max-w-[1190px] flex-col gap-6">
-          <nav
-            aria-label="마이페이지 메뉴"
-            className="flex gap-2 overflow-x-auto lg:hidden"
-          >
-            {menuItems.map((item) => {
-              const isActive = active === item.section;
+          <div className="flex min-w-0 w-full max-w-[1190px] flex-col gap-6">
+            <nav
+              aria-label="마이페이지 메뉴"
+              className="flex gap-2 overflow-x-auto lg:hidden"
+            >
+              {menuItems.map((item) => {
+                const isActive = active === item.section;
 
-              return (
-                <Link
-                  className={`shrink-0 rounded-xl px-4 py-2.5 text-[14px] ${
-                    isActive
-                      ? "bg-blue-700 font-semibold text-text-inverse"
-                      : "border border-blue-ice font-medium text-text-primary"
-                  }`}
-                  href={item.href}
-                  key={item.href}
-                >
-                  {item.label}
-                </Link>
-              );
-            })}
-          </nav>
-          {children}
+                return (
+                  <Link
+                    className={`shrink-0 rounded-xl px-4 py-2.5 text-[14px] ${
+                      isActive
+                        ? "bg-blue-700 font-semibold text-text-inverse"
+                        : "border border-blue-ice font-medium text-text-primary"
+                    }`}
+                    href={item.href}
+                    key={item.href}
+                  >
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </nav>
+            {children}
+          </div>
         </div>
-      </div>
+      </ContentContainer>
     </div>
   );
 }
