@@ -8,6 +8,7 @@ import type {
   MembershipApplicationValidation,
   MyCreatorMembership,
   SettlementRequestResult,
+  UpdateMembershipMonthlyPriceResult,
 } from "@/features/membership/types";
 import { rawApiClient } from "@/utils/apiClient";
 
@@ -50,6 +51,16 @@ export function applyMembership(request: MembershipApplicationRequest) {
   return rawApiClient<MembershipApplicationResult>(
     `${MEMBERSHIP_API_PREFIX}/memberships/applications`,
     { method: "POST", body: JSON.stringify(request) }
+  );
+}
+
+export function updateMembershipMonthlyPrice(monthlyPrice: number) {
+  return rawApiClient<UpdateMembershipMonthlyPriceResult>(
+    `${MEMBERSHIP_API_PREFIX}/memberships/me/monthly-price`,
+    {
+      method: "PATCH",
+      body: JSON.stringify({ monthlyPrice }),
+    }
   );
 }
 

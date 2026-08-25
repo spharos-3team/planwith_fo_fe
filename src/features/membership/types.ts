@@ -92,3 +92,16 @@ export interface SettlementRequestResult {
   reservedRevenue: number;
   requestedAt: string;
 }
+
+export interface UpdateMembershipMonthlyPriceRequest {
+  monthlyPrice: number;
+}
+
+export interface UpdateMembershipMonthlyPriceResult {
+  membershipUuid: string;
+  creatorUuid: string;
+  membershipName: string;
+  monthlyPrice: number;
+  priceUnit: string;
+  status: string;
+}
