@@ -40,7 +40,7 @@ export function MeetingGridCard({
         ) : (
           <div
             aria-hidden="true"
-            className="relative h-full w-full bg-[url('/images/meetings/hero.png')] bg-cover bg-center"
+            className="relative h-full w-full bg-[url('/images/meetings/hero-background.png')] bg-cover bg-center"
           >
             <div className="absolute inset-0 bg-gradient-to-t from-black/35 to-black/5" />
           </div>

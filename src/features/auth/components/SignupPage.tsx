@@ -181,7 +181,7 @@ export function SignupPage() {
   };
 
   return (
-    <section className="flex flex-col items-center bg-surface-default px-6 pb-16">
+    <section className="flex flex-col items-center bg-surface-default px-6 pb-16 pt-10">
       {step === 1 ? (
         <TermsStep
           agreements={state.agreements}
