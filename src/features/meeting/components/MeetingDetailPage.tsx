@@ -3,7 +3,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { Badge } from "@/components/common/Badge";
 import { Button } from "@/components/common/Button";
@@ -109,9 +109,16 @@ export function MeetingDetailPage({ meetingUuid }: MeetingDetailPageProps) {
   const [applying, setApplying] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const applyInFlight = useRef(false);
+  const confirmInFlight = useRef(false);
+
+  const detailQueryKey = useMemo(
+    () => ["meetings", "detail", meetingUuid, isAuthenticated] as const,
+    [isAuthenticated, meetingUuid]
+  );
 
   const detailQuery = useQuery({
-    queryKey: ["meetings", "detail", meetingUuid, isAuthenticated],
+    queryKey: detailQueryKey,
     queryFn: () => getMeetingDetail(meetingUuid),
     enabled: status !== "initializing",
   });
@@ -129,68 +136,94 @@ export function MeetingDetailPage({ meetingUuid }: MeetingDetailPageProps) {
     return () => window.clearTimeout(timer);
   }, [toast]);
 
-  const refreshMeeting = useCallback(async () => {
-    await queryClient.invalidateQueries({ queryKey: ["meetings"] });
-  }, [queryClient]);
+  const patchDetail = useCallback(
+    (patch: Partial<MeetingDetail>) => {
+      queryClient.setQueryData<MeetingDetail>(detailQueryKey, (current) =>
+        current ? { ...current, ...patch } : current
+      );
+    },
+    [detailQueryKey, queryClient]
+  );
 
   const closeApply = useCallback(() => {
+    if (applyInFlight.current) {
+      return;
+    }
     setApplyError("");
-    setApplying(false);
     setApplyOpen(false);
   }, []);
 
   const handleApply = async (message: string) => {
-    if (applying) {
+    if (applyInFlight.current) {
       return;
     }
 
+    applyInFlight.current = true;
     setApplying(true);
     setApplyError("");
 
     try {
       await applyToMeeting(meetingUuid, { message: message || null });
+      patchDetail({
+        myParticipation: "PENDING",
+        canApply: false,
+        canEnterChat: false,
+        canViewMembers: false,
+      });
       setApplyOpen(false);
       setToast("모임 신청이 완료되었습니다");
-      await refreshMeeting();
-    } catch (error) {
+    } catch (error: unknown) {
       setApplyError(errorMessage(error, "신청 처리 중 오류가 발생했습니다."));
     } finally {
+      applyInFlight.current = false;
       setApplying(false);
     }
   };
 
   const handleConfirm = async () => {
-    if (!confirmKind || confirming) {
+    if (!confirmKind || confirmInFlight.current) {
       return;
     }
 
+    confirmInFlight.current = true;
     setConfirming(true);
+    const kind = confirmKind;
     setConfirmError("");
 
     try {
-      if (confirmKind === "leave") {
+      if (kind === "leave") {
         await leaveMeeting(meetingUuid);
+        patchDetail({
+          myParticipation: "LEFT",
+          myRole: null,
+          canApply: meeting?.status === "RECRUITING",
+          canEnterChat: false,
+          canViewMembers: false,
+          currentMemberCount: Math.max(
+            0,
+            (meeting?.currentMemberCount ?? 1) - 1
+          ),
+        });
         setConfirmKind(null);
         setToast("모임에서 나왔습니다");
-        await refreshMeeting();
         return;
       }
 
-      if (confirmKind === "complete") {
+      if (kind === "complete") {
         await completeMeeting(meetingUuid);
+        patchDetail({ status: "COMPLETED", canApply: false });
         setConfirmKind(null);
         setToast("모집을 완료했습니다. 채팅은 열람만 가능합니다");
-        await refreshMeeting();
         return;
       }
 
       await disbandMeeting(meetingUuid);
       setConfirmKind(null);
-      await queryClient.invalidateQueries({ queryKey: ["meetings"] });
       router.push("/meetings");
-    } catch (error) {
+    } catch (error: unknown) {
       setConfirmError(errorMessage(error, "요청 처리 중 오류가 발생했습니다."));
     } finally {
+      confirmInFlight.current = false;
       setConfirming(false);
     }
   };
@@ -518,7 +551,9 @@ export function MeetingDetailPage({ meetingUuid }: MeetingDetailPageProps) {
       <ApplyMeetingDialog
         error={applyError}
         onClose={closeApply}
-        onSubmit={handleApply}
+        onSubmit={(message) => {
+          void handleApply(message);
+        }}
         open={applyOpen}
         submitting={applying}
       />

@@ -1,4 +1,4 @@
-import type { MeetingStatus } from "@/features/meeting/types";
+import type { MeetingRole, MeetingStatus } from "@/features/meeting/types";
 
 export function formatMeetingPeriod(
   startDate: string | null,
@@ -56,6 +56,32 @@ export function meetingStatusTone(
 
 export function isHttpUrl(value: string | null | undefined): value is string {
   return Boolean(value && /^https?:\/\//i.test(value));
+}
+
+export function meetingRoleLabel(role: MeetingRole | string): string {
+  switch (role) {
+    case "HOST":
+      return "방장";
+    case "VICE_HOST":
+      return "부방장";
+    case "MEMBER":
+      return "멤버";
+    default:
+      return role;
+  }
+}
+
+export function meetingRoleTone(
+  role: MeetingRole | string
+): "orange" | "blue" | "gray" {
+  switch (role) {
+    case "HOST":
+      return "orange";
+    case "VICE_HOST":
+      return "blue";
+    default:
+      return "gray";
+  }
 }
 
 export const MY_MEETING_STATUS_ORDER: MeetingStatus[] = [

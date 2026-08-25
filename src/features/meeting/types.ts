@@ -88,3 +88,12 @@ export interface MeetingParticipation {
 export interface ApplyMeetingPayload {
   message?: string | null;
 }
+
+export interface MeetingMember {
+  memberUuid: string;
+  role: MeetingRole | string;
+  status: ParticipationStatus | string;
+  joinedAt: string | null;
+  nickname: string | null;
+  profileImageUrl: string | null;
+}
