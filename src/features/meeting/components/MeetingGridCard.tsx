@@ -45,7 +45,9 @@ export function MeetingGridCard({
             <div className="absolute inset-0 bg-gradient-to-t from-black/35 to-black/5" />
           </div>
         )}
-        {meeting.status === "RECRUITING" || meeting.status === "FULL" ? (
+        {meeting.status === "RECRUITING" ||
+        meeting.status === "FULL" ||
+        meeting.status === "COMPLETED" ? (
           <Badge
             className="absolute left-4 top-4"
             size="sm"

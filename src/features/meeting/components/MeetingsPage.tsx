@@ -16,6 +16,10 @@ import { MeetingGridCard } from "@/features/meeting/components/MeetingGridCard";
 import { MeetingHero } from "@/features/meeting/components/MeetingHero";
 import { MeetingPagination } from "@/features/meeting/components/MeetingPagination";
 import { MyMeetingRow } from "@/features/meeting/components/MyMeetingRow";
+import {
+  groupMeetingsByStatus,
+  meetingStatusLabel,
+} from "@/features/meeting/lib/format";
 import type { MyMeetingScope } from "@/features/meeting/types";
 import { useApiError } from "@/hooks/useApiError";
 import { listMeetings, listMyMeetings } from "@/services/meeting/meetings";
@@ -322,7 +326,7 @@ export function MeetingsPage() {
                             </Link>
                           ) : null}
                         </div>
-                      ) : (
+                      ) : section.scope === "pending" ? (
                         <div className="grid gap-4">
                           {items.map((meeting) => (
                             <MyMeetingRow
@@ -336,6 +340,28 @@ export function MeetingsPage() {
                               key={meeting.meetingUuid}
                               meeting={meeting}
                             />
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="grid gap-8">
+                          {groupMeetingsByStatus(items).map((group) => (
+                            <div className="grid gap-4" key={group.status}>
+                              <h3 className="text-heading-sm text-text-secondary">
+                                {meetingStatusLabel(group.status)}
+                              </h3>
+                              {group.items.map((meeting) => (
+                                <MyMeetingRow
+                                  actionHref={
+                                    section.actionLabel
+                                      ? `/chat?meetingUuid=${meeting.meetingUuid}`
+                                      : undefined
+                                  }
+                                  actionLabel={section.actionLabel}
+                                  key={meeting.meetingUuid}
+                                  meeting={meeting}
+                                />
+                              ))}
+                            </div>
                           ))}
                         </div>
                       )}

@@ -1,6 +1,10 @@
 import type {
+  ApplyMeetingPayload,
   ListMeetingsQuery,
   ListMyMeetingsQuery,
+  MeetingApplication,
+  MeetingDetail,
+  MeetingParticipation,
   MyMeetings,
   PagedMeetings,
 } from "@/features/meeting/types";
@@ -43,4 +47,45 @@ export function listMyMeetings(query: ListMyMeetingsQuery) {
       size: query.size,
     })}`
   );
+}
+
+export function getMeetingDetail(meetingUuid: string) {
+  return apiClient<MeetingDetail>(`/meetings/${meetingUuid}`);
+}
+
+export function getMeetingParticipation(meetingUuid: string) {
+  return apiClient<MeetingParticipation>(
+    `/meetings/${meetingUuid}/participation`
+  );
+}
+
+export function applyToMeeting(
+  meetingUuid: string,
+  payload: ApplyMeetingPayload = {}
+) {
+  return apiClient<MeetingApplication>(
+    `/meetings/${meetingUuid}/applications`,
+    {
+      method: "POST",
+      body: JSON.stringify({ message: payload.message ?? null }),
+    }
+  );
+}
+
+export function leaveMeeting(meetingUuid: string) {
+  return apiClient<unknown>(`/meetings/${meetingUuid}/members/me`, {
+    method: "DELETE",
+  });
+}
+
+export function completeMeeting(meetingUuid: string) {
+  return apiClient<unknown>(`/meetings/${meetingUuid}/complete`, {
+    method: "POST",
+  });
+}
+
+export function disbandMeeting(meetingUuid: string) {
+  return apiClient<unknown>(`/meetings/${meetingUuid}/disband`, {
+    method: "POST",
+  });
 }
