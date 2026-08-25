@@ -10,7 +10,6 @@ import { Dialog } from "@/components/common/Dialog";
 import { InputField } from "@/components/common/InputField";
 import { Modal } from "@/components/common/Modal";
 import { StatusMessage } from "@/components/common/StatusMessage";
-import { useGradeUpdateEvents } from "@/features/grade/hooks/useGradeUpdateEvents";
 import type {
   GradeCatalogItem,
   GradeCode,
@@ -844,7 +843,6 @@ export function MembershipPage() {
     message: "",
     error: "",
   });
-  useGradeUpdateEvents();
   const gradeQuery = useQuery({
     queryKey: ["grades", "me", "management"],
     queryFn: getMyGradeManagementPage,
