@@ -17,6 +17,7 @@ interface DialogProps {
   title: string;
   children: ReactNode;
   description?: string;
+  closeOnOverlayClick?: boolean;
 }
 
 export function Dialog({
@@ -25,6 +26,7 @@ export function Dialog({
   title,
   children,
   description,
+  closeOnOverlayClick = true,
 }: DialogProps): ReactElement | null {
   const titleId = useId();
   const descriptionId = useId();
@@ -61,7 +63,7 @@ export function Dialog({
   }
 
   const handleOverlayClick = (event: MouseEvent<HTMLDivElement>) => {
-    if (event.target === event.currentTarget) {
+    if (closeOnOverlayClick && event.target === event.currentTarget) {
       onClose();
     }
   };

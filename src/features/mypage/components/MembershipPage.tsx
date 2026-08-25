@@ -38,8 +38,12 @@ import {
   applyMembership,
   cancelMembershipSubscription,
   requestMembershipSettlement,
+  updateMembershipMonthlyPrice,
   validateMembershipApplication,
 } from "@/services/membership/membership";
+
+const TOKEN_TO_KRW = 100;
+const MIN_MONTHLY_TOKEN_PRICE = 1;
 
 const gradeEnglishNames: Record<GradeCode, string> = {
   ROOKIE: "Rookie",
@@ -221,7 +225,7 @@ function MembershipApplicationDialog({
         <InputField
           disabled={form.submitting}
           label="월 구독 금액(토큰)"
-          min={1}
+          min={MIN_MONTHLY_TOKEN_PRICE}
           onChange={(event) =>
             onChange({ ...form, monthlyPrice: event.target.value, error: "" })
           }
@@ -266,6 +270,117 @@ const initialSettlementForm: SettlementFormState = {
   submitting: false,
   error: "",
 };
+
+interface TokenSettingFormState {
+  open: boolean;
+  monthlyPrice: string;
+  submitting: boolean;
+  error: string;
+}
+
+const initialTokenSettingForm: TokenSettingFormState = {
+  open: false,
+  monthlyPrice: "",
+  submitting: false,
+  error: "",
+};
+
+function TokenSettingDialog({
+  form,
+  onChange,
+  onClose,
+  onSubmit,
+}: {
+  form: TokenSettingFormState;
+  onChange: (nextForm: TokenSettingFormState) => void;
+  onClose: () => void;
+  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+}) {
+  const monthlyPrice = Number(form.monthlyPrice);
+  const hasValidPrice =
+    Number.isInteger(monthlyPrice) && monthlyPrice >= MIN_MONTHLY_TOKEN_PRICE;
+  const convertedWon = hasValidPrice ? monthlyPrice * TOKEN_TO_KRW : 0;
+
+  return (
+    <Dialog
+      closeOnOverlayClick={false}
+      onClose={onClose}
+      open={form.open}
+      title="토큰 설정"
+    >
+      <form className="grid gap-5" onSubmit={onSubmit}>
+        <div className="grid gap-1.5">
+          <label
+            className="text-label-sm text-text-primary"
+            htmlFor="monthly-subscription-token"
+          >
+            월 구독 토큰
+          </label>
+          <div className="relative">
+            <input
+              className="h-12 w-full rounded-sm border border-line-default bg-surface-default px-4 pr-24 text-body-sm text-text-primary outline-none transition placeholder:text-text-disabled focus:border-brand-primary disabled:cursor-not-allowed disabled:bg-surface-page"
+              disabled={form.submitting}
+              id="monthly-subscription-token"
+              min={MIN_MONTHLY_TOKEN_PRICE}
+              onChange={(event) =>
+                onChange({
+                  ...form,
+                  monthlyPrice: event.target.value,
+                  error: "",
+                })
+              }
+              placeholder="40"
+              required
+              type="number"
+              value={form.monthlyPrice}
+            />
+            <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-body-sm text-text-disabled">
+              토큰 / 월
+            </span>
+          </div>
+          <p className="text-caption text-text-secondary">
+            구독자가 매달 지불할 토큰 금액을 설정해주세요. 최소{" "}
+            {MIN_MONTHLY_TOKEN_PRICE}토큰부터 설정 가능합니다.
+          </p>
+        </div>
+
+        <div className="grid gap-2">
+          <p className="text-label-sm text-text-primary">토큰 환산 금액</p>
+          <div className="flex flex-wrap items-center justify-between gap-2 text-body-sm">
+            <span className="text-text-secondary">
+              1토큰 = {TOKEN_TO_KRW.toLocaleString("ko-KR")}원 기준
+            </span>
+            <span className="font-semibold text-brand-primary">
+              {hasValidPrice
+                ? `${monthlyPrice.toLocaleString("ko-KR")}토큰 = ${convertedWon.toLocaleString("ko-KR")}원 / 월`
+                : "-"}
+            </span>
+          </div>
+        </div>
+
+        {form.error ? (
+          <p className="text-caption text-status-error" role="alert">
+            {form.error}
+          </p>
+        ) : null}
+
+        <div className="flex justify-end gap-2">
+          <Button
+            buttonStyle="secondary"
+            disabled={form.submitting}
+            onClick={onClose}
+            type="button"
+          >
+            취소
+          </Button>
+          <Button disabled={form.submitting} type="submit">
+            {form.submitting ? "설정 중..." : "설정하기"}
+          </Button>
+        </div>
+      </form>
+    </Dialog>
+  );
+}
 
 function SettlementRequestDialog({
   availableRevenue,
@@ -539,11 +654,21 @@ function CreatorMembershipOperationCard({
   revenue?: CreatorRevenueSummary;
   subscribers?: CreatorSubscribersSummary;
   onRevenueRequest?: () => void;
-  onTokenSetting?: () => void;
+  onTokenSetting: () => void;
 }) {
+  const [isRevenueRequesting, setIsRevenueRequesting] = useState(false);
+
   if (!isExplorerOrHigher || !hasApprovedCreatorMembership(membership)) {
     return null;
   }
+
+  const handleRevenueRequest = () => {
+    if (isRevenueRequesting) {
+      return;
+    }
+    setIsRevenueRequesting(true);
+    onRevenueRequest?.();
+  };
 
   return (
     <MyPageCard>
@@ -567,10 +692,11 @@ function CreatorMembershipOperationCard({
             </div>
           </dl>
           <Button
+            aria-haspopup="dialog"
             buttonStyle="secondary"
-            disabled={!onTokenSetting}
-            onClick={onTokenSetting}
+            onClick={() => onTokenSetting()}
             size="sm"
+            type="button"
           >
             토큰 설정
           </Button>
@@ -604,13 +730,18 @@ function CreatorMembershipOperationCard({
 
         <div className="mt-7 flex justify-end">
           <Button
-            disabled={!onRevenueRequest}
+            className={
+              isRevenueRequesting
+                ? "bg-gray-500 text-text-inverse hover:bg-gray-500 disabled:bg-gray-500 disabled:text-text-inverse"
+                : undefined
+            }
+            disabled={isRevenueRequesting}
             icon="left"
             iconComponent={WalletCards}
-            onClick={onRevenueRequest}
+            onClick={handleRevenueRequest}
             size="sm"
           >
-            수익 신청하기
+            {isRevenueRequesting ? "신청중.." : "수익 신청하기"}
           </Button>
         </div>
       </div>
@@ -837,6 +968,8 @@ export function MembershipPage() {
   const [settlementForm, setSettlementForm] = useState<SettlementFormState>(
     initialSettlementForm
   );
+  const [tokenSettingForm, setTokenSettingForm] =
+    useState<TokenSettingFormState>(initialTokenSettingForm);
   const [action, setAction] = useState({
     cancelTarget: null as string | null,
     cancelling: false,
@@ -884,10 +1017,10 @@ export function MembershipPage() {
       return;
     }
 
-    if (monthlyPrice <= 0) {
+    if (monthlyPrice < MIN_MONTHLY_TOKEN_PRICE) {
       setApplicationForm((current) => ({
         ...current,
-        error: "월 구독 금액은 1토큰 이상이어야 합니다.",
+        error: `월 구독 금액은 ${MIN_MONTHLY_TOKEN_PRICE}토큰 이상이어야 합니다.`,
       }));
       return;
     }
@@ -962,6 +1095,78 @@ export function MembershipPage() {
   const closeSettlementDialog = () => {
     if (!settlementForm.submitting) {
       setSettlementForm(initialSettlementForm);
+    }
+  };
+
+  const closeTokenSettingDialog = () => {
+    if (!tokenSettingForm.submitting) {
+      setTokenSettingForm(initialTokenSettingForm);
+    }
+  };
+
+  const openTokenSettingDialog = () => {
+    const currentPrice = membershipDashboard.membership?.monthlyPrice;
+    setTokenSettingForm({
+      open: true,
+      monthlyPrice:
+        currentPrice && currentPrice > 0 ? String(currentPrice) : "40",
+      submitting: false,
+      error: "",
+    });
+  };
+
+  const handleTokenSettingSubmit = async (
+    event: FormEvent<HTMLFormElement>
+  ) => {
+    event.preventDefault();
+    const monthlyPrice = Number(tokenSettingForm.monthlyPrice);
+
+    if (
+      !Number.isInteger(monthlyPrice) ||
+      monthlyPrice < MIN_MONTHLY_TOKEN_PRICE
+    ) {
+      setTokenSettingForm((current) => ({
+        ...current,
+        error: `월 구독 토큰은 최소 ${MIN_MONTHLY_TOKEN_PRICE}토큰부터 설정 가능합니다.`,
+      }));
+      return;
+    }
+
+    setTokenSettingForm((current) => ({
+      ...current,
+      submitting: true,
+      error: "",
+    }));
+
+    try {
+      const updatedMembership =
+        await updateMembershipMonthlyPrice(monthlyPrice);
+      queryClient.setQueryData<MyCreatorMembership>(
+        membershipQueryKeys.me,
+        (current) =>
+          current
+            ? {
+                ...current,
+                monthlyPrice: updatedMembership.monthlyPrice,
+                priceUnit: updatedMembership.priceUnit,
+              }
+            : current
+      );
+      setTokenSettingForm(initialTokenSettingForm);
+      setAction((current) => ({
+        ...current,
+        message: "월 구독 토큰이 설정되었습니다.",
+        error: "",
+      }));
+    } catch (tokenSettingError) {
+      setTokenSettingForm((current) => ({
+        ...current,
+        submitting: false,
+        error:
+          tokenSettingError instanceof Error
+            ? tokenSettingError.message
+            : "토큰 설정에 실패했습니다.",
+      }));
     }
   };
 
@@ -1088,12 +1293,10 @@ export function MembershipPage() {
       <CreatorMembershipOperationCard
         isExplorerOrHigher={isExplorerOrHigher}
         membership={membershipDashboard.membership}
-        onRevenueRequest={
-          membershipDashboard.revenue &&
-          membershipDashboard.revenue.availableRevenue > 0
-            ? () => setSettlementForm((current) => ({ ...current, open: true }))
-            : undefined
+        onRevenueRequest={() =>
+          setSettlementForm((current) => ({ ...current, open: true }))
         }
+        onTokenSetting={openTokenSettingDialog}
         revenue={membershipDashboard.revenue}
         subscribers={membershipDashboard.subscribers}
       />
@@ -1125,6 +1328,13 @@ export function MembershipPage() {
         onChange={setApplicationForm}
         onClose={closeApplicationDialog}
         onSubmit={(event) => void handleApplicationSubmit(event)}
+      />
+
+      <TokenSettingDialog
+        form={tokenSettingForm}
+        onChange={setTokenSettingForm}
+        onClose={closeTokenSettingDialog}
+        onSubmit={(event) => void handleTokenSettingSubmit(event)}
       />
 
       <SettlementRequestDialog
