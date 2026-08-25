@@ -231,88 +231,90 @@ export function LoginPage() {
   };
 
   return (
-    <section className="flex flex-col items-center bg-surface-default px-6 pb-16">
-      <AuthHero
-        description="AI 일정 생성 · 여행 기록 · 여행 스토리 · 함께하는 모임"
-        eyebrow="BOARDING PASS"
-        title="login"
-      />
-
-      <form
-        className="mt-8 flex w-full max-w-[400px] flex-col items-center gap-6"
-        onSubmit={onSubmit}
-      >
-        <InputField
-          autoComplete="email"
-          error={form.formState.errors.email?.message}
-          label="이메일"
-          placeholder="example@planwith.you"
-          type="email"
-          {...form.register("email")}
+    <section className="flex flex-col items-center bg-surface-default px-6">
+      <div className="flex w-full flex-col items-center pb-10">
+        <AuthHero
+          description="AI 일정 생성 · 여행 기록 · 여행 스토리 · 함께하는 모임"
+          eyebrow="BOARDING PASS"
+          title="login"
         />
-        <div className="grid w-full gap-2">
-          <InputField
-            autoComplete="current-password"
-            error={form.formState.errors.password?.message}
-            label="비밀번호"
-            placeholder="********"
-            type="password"
-            {...form.register("password")}
-          />
-          <AuthCheckbox
-            checked={rememberEmail}
-            label="아이디 저장"
-            onChange={(checked) => {
-              setRememberEmail(checked);
-              form.setValue("rememberEmail", checked);
-            }}
-          />
-        </div>
 
-        {request.error ? (
-          <p
-            className="w-full text-center text-caption text-status-error"
-            role="alert"
-          >
-            {apiError}
-          </p>
-        ) : null}
-
-        <Button
-          className="w-[200px] tracking-[1.5px]"
-          disabled={request.submitting}
-          type="submit"
+        <form
+          className="mt-8 flex w-full max-w-[400px] flex-col items-center gap-6"
+          onSubmit={onSubmit}
         >
-          탑승 하기
-        </Button>
-      </form>
+          <InputField
+            autoComplete="email"
+            error={form.formState.errors.email?.message}
+            label="이메일"
+            placeholder="example@planwith.you"
+            type="email"
+            {...form.register("email")}
+          />
+          <div className="grid w-full gap-2">
+            <InputField
+              autoComplete="current-password"
+              error={form.formState.errors.password?.message}
+              label="비밀번호"
+              placeholder="********"
+              type="password"
+              {...form.register("password")}
+            />
+            <AuthCheckbox
+              checked={rememberEmail}
+              label="아이디 저장"
+              onChange={(checked) => {
+                setRememberEmail(checked);
+                form.setValue("rememberEmail", checked);
+              }}
+            />
+          </div>
 
-      <div className="mt-8 flex w-full max-w-[464px] items-center gap-4 py-8">
-        <span className="h-px flex-1 bg-line-light" />
-        <p className="text-body-sm text-text-tertiary/50">또는 간편 로그인</p>
-        <span className="h-px flex-1 bg-line-light" />
-      </div>
+          {request.error ? (
+            <p
+              className="w-full text-center text-caption text-status-error"
+              role="alert"
+            >
+              {apiError}
+            </p>
+          ) : null}
 
-      <SocialLoginButtons
-        disabled={request.submitting}
-        onSelect={handleSocial}
-      />
+          <Button
+            className="w-[200px] tracking-[1.5px]"
+            disabled={request.submitting}
+            type="submit"
+          >
+            탑승 하기
+          </Button>
+        </form>
 
-      <div className="mt-4 flex flex-col items-center gap-2 py-2">
-        <div className="flex items-center gap-2 text-body-md text-text-disabled">
-          <Link className="p-2" href="/find-email">
-            아이디 찾기
-          </Link>
-          <Link className="p-2" href="/reset-password">
-            비밀번호 찾기
-          </Link>
+        <div className="mt-8 flex w-full max-w-[464px] items-center gap-4 py-8">
+          <span className="h-px flex-1 bg-line-light" />
+          <p className="text-body-sm text-text-tertiary/50">또는 간편 로그인</p>
+          <span className="h-px flex-1 bg-line-light" />
         </div>
-        <p className="text-body-sm text-text-disabled">
-          아직 회원이 아니신가요?{" "}
-          <Link className="text-body-md font-bold underline" href="/signup">
-            회원가입
-          </Link>
-        </p>
+
+        <SocialLoginButtons
+          disabled={request.submitting}
+          onSelect={handleSocial}
+        />
+
+        <div className="mt-4 flex flex-col items-center gap-2 py-2">
+          <div className="flex items-center gap-2 text-body-md text-text-disabled">
+            <Link className="p-2" href="/find-email">
+              아이디 찾기
+            </Link>
+            <Link className="p-2" href="/reset-password">
+              비밀번호 찾기
+            </Link>
+          </div>
+          <p className="text-body-sm text-text-disabled">
+            아직 회원이 아니신가요?{" "}
+            <Link className="text-body-md font-bold underline" href="/signup">
+              회원가입
+            </Link>
+          </p>
+        </div>
       </div>
     </section>
   );

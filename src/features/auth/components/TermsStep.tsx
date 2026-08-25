@@ -63,14 +63,14 @@ export function TermsStep({
   return (
     <div className="flex w-full max-w-[724px] flex-col items-center">
       <SignupStepper currentStep={1} />
-      <h1 className="mt-8 text-[29px] font-extrabold text-gray-900">
+      <h1 className="mt-8 text-[29px] font-extrabold text-text-primary">
         약관 동의
       </h1>
       <p className="mt-2 text-body-sm text-text-tertiary">
         서비스 이용을 위해 아래 약관에 동의해주세요
       </p>
 
-      <div className="mt-12 w-full">
+      <div className="mt-16 w-full">
         <div className="flex h-11 items-center">
           <AuthCheckbox
             checked={allSelected}
@@ -79,7 +79,7 @@ export function TermsStep({
           />
         </div>
 
-        <div className="mt-1 grid">
+        <div className="mx-auto mt-1 grid w-full max-w-[684px]">
           <div className="flex h-10 items-center justify-between gap-2">
             <AuthCheckbox
               checked={over14}
@@ -117,7 +117,7 @@ export function TermsStep({
           ))}
         </div>
 
-        <div className="mt-12 rounded-lg border-[1.5px] border-line-light px-6 py-4">
+        <div className="mx-auto mt-12 w-full max-w-[684px] rounded-lg border-[1.5px] border-line-light px-6 py-4">
           <p className="text-body-sm font-semibold text-text-tertiary">
             광고성 정보 수신 동의 (선택)
           </p>
