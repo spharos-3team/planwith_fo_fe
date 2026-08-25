@@ -29,9 +29,11 @@ export function meetingStatusLabel(status: MeetingStatus | string): string {
     case "RECRUITING":
       return "모집중";
     case "FULL":
-      return "모집완료";
+      return "모집 중단";
     case "COMPLETED":
-      return "완료";
+      return "모집 완료";
+    case "DISBANDED":
+      return "모임 해체";
     default:
       return status;
   }
@@ -39,12 +41,12 @@ export function meetingStatusLabel(status: MeetingStatus | string): string {
 
 export function meetingStatusTone(
   status: MeetingStatus | string
-): "blue" | "gray" | "green" {
+): "blue" | "orange" | "green" | "gray" {
   switch (status) {
     case "RECRUITING":
       return "blue";
     case "FULL":
-      return "gray";
+      return "orange";
     case "COMPLETED":
       return "green";
     default:
@@ -52,8 +54,33 @@ export function meetingStatusTone(
   }
 }
 
-export function isHttpUrl(value: string | null): boolean {
+export function isHttpUrl(value: string | null | undefined): value is string {
   return Boolean(value && /^https?:\/\//i.test(value));
+}
+
+export const MY_MEETING_STATUS_ORDER: MeetingStatus[] = [
+  "RECRUITING",
+  "FULL",
+  "COMPLETED",
+];
+
+export function groupMeetingsByStatus<
+  T extends { status: MeetingStatus | string },
+>(items: T[]): { status: MeetingStatus | string; items: T[] }[] {
+  const groups: { status: MeetingStatus | string; items: T[] }[] =
+    MY_MEETING_STATUS_ORDER.map((status) => ({
+      status,
+      items: items.filter((item) => item.status === status),
+    })).filter((group) => group.items.length > 0);
+
+  const known = new Set<string>(MY_MEETING_STATUS_ORDER);
+  const rest = items.filter((item) => !known.has(item.status));
+
+  if (rest.length > 0) {
+    groups.push({ status: rest[0].status, items: rest });
+  }
+
+  return groups;
 }
 
 function toDotDate(isoDate: string): string {

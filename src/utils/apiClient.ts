@@ -98,8 +98,12 @@ export async function authenticatedFetch(
   const headers = new Headers(init.headers);
   const token = getAccessToken();
 
-  if (token && !headers.has("Authorization")) {
+  if (token) {
     headers.set("Authorization", `Bearer ${token}`);
+    headers.set("X-Planwith-Access-Token", token);
+  } else {
+    headers.delete("Authorization");
+    headers.delete("X-Planwith-Access-Token");
   }
 
   const response = await fetch(resolveApiUrl(path), {
@@ -112,10 +116,17 @@ export async function authenticatedFetch(
     const nextToken = await refreshAccessToken();
 
     if (nextToken) {
-      return authenticatedFetch(path, init, {
-        ...options,
-        skipAuthRefresh: true,
-      });
+      const retryHeaders = new Headers(init.headers);
+      retryHeaders.delete("Authorization");
+      retryHeaders.delete("X-Planwith-Access-Token");
+      return authenticatedFetch(
+        path,
+        { ...init, headers: retryHeaders },
+        {
+          ...options,
+          skipAuthRefresh: true,
+        }
+      );
     }
   }
 
