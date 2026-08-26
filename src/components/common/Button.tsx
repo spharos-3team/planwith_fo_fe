@@ -7,7 +7,8 @@ import {
 } from "react";
 
 type ButtonSize = "sm" | "md" | "lg";
-type ButtonStyle = "primary" | "secondary" | "ghost" | "danger" | "inverse";
+type ButtonStyle =
+  "primary" | "secondary" | "ghost" | "danger" | "dangerOutline" | "inverse";
 type ButtonIcon = "none" | "left";
 
 const sizeClasses: Record<ButtonSize, string> = {
@@ -25,6 +26,8 @@ const styleClasses: Record<ButtonStyle, string> = {
     "bg-transparent text-text-primary hover:bg-surface-page disabled:text-text-disabled",
   danger:
     "bg-status-error text-text-inverse hover:bg-status-error/90 disabled:bg-status-error/40",
+  dangerOutline:
+    "border border-status-error bg-transparent text-status-error hover:bg-status-error/10 disabled:border-line-light disabled:text-text-disabled",
   inverse:
     "bg-surface-default text-text-primary hover:bg-surface-page disabled:bg-surface-default/60 disabled:text-text-disabled",
 };

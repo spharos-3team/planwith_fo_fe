@@ -123,7 +123,13 @@ export async function proxyGatewayRequest(
   };
 
   if (request.method !== "GET" && request.method !== "HEAD") {
-    init.body = await request.arrayBuffer();
+    const body = await request.arrayBuffer();
+    if (body.byteLength > 0) {
+      init.body = body;
+    } else {
+      headers.delete("content-type");
+      headers.delete("content-length");
+    }
   }
 
   try {
@@ -137,14 +143,20 @@ export async function proxyGatewayRequest(
       responseHeaders.set(key, value);
     });
 
-    const responseBody =
-      request.method === "HEAD" || NULL_BODY_STATUSES.has(upstream.status)
-        ? null
-        : await upstream.arrayBuffer();
-    const response = new NextResponse(responseBody, {
-      status: upstream.status,
-      headers: responseHeaders,
-    });
+    const emptyBody =
+      request.method === "HEAD" || NULL_BODY_STATUSES.has(upstream.status);
+    if (emptyBody) {
+      responseHeaders.delete("content-length");
+      responseHeaders.delete("content-type");
+    }
+
+    const response = new NextResponse(
+      emptyBody ? null : await upstream.arrayBuffer(),
+      {
+        status: upstream.status,
+        headers: responseHeaders,
+      }
+    );
 
     if (typeof upstream.headers.getSetCookie === "function") {
       upstream.headers.getSetCookie().forEach((cookie) => {

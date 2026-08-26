@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 
 import { StatusMessage } from "@/components/common/StatusMessage";
 import { useAuth } from "@/features/auth/context/AuthProvider";
+import { redirectAfterAuth } from "@/features/auth/lib/return-path";
 import {
   completeSocialLogin,
   isOAuthPopupMessage,
@@ -92,7 +93,7 @@ export function SocialCallbackPage({ provider }: { provider: string }) {
         if (cancelled) {
           return;
         }
-        router.replace(next === "signup" ? "/signup" : "/");
+        redirectAfterAuth(router.replace, next);
       } catch (loginError: unknown) {
         if (!cancelled) {
           setError(

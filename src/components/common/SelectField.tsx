@@ -13,6 +13,7 @@ interface SelectFieldProps extends SelectHTMLAttributes<HTMLSelectElement> {
   options: SelectOption[];
   placeholder?: string;
   showLabel?: boolean;
+  wrapperClassName?: string;
 }
 
 export function SelectField({
@@ -21,6 +22,7 @@ export function SelectField({
   options,
   placeholder,
   showLabel = Boolean(label),
+  wrapperClassName,
   className = "",
   disabled,
   id: idProp,
@@ -45,7 +47,7 @@ export function SelectField({
     .join(" ");
 
   return (
-    <div className="grid w-full gap-1.5">
+    <div className={["grid gap-1.5", wrapperClassName ?? "w-full"].join(" ")}>
       {showLabel && label && (
         <label className="text-label-sm text-text-primary" htmlFor={selectId}>
           {label}
