@@ -237,7 +237,7 @@ export function MeetingDetailPage({ meetingUuid }: MeetingDetailPageProps) {
         <div className="mt-6 text-center">
           <Link
             className="text-body-sm font-semibold text-brand-primary hover:underline"
-            href="/meetings"
+            href="/community/meeting"
           >
             모임 목록으로 돌아가기
           </Link>
@@ -286,7 +286,7 @@ export function MeetingDetailPage({ meetingUuid }: MeetingDetailPageProps) {
   const hostImage = isHost
     ? (profile?.profileImage ?? hostProfileQuery.data?.profileImage ?? null)
     : (hostProfileQuery.data?.profileImage ?? null);
-  const membersHref = `/meetings/${meeting.meetingUuid}/members`;
+  const membersHref = `/community/meeting/${meeting.meetingUuid}/members`;
   const chatHref = isCompleted
     ? `/chat?meetingUuid=${meeting.meetingUuid}&readonly=1`
     : `/chat?meetingUuid=${meeting.meetingUuid}`;
@@ -323,11 +323,11 @@ export function MeetingDetailPage({ meetingUuid }: MeetingDetailPageProps) {
           aria-label="breadcrumb"
           className="flex items-center gap-2 text-caption text-text-secondary"
         >
-          <Link className="hover:text-text-primary" href="/meetings">
+          <Link className="hover:text-text-primary" href="/community/meeting">
             커뮤니티
           </Link>
           <span aria-hidden="true">&gt;</span>
-          <Link className="hover:text-text-primary" href="/meetings">
+          <Link className="hover:text-text-primary" href="/community/meeting">
             모임
           </Link>
           <span aria-hidden="true">&gt;</span>
@@ -462,7 +462,7 @@ export function MeetingDetailPage({ meetingUuid }: MeetingDetailPageProps) {
                   {isCompleted ? null : (
                     <Link
                       className={ACTION_LINK_SECONDARY}
-                      href={`/meetings/${meeting.meetingUuid}/edit`}
+                      href={`/community/meeting/${meeting.meetingUuid}/edit`}
                     >
                       모임 수정
                     </Link>

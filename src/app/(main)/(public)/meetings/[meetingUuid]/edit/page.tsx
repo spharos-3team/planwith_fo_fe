@@ -1,20 +1,13 @@
-import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 
-import { MeetingEditorPage } from "@/features/meeting/components/MeetingEditorPage";
-
-export const metadata: Metadata = {
-  title: "모임 수정",
-  description: "모임 소개와 일정, 대표 사진을 수정하세요.",
-};
-
-interface EditMeetingRouteProps {
+interface LegacyEditMeetingRouteProps {
   params: Promise<{ meetingUuid: string }>;
 }
 
-export default async function EditMeetingRoutePage({
+export default async function LegacyEditMeetingRoutePage({
   params,
-}: EditMeetingRouteProps) {
+}: LegacyEditMeetingRouteProps) {
   const { meetingUuid } = await params;
 
-  return <MeetingEditorPage meetingUuid={meetingUuid} mode="edit" />;
+  redirect(`/community/meeting/${meetingUuid}/edit`);
 }
