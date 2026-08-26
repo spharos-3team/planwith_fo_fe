@@ -17,6 +17,8 @@ const HOP_BY_HOP = new Set([
   "upgrade",
 ]);
 
+const NULL_BODY_STATUSES = new Set([101, 204, 205, 304]);
+
 function gatewayOrigin(): string {
   const raw = (process.env.GATEWAY_URL ?? "http://127.0.0.1:8000").replace(
     /\/$/,
@@ -141,20 +143,20 @@ export async function proxyGatewayRequest(
       responseHeaders.set(key, value);
     });
 
-    const emptyBodyStatus =
-      upstream.status === 204 ||
-      upstream.status === 205 ||
-      upstream.status === 304;
-    const upstreamBody = await upstream.arrayBuffer();
-    if (emptyBodyStatus) {
+    const emptyBody =
+      request.method === "HEAD" || NULL_BODY_STATUSES.has(upstream.status);
+    if (emptyBody) {
       responseHeaders.delete("content-length");
       responseHeaders.delete("content-type");
     }
 
-    const response = new NextResponse(emptyBodyStatus ? null : upstreamBody, {
-      status: upstream.status,
-      headers: responseHeaders,
-    });
+    const response = new NextResponse(
+      emptyBody ? null : await upstream.arrayBuffer(),
+      {
+        status: upstream.status,
+        headers: responseHeaders,
+      }
+    );
 
     if (typeof upstream.headers.getSetCookie === "function") {
       upstream.headers.getSetCookie().forEach((cookie) => {
