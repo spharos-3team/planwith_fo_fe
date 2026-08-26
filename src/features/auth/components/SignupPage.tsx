@@ -8,6 +8,7 @@ import { TermsStep } from "@/features/auth/components/TermsStep";
 import { VerificationStep } from "@/features/auth/components/VerificationStep";
 import { useAuth } from "@/features/auth/context/AuthProvider";
 import { hasPhoneVerificationRedirect } from "@/features/auth/lib/phone-verification";
+import { redirectAfterAuth } from "@/features/auth/lib/return-path";
 import {
   getPendingSocialSignup,
   getSignupDraft,
@@ -170,7 +171,7 @@ export function SignupPage() {
         await uploadProfileImage(state.profileImageFile);
       }
 
-      router.replace("/");
+      redirectAfterAuth(router.replace, "home");
     } catch (error) {
       patch({
         submitting: false,

@@ -19,12 +19,27 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 
 import { Button } from "@/components/common/Button";
 import { InputField } from "@/components/common/InputField";
+import { useAuth } from "@/features/auth/context/AuthProvider";
+import { setReturnPath } from "@/features/auth/lib/return-path";
+import {
+  AI_APPLICATION_PATH,
+  AI_APPLICATION_STEPS,
+  type AiApplicationDraft,
+  type AiApplicationValues,
+  beginAiApplicationDraft,
+  emptyAiApplicationValues,
+  loadAiApplicationDraft,
+  markAiApplicationGenerating,
+  saveAiApplicationDraft,
+  saveAiGenerateRequest,
+  subscribeAiApplicationDraft,
+  toAiGeneratePayload,
+} from "@/features/schedule/lib/ai-application";
 
-const TOTAL_STEPS = 7;
 const suggestedTags = ["tokyo", "newyork", "busan"] as const;
 const destinationSuggestions = [
   "독일",
@@ -50,19 +65,7 @@ const styleOptions = [
 ] as const;
 
 type NumericField = "people" | "budget";
-
-interface ApplicationValues {
-  destination: string;
-  includeFlight: boolean;
-  departure: string;
-  startDate: { year: number; month: number; day: number };
-  endDate: { year: number; month: number; day: number };
-  people: string;
-  budget: string;
-  transports: string[];
-  styles: string[];
-  request: string;
-}
+type ApplicationValues = AiApplicationValues;
 
 const glassInputClass =
   "h-[53px] border-0 bg-white/16 text-body-md text-text-inverse placeholder:text-white/75 focus:border-white/40";
@@ -70,20 +73,21 @@ const glassInputClass =
 function StepIndicator({ step }: { step: number }) {
   return (
     <ol
-      aria-label={`전체 ${TOTAL_STEPS}단계 중 ${step}단계`}
+      aria-label={`전체 ${AI_APPLICATION_STEPS}단계 중 ${step}단계`}
       className="flex items-center gap-2"
     >
-      {Array.from({ length: TOTAL_STEPS }, (_, index) => index + 1).map(
-        (item) => (
-          <li
-            aria-current={item === step ? "step" : undefined}
-            className={`h-2 rounded-full transition-all ${
-              item === step ? "w-7 bg-text-inverse" : "w-2 bg-white/45"
-            }`}
-            key={item}
-          />
-        )
-      )}
+      {Array.from(
+        { length: AI_APPLICATION_STEPS },
+        (_, index) => index + 1
+      ).map((item) => (
+        <li
+          aria-current={item === step ? "step" : undefined}
+          className={`h-2 rounded-full transition-all ${
+            item === step ? "w-7 bg-text-inverse" : "w-2 bg-white/45"
+          }`}
+          key={item}
+        />
+      ))}
     </ol>
   );
 }
@@ -208,24 +212,48 @@ function NumericKeypad({ onKey }: { onKey: (key: string) => void }) {
 }
 
 export function ScheduleApplicationForm() {
+  const draft = useSyncExternalStore(
+    subscribeAiApplicationDraft,
+    loadAiApplicationDraft,
+    () => null
+  );
+
+  return (
+    <ScheduleApplicationFormFields
+      initial={draft}
+      key={draft ? "restored" : "fresh"}
+    />
+  );
+}
+
+function ScheduleApplicationFormFields({
+  initial,
+}: {
+  initial: AiApplicationDraft | null;
+}) {
   const router = useRouter();
+  const { status, isAuthenticated } = useAuth();
+  const skipPersist = useRef(true);
   const [flow, setFlow] = useState({
-    step: 1,
+    step: Math.min(AI_APPLICATION_STEPS, Math.max(1, initial?.step ?? 1)),
     error: "",
     numericField: "people" as NumericField,
   });
-  const [values, setValues] = useState<ApplicationValues>({
-    destination: "",
-    includeFlight: false,
-    departure: "",
-    startDate: { year: 2026, month: 8, day: 1 },
-    endDate: { year: 2026, month: 8, day: 1 },
-    people: "",
-    budget: "",
-    transports: [],
-    styles: [],
-    request: "",
-  });
+  const [values, setValues] = useState<ApplicationValues>(
+    () => initial?.values ?? emptyAiApplicationValues()
+  );
+
+  useEffect(() => {
+    beginAiApplicationDraft();
+  }, []);
+
+  useEffect(() => {
+    if (skipPersist.current) {
+      skipPersist.current = false;
+      return;
+    }
+    saveAiApplicationDraft({ step: flow.step, values });
+  }, [flow.step, values]);
 
   const update = <Key extends keyof ApplicationValues>(
     key: Key,
@@ -270,8 +298,20 @@ export function ScheduleApplicationForm() {
       setFlow((current) => ({ ...current, error }));
       return;
     }
-    if (flow.step === TOTAL_STEPS) {
-      router.push("/login");
+    if (flow.step === AI_APPLICATION_STEPS) {
+      saveAiGenerateRequest(toAiGeneratePayload(values));
+      saveAiApplicationDraft({ step: AI_APPLICATION_STEPS, values });
+      if (status === "initializing") {
+        return;
+      }
+      if (isAuthenticated) {
+        markAiApplicationGenerating();
+        const generationId = crypto.randomUUID();
+        router.push(`/schedules/ai/${generationId}/generating`);
+        return;
+      }
+      setReturnPath(AI_APPLICATION_PATH);
+      router.push(`/login?next=${encodeURIComponent(AI_APPLICATION_PATH)}`);
       return;
     }
     setFlow((current) => ({ ...current, step: current.step + 1, error: "" }));
@@ -478,7 +518,7 @@ export function ScheduleApplicationForm() {
             </div>
           ) : null}
 
-          {flow.step === 7 ? (
+          {flow.step === AI_APPLICATION_STEPS ? (
             <div className="w-full max-w-2xl">
               <span className="mx-auto grid size-14 place-items-center rounded-circle bg-white/12 text-brand-primary">
                 <Sparkles aria-hidden="true" className="h-7 w-7" />
@@ -522,10 +562,19 @@ export function ScheduleApplicationForm() {
           ) : null}
           <Button
             className="h-[45px] min-w-[130px] bg-white/30 hover:bg-white/40"
+            disabled={
+              flow.step === AI_APPLICATION_STEPS && status === "initializing"
+            }
             onClick={next}
             pill
           >
-            {flow.step === TOTAL_STEPS ? "LOGIN" : "NEXT"}
+            {flow.step === AI_APPLICATION_STEPS
+              ? status === "initializing"
+                ? "확인 중"
+                : isAuthenticated
+                  ? "AI 일정생성"
+                  : "로그인하기"
+              : "NEXT"}
           </Button>
         </div>
 

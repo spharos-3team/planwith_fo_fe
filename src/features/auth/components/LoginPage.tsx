@@ -13,6 +13,10 @@ import { AuthHero } from "@/features/auth/components/AuthHero";
 import { SocialLoginButtons } from "@/features/auth/components/SocialLoginButtons";
 import { useAuth } from "@/features/auth/context/AuthProvider";
 import {
+  captureReturnPathFromLocation,
+  redirectAfterAuth,
+} from "@/features/auth/lib/return-path";
+import {
   completeSocialLogin,
   consumeOAuthPopupMessage,
   isOAuthPopupMessage,
@@ -51,6 +55,10 @@ export function LoginPage() {
       rememberEmail: false,
     },
   });
+
+  useEffect(() => {
+    captureReturnPathFromLocation();
+  }, []);
 
   useEffect(() => {
     const remembered = getSavedEmail();
@@ -106,7 +114,7 @@ export function LoginPage() {
         message.state
       )
         .then((next) => {
-          router.replace(next === "signup" ? "/signup" : "/");
+          redirectAfterAuth(router.replace, next);
         })
         .catch((loginError: unknown) => {
           setRequest({
@@ -171,7 +179,7 @@ export function LoginPage() {
     try {
       await login(values.email, values.password);
       setSavedEmail(rememberEmail ? values.email : null);
-      router.replace("/");
+      redirectAfterAuth(router.replace, "home");
     } catch (error) {
       setRequest({
         submitting: false,

@@ -5,6 +5,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { type ReactNode, useState } from "react";
 
 import { AuthProvider } from "@/features/auth/context/AuthProvider";
+import { ApiClientError } from "@/utils/apiClient";
 
 interface ProvidersProps {
   children: ReactNode;
@@ -17,7 +18,12 @@ export function Providers({ children }: ProvidersProps) {
         defaultOptions: {
           queries: {
             staleTime: 60_000,
-            retry: 1,
+            retry: (failureCount, error) => {
+              if (error instanceof ApiClientError && error.status === 404) {
+                return false;
+              }
+              return failureCount < 1;
+            },
             refetchOnWindowFocus: false,
           },
         },

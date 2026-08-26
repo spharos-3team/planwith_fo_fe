@@ -121,7 +121,13 @@ export async function proxyGatewayRequest(
   };
 
   if (request.method !== "GET" && request.method !== "HEAD") {
-    init.body = await request.arrayBuffer();
+    const body = await request.arrayBuffer();
+    if (body.byteLength > 0) {
+      init.body = body;
+    } else {
+      headers.delete("content-type");
+      headers.delete("content-length");
+    }
   }
 
   try {
@@ -135,7 +141,17 @@ export async function proxyGatewayRequest(
       responseHeaders.set(key, value);
     });
 
-    const response = new NextResponse(await upstream.arrayBuffer(), {
+    const emptyBodyStatus =
+      upstream.status === 204 ||
+      upstream.status === 205 ||
+      upstream.status === 304;
+    const upstreamBody = await upstream.arrayBuffer();
+    if (emptyBodyStatus) {
+      responseHeaders.delete("content-length");
+      responseHeaders.delete("content-type");
+    }
+
+    const response = new NextResponse(emptyBodyStatus ? null : upstreamBody, {
       status: upstream.status,
       headers: responseHeaders,
     });
