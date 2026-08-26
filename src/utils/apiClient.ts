@@ -19,6 +19,7 @@ export class ApiClientError extends Error {
 interface ApiClientOptions {
   skipAuthRefresh?: boolean;
   allowEmpty?: boolean;
+  quiet?: boolean;
 }
 
 interface RawApiError {
@@ -178,7 +179,9 @@ export async function apiClient<T>(
             body?.error?.code ? ` ${body.error.code}` : ""
           })`;
 
-    console.error("[apiClient]", requestUrl, response.status, body);
+    if (!options.quiet) {
+      console.error("[apiClient]", requestUrl, response.status, body);
+    }
 
     throw new ApiClientError(
       response.status,
