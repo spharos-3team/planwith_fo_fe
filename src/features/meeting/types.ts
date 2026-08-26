@@ -89,6 +89,33 @@ export interface ApplyMeetingPayload {
   message?: string | null;
 }
 
+export interface CreateMeetingPayload {
+  scheduleUuid: string;
+  title: string;
+  intro: string;
+  maxMemberCount: number;
+}
+
+export interface UpdateMeetingPayload {
+  scheduleUuid?: string;
+  title?: string;
+  intro?: string;
+  maxMemberCount?: number;
+}
+
+export interface MeetingWriteResult {
+  meetingUuid: string;
+  memberUuid: string;
+  scheduleUuid: string | null;
+  title: string;
+  intro: string | null;
+  maxMemberCount: number;
+  currentMemberCount: number;
+  status: MeetingStatus | string;
+  coverImage: string | null;
+  createdAt: string;
+}
+
 export interface MeetingMember {
   memberUuid: string;
   role: MeetingRole | string;
