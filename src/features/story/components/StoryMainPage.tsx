@@ -1,4 +1,4 @@
-import { Search } from "lucide-react";
+import { CalendarDays, Eye, Heart, MessageCircle, Search } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -18,6 +18,102 @@ const storyTabs = [
 
 export type StorySort = (typeof storyTabs)[number]["value"];
 
+const recommendedStories = [
+  {
+    image: "/images/story/recommended-tokyo.png",
+    title: "여러분 놓치지 말고 도쿄 여행",
+  },
+  {
+    image: "/images/story/recommended-busan.png",
+    title: "광안리 맛집 모음집!",
+  },
+  {
+    image: "/images/story/recommended-osaka.png",
+    title: "쓰러지게 먹어보기",
+  },
+] as const;
+
+const popularCreators = [
+  {
+    image: "/images/story/creator-sky.png",
+    name: "하늘여행자",
+  },
+  {
+    image: "/images/story/creator-ocean.png",
+    name: "뷰티소영",
+  },
+  {
+    image: "/images/story/creator-wellness.png",
+    name: "건강한미소",
+  },
+  {
+    image: "/images/story/creator-fashion.png",
+    name: "패션리즈",
+  },
+  {
+    image: "/images/story/creator-food.png",
+    name: "요리왕루시",
+  },
+] as const;
+
+const latestStories = [
+  {
+    category: "일본 · 오사카",
+    creator: "초밥러버",
+    date: "2026.03.11",
+    image: "/images/story/latest-osaka-sushi.png",
+    title: "오사카 가성비 미슐랭 스시집 미도리 솔직한 평가",
+    likes: "368",
+    comments: "32",
+    views: "1.2K",
+    featured: true,
+  },
+  {
+    category: "프랑스 · 파리",
+    creator: "유럽방랑객",
+    date: "2026.03.08",
+    image: "/images/story/latest-paris.png",
+    title: "에펠탑 인생샷 명소 스팟 TOP 3 & 피해야 할 명소 정리",
+    likes: "368",
+    comments: "32",
+    views: "1.2K",
+    featured: false,
+  },
+  {
+    category: "태국 · 방콕",
+    creator: "방콕작가",
+    date: "2026.03.02",
+    image: "/images/story/latest-bangkok.png",
+    title: "방콕 야시장 쩨페어 실시간 먹거리 투어 총정리",
+    likes: "222",
+    comments: "26",
+    views: "835",
+    featured: true,
+  },
+  {
+    category: "인도네시아 · 발리",
+    creator: "건강한미소",
+    date: "2026.02.28",
+    image: "/images/story/latest-bali-yoga.png",
+    title: "발리 우붓 요가 리트릿 7일 체험기",
+    likes: "222",
+    comments: "26",
+    views: "835",
+    featured: false,
+  },
+  {
+    category: "프랑스 · 파리",
+    creator: "패션리즈",
+    date: "2026.02.25",
+    image: "/images/story/latest-paris-family.png",
+    title: "엄마와 딸의 첫 파리 여행, 골목 산책 기록",
+    likes: "216",
+    comments: "28",
+    views: "937",
+    featured: true,
+  },
+] as const;
+
 function LatestStoriesSection() {
   return (
     <section aria-labelledby="latest-stories-heading">
@@ -33,37 +129,74 @@ function LatestStoriesSection() {
         </p>
       </div>
 
-      <div
-        aria-label="최신 스토리를 불러오는 중입니다."
-        className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
-        role="status"
-      >
-        {Array.from({ length: 9 }, (_, index) => (
-          <div
-            aria-hidden="true"
-            className="relative aspect-[1.95/1] min-h-[140px] overflow-hidden rounded-lg bg-gray-300"
-            key={index}
+      <div className="grid gap-4 md:grid-cols-3">
+        {latestStories.map((story, index) => (
+          <Link
+            aria-label={`${story.title} 상세 보기`}
+            className={`group relative min-h-[240px] overflow-hidden rounded-lg bg-gray-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary ${
+              story.featured ? "md:col-span-2" : ""
+            }`}
+            href={`/community/stories/story-${index + 1}`}
+            key={story.title}
           >
-            <span className="absolute left-4 top-4 h-3 w-14 rounded-full bg-surface-default/70" />
-            <div className="absolute inset-x-4 bottom-4 text-text-inverse">
-              <p className="mb-2 text-caption-sm">스토리 제목 텍스트</p>
-              <div className="flex items-center gap-2">
-                <span className="size-2 rounded-circle bg-surface-default/70" />
-                <span className="h-2 w-14 rounded-full bg-surface-default/70" />
-                <span className="h-2 w-8 rounded-full bg-surface-default/70" />
+            <Image
+              alt=""
+              className="object-cover transition duration-300 group-hover:scale-[1.02]"
+              fill
+              sizes={
+                story.featured
+                  ? "(min-width: 768px) 66vw, 100vw"
+                  : "(min-width: 768px) 33vw, 100vw"
+              }
+              src={story.image}
+            />
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-black/10"
+            />
+            <span className="absolute left-4 top-4 rounded-xs bg-surface-default/90 px-3 py-1 text-caption text-text-secondary">
+              {story.category}
+            </span>
+            <div className="absolute inset-x-5 bottom-5 text-text-inverse">
+              <h3 className="max-w-2xl text-heading-lg">{story.title}</h3>
+              <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-caption">
+                <span>{story.creator}</span>
+                <span className="inline-flex items-center gap-1.5">
+                  <CalendarDays aria-hidden="true" className="size-4" />
+                  {story.date}
+                </span>
               </div>
-              <span className="mt-2 block h-2 w-16 rounded-full bg-surface-default/70" />
+              <div className="mt-3 flex items-center gap-4 text-caption">
+                <span className="inline-flex items-center gap-1">
+                  <Heart aria-hidden="true" className="size-4" />
+                  {story.likes}
+                </span>
+                <span className="inline-flex items-center gap-1">
+                  <MessageCircle aria-hidden="true" className="size-4" />
+                  {story.comments}
+                </span>
+                <span className="inline-flex items-center gap-1">
+                  <Eye aria-hidden="true" className="size-4" />
+                  {story.views}
+                </span>
+              </div>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
 
-      <div aria-hidden="true" className="mt-10 flex justify-center gap-2">
+      <div
+        aria-label="스토리 페이지"
+        className="mt-10 flex justify-center gap-2"
+      >
         {Array.from({ length: 5 }, (_, index) => (
-          <span
-            className={`size-3 rounded-circle ${
-              index === 0 ? "bg-brand-primary" : "bg-gray-200"
+          <Link
+            aria-current={index === 0 ? "page" : undefined}
+            aria-label={`${index + 1}페이지`}
+            className={`size-3 rounded-circle transition ${
+              index === 0 ? "bg-brand-primary" : "bg-gray-200 hover:bg-gray-300"
             }`}
+            href={`/community/stories?page=${index + 1}`}
             key={index}
           />
         ))}
@@ -74,27 +207,42 @@ function LatestStoriesSection() {
 
 function RecommendedStoriesSection() {
   return (
-    <section aria-labelledby="recommended-stories-heading">
+    <section
+      aria-labelledby="recommended-stories-heading"
+      className="border-b border-line-light pb-12"
+    >
       <h2
-        className="mb-4 text-heading-lg text-text-primary"
+        className="mb-6 text-heading-lg text-text-primary"
         id="recommended-stories-heading"
       >
         추천 스토리
       </h2>
-      <div className="grid gap-6 md:grid-cols-3" role="status">
-        <span className="sr-only">추천할 스토리가 아직 없습니다.</span>
-        {Array.from({ length: 3 }, (_, index) => (
-          <div
-            aria-hidden="true"
-            className="relative aspect-[2.1/1] min-h-[132px] overflow-hidden rounded-lg bg-gray-300"
-            key={index}
-          >
-            <div className="absolute inset-x-4 bottom-4">
-              <span className="mb-3 block h-3 w-12 rounded-full bg-surface-default/80" />
-              <span className="mb-2 block h-2 w-24 rounded-full bg-text-secondary/35" />
-              <span className="block h-1.5 w-10 rounded-full bg-brand-primary/55" />
-            </div>
-          </div>
+      <div className="grid gap-8 md:grid-cols-3 md:gap-12">
+        {recommendedStories.map((story, index) => (
+          <article className="text-center" key={story.title}>
+            <Link
+              aria-label={`${story.title} 상세 보기`}
+              className="group relative mx-auto block aspect-square w-full max-w-[300px] overflow-hidden rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary"
+              href={`/community/stories/recommended-${index + 1}`}
+            >
+              <Image
+                alt={story.title}
+                className="object-cover transition duration-300 group-hover:scale-[1.03]"
+                fill
+                sizes="(min-width: 768px) 30vw, 80vw"
+                src={story.image}
+              />
+            </Link>
+            <h3 className="mt-5 text-body-md text-text-primary">
+              {story.title}
+            </h3>
+            <Link
+              className="mt-2 inline-block text-caption text-brand-primary hover:text-brand-primary-hover"
+              href={`/community/stories/recommended-${index + 1}`}
+            >
+              더보기
+            </Link>
+          </article>
         ))}
       </div>
     </section>
@@ -103,29 +251,43 @@ function RecommendedStoriesSection() {
 
 function PopularCreatorsSection() {
   return (
-    <section aria-labelledby="popular-creators-heading">
+    <section
+      aria-labelledby="popular-creators-heading"
+      className="border-b border-line-light pb-12"
+    >
       <h2
-        className="mb-5 text-heading-lg text-text-primary"
+        className="mb-7 text-heading-lg text-text-primary"
         id="popular-creators-heading"
       >
         인기 크리에이터
       </h2>
-      <div
-        className="flex flex-wrap items-start justify-center gap-8 sm:gap-12"
-        role="status"
+      <ul
+        aria-label="인기 크리에이터 목록"
+        className="flex flex-wrap items-start justify-center gap-8 sm:gap-12 lg:gap-16"
       >
-        <span className="sr-only">소개할 인기 크리에이터가 아직 없습니다.</span>
-        {Array.from({ length: 5 }, (_, index) => (
-          <div
-            aria-hidden="true"
-            className="grid w-20 justify-items-center gap-2"
-            key={index}
-          >
-            <span className="size-16 rounded-circle bg-gray-300" />
-            <span className="text-caption text-text-secondary">크리에이터</span>
-          </div>
+        {popularCreators.map((creator, index) => (
+          <li key={creator.name}>
+            <Link
+              aria-label={`${creator.name} 크리에이터 상세 보기`}
+              className="grid w-24 justify-items-center gap-3 rounded-lg transition hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-primary"
+              href={`/community/stories/creators/creator-${index + 1}`}
+            >
+              <span className="relative size-20 overflow-hidden rounded-circle">
+                <Image
+                  alt=""
+                  className="object-cover"
+                  fill
+                  sizes="80px"
+                  src={creator.image}
+                />
+              </span>
+              <span className="text-body-sm text-text-primary">
+                {creator.name}
+              </span>
+            </Link>
+          </li>
         ))}
-      </div>
+      </ul>
     </section>
   );
 }
