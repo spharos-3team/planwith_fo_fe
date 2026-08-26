@@ -286,7 +286,13 @@ export function Header({
             {isAuthenticated ? (
               <>
                 <div className="flex items-center gap-4">
-                  <Link aria-label="채팅" href="/chat">
+                  <Link
+                    aria-current={
+                      pathname.startsWith("/chat") ? "page" : undefined
+                    }
+                    aria-label="채팅"
+                    href="/chat"
+                  >
                     <Image
                       alt=""
                       className="size-[30px]"
@@ -445,6 +451,9 @@ export function Header({
                 </span>
                 <div className="flex items-center gap-3">
                   <Link
+                    aria-current={
+                      pathname.startsWith("/chat") ? "page" : undefined
+                    }
                     aria-label="채팅"
                     href="/chat"
                     onClick={() => setMobileMenuOpen(false)}

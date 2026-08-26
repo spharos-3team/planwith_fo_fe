@@ -14,10 +14,18 @@ export default function MainAuthenticatedLayout({
   children,
 }: Readonly<MainAuthenticatedLayoutProps>) {
   const pathname = usePathname();
-  const activeHref = pathname.startsWith("/mypage") ? "/mypage" : "/schedules";
+  const activeHref = pathname.startsWith("/mypage")
+    ? "/mypage"
+    : pathname.startsWith("/chat")
+      ? "/chat"
+      : "/schedules";
 
   return (
-    <SiteLayout activeHref={activeHref} headerVariant="solid">
+    <SiteLayout
+      activeHref={activeHref}
+      headerVariant="solid"
+      showFooter={!pathname.startsWith("/chat")}
+    >
       <AuthGuard>{children}</AuthGuard>
     </SiteLayout>
   );
