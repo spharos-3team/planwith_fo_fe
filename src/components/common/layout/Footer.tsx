@@ -11,7 +11,7 @@ const footerGroups = [
     links: [
       { label: "AI 일정생성", href: "/schedules/ai/new" },
       { label: "여행 기록", href: "/schedules" },
-      { label: "커뮤니티", href: "/community" },
+      { label: "커뮤니티", href: "/community/stories" },
       { label: "핫스팟", href: "/community/hotspots" },
     ],
   },

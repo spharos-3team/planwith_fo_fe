@@ -38,14 +38,20 @@ const MY_SECTIONS: {
     scope: "hosted",
     title: "내가 만든 모임",
     empty: "아직 만든 모임이 없어요",
-    emptyAction: { label: "모임 만들러 가기", href: "/meetings/new" },
+    emptyAction: {
+      label: "모임 만들러 가기",
+      href: "/community/meeting/new",
+    },
     actionLabel: "채팅방 입장",
   },
   {
     scope: "joined",
     title: "참여한 모임",
     empty: "아직 참여한 모임이 없어요",
-    emptyAction: { label: "모임 가입하러 가기", href: "/meetings" },
+    emptyAction: {
+      label: "모임 가입하러 가기",
+      href: "/community/meeting",
+    },
     actionLabel: "채팅방 입장",
   },
   {
@@ -220,7 +226,7 @@ export function MeetingsPage() {
                 </label>
                 {isAuthenticated ? (
                   <Button
-                    onClick={() => router.push("/meetings/new")}
+                    onClick={() => router.push("/community/meeting/new")}
                     pill
                     size="sm"
                   >
@@ -228,7 +234,9 @@ export function MeetingsPage() {
                   </Button>
                 ) : (
                   <Button
-                    onClick={() => requireLogin(undefined, "/meetings/new")}
+                    onClick={() =>
+                      requireLogin(undefined, "/community/meeting/new")
+                    }
                     pill
                     size="sm"
                   >
@@ -319,14 +327,18 @@ export function MeetingsPage() {
                               href={emptyAction.href}
                               onClick={(event) => {
                                 if (
-                                  emptyAction.href === "/meetings/new" &&
+                                  emptyAction.href ===
+                                    "/community/meeting/new" &&
                                   !isAuthenticated
                                 ) {
                                   event.preventDefault();
-                                  requireLogin(undefined, "/meetings/new");
+                                  requireLogin(
+                                    undefined,
+                                    "/community/meeting/new"
+                                  );
                                 }
 
-                                if (emptyAction.href === "/meetings") {
+                                if (emptyAction.href === "/community/meeting") {
                                   event.preventDefault();
                                   setTab("all");
                                 }

@@ -193,7 +193,9 @@ export function MeetingEditorPage({
           <div className="mt-6 flex justify-center">
             <Button
               buttonStyle="secondary"
-              onClick={() => router.push(`/meetings/${meeting.meetingUuid}`)}
+              onClick={() =>
+                router.push(`/community/meeting/${meeting.meetingUuid}`)
+              }
             >
               모임 상세로 돌아가기
             </Button>
@@ -556,11 +558,11 @@ function MeetingEditorForm({
         open={saved}
         primaryAction={{
           label: "모임 상세 보기",
-          onClick: () => router.push(`/meetings/${createdUuid}`),
+          onClick: () => router.push(`/community/meeting/${createdUuid}`),
         }}
         secondaryAction={{
           label: "모임 목록",
-          onClick: () => router.push("/meetings"),
+          onClick: () => router.push("/community/meeting"),
         }}
         title={editing ? "모임 수정 완료" : "모임이 생성되었습니다"}
         variant="success"

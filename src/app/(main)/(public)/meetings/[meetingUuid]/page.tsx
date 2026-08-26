@@ -1,20 +1,13 @@
-import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 
-import { MeetingDetailPage } from "@/features/meeting/components/MeetingDetailPage";
-
-export const metadata: Metadata = {
-  title: "모임상세",
-  description: "여행 모임의 소개를 보고 신청하거나 참여하세요.",
-};
-
-interface MeetingDetailRouteProps {
+interface LegacyMeetingDetailRouteProps {
   params: Promise<{ meetingUuid: string }>;
 }
 
-export default async function MeetingDetailRoute({
+export default async function LegacyMeetingDetailRoute({
   params,
-}: MeetingDetailRouteProps) {
+}: LegacyMeetingDetailRouteProps) {
   const { meetingUuid } = await params;
 
-  return <MeetingDetailPage meetingUuid={meetingUuid} />;
+  redirect(`/community/meeting/${meetingUuid}`);
 }

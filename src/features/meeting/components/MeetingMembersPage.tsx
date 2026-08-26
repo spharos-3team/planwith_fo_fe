@@ -295,17 +295,17 @@ export function MeetingMembersPage({ meetingUuid }: MeetingMembersPageProps) {
           aria-label="breadcrumb"
           className="flex flex-wrap items-center gap-2 text-caption text-text-secondary"
         >
-          <Link className="hover:text-text-primary" href="/meetings">
+          <Link className="hover:text-text-primary" href="/community/meeting">
             커뮤니티
           </Link>
           <span aria-hidden="true">&gt;</span>
-          <Link className="hover:text-text-primary" href="/meetings">
+          <Link className="hover:text-text-primary" href="/community/meeting">
             모임
           </Link>
           <span aria-hidden="true">&gt;</span>
           <Link
             className="hover:text-text-primary"
-            href={`/meetings/${meetingUuid}`}
+            href={`/community/meeting/${meetingUuid}`}
           >
             모임상세
           </Link>
@@ -337,7 +337,7 @@ export function MeetingMembersPage({ meetingUuid }: MeetingMembersPageProps) {
             <div className="mt-4 text-center">
               <Link
                 className="text-body-sm font-semibold text-brand-primary hover:underline"
-                href={`/meetings/${meetingUuid}`}
+                href={`/community/meeting/${meetingUuid}`}
               >
                 모임 상세로 돌아가기
               </Link>

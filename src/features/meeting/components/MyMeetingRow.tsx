@@ -29,7 +29,7 @@ export function MyMeetingRow({
     <article className="flex flex-col overflow-hidden rounded-lg border border-line-light bg-surface-default sm:flex-row">
       <Link
         className="relative h-48 w-full shrink-0 bg-blue-ice sm:h-[12.5rem] sm:w-[18.75rem]"
-        href={`/meetings/${meeting.meetingUuid}`}
+        href={`/community/meeting/${meeting.meetingUuid}`}
       >
         <div className="absolute inset-0 bg-gradient-to-br from-header-branded to-brand-primary" />
         <MeetingCoverImage
@@ -42,7 +42,10 @@ export function MyMeetingRow({
         </p>
       </Link>
       <div className="flex min-w-0 flex-1 flex-col justify-center gap-4 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
-        <Link className="min-w-0" href={`/meetings/${meeting.meetingUuid}`}>
+        <Link
+          className="min-w-0"
+          href={`/community/meeting/${meeting.meetingUuid}`}
+        >
           <div className="flex flex-wrap items-center gap-2">
             <Badge
               size="sm"

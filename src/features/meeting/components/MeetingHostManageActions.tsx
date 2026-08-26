@@ -158,7 +158,7 @@ export function MeetingHostManageActions({
       });
       await queryClient.invalidateQueries({ queryKey: ["meetings"] });
       setConfirmKind(null);
-      router.push("/meetings");
+      router.push("/community/meeting");
     } catch (error: unknown) {
       setConfirmError(errorMessage(error, "요청 처리 중 오류가 발생했습니다."));
     } finally {

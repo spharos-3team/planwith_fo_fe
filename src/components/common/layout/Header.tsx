@@ -2,10 +2,12 @@
 
 import {
   Bell,
+  BookOpen,
   CalendarDays,
   ChevronDown,
   Coins,
   Home,
+  type LucideIcon,
   Menu,
   MessageCircle,
   Search,
@@ -37,7 +39,7 @@ const scheduleNavItems = [
     label: "일정관리",
     icon: Sparkles,
   },
-  { href: "/meetings", label: "커뮤니티", hasDropdown: true, icon: Users },
+  { href: "/community", label: "커뮤니티", hasDropdown: true, icon: Users },
   {
     href: "/mypage",
     label: "마이페이지",
@@ -63,6 +65,21 @@ const scheduleSubmenuItems = [
   },
 ] as const;
 
+const communitySubmenuItems = [
+  {
+    href: "/community/stories",
+    label: "스토리",
+    description: "여행자들의 이야기를 둘러보세요",
+    icon: BookOpen,
+  },
+  {
+    href: "/community/meeting",
+    label: "모임",
+    description: "함께 떠날 여행 모임을 찾아보세요",
+    icon: Users,
+  },
+] as const;
+
 const headerAssets = {
   chevron: "/images/header/chevron-down.svg",
   chevronActive: "/images/header/chevron-down-active.svg",
@@ -72,7 +89,22 @@ const headerAssets = {
   token: "/images/header/token.svg",
 } as const;
 
-function ScheduleDesktopMenu({ active }: { active: boolean }) {
+interface DesktopDropdownMenuProps {
+  active: boolean;
+  items: ReadonlyArray<{
+    href: string;
+    label: string;
+    description: string;
+    icon: LucideIcon;
+  }>;
+  label: string;
+}
+
+function DesktopDropdownMenu({
+  active,
+  items,
+  label,
+}: DesktopDropdownMenuProps) {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -120,7 +152,7 @@ function ScheduleDesktopMenu({ active }: { active: boolean }) {
             className="absolute -inset-x-1 inset-y-0 -z-10 rounded-full border border-brand-primary/40 bg-header-nav-active"
           />
         ) : null}
-        일정관리
+        {label}
         <Image
           alt=""
           className={`size-6 transition ${open ? "rotate-180" : ""}`}
@@ -132,7 +164,7 @@ function ScheduleDesktopMenu({ active }: { active: boolean }) {
 
       {open ? (
         <div className="absolute left-1/2 top-[calc(100%+0.75rem)] z-50 w-72 -translate-x-1/2 rounded-lg border border-white/20 bg-header-branded/95 p-2 shadow-landmark backdrop-blur-md">
-          {scheduleSubmenuItems.map((item) => {
+          {items.map((item) => {
             const Icon = item.icon;
 
             return (
@@ -256,9 +288,11 @@ export function Header({
             {visibleNavItems.map((item) => {
               if (item.href === "/schedules") {
                 return isAuthenticated ? (
-                  <ScheduleDesktopMenu
+                  <DesktopDropdownMenu
                     active={pathname.startsWith("/schedules")}
+                    items={scheduleSubmenuItems}
                     key={item.href}
+                    label={item.label}
                   />
                 ) : (
                   <NavLink
@@ -266,6 +300,17 @@ export function Header({
                     href="/schedules/ai/new"
                     key={item.href}
                     label="AI 일정생성"
+                  />
+                );
+              }
+
+              if (item.href === "/community") {
+                return (
+                  <DesktopDropdownMenu
+                    active={pathname.startsWith("/community")}
+                    items={communitySubmenuItems}
+                    key={item.href}
+                    label={item.label}
                   />
                 );
               }
@@ -397,20 +442,26 @@ export function Header({
             </Link>
             {visibleNavItems.map((item) => {
               const Icon = item.icon;
+              const submenuItems =
+                item.href === "/schedules" && isAuthenticated
+                  ? scheduleSubmenuItems
+                  : item.href === "/community"
+                    ? communitySubmenuItems
+                    : undefined;
 
-              if (item.href === "/schedules" && isAuthenticated) {
+              if (submenuItems) {
                 return (
                   <details className="group" key={item.href}>
                     <summary className="flex cursor-pointer list-none items-center gap-3 rounded-lg px-3 py-3 hover:bg-white/10 [&::-webkit-details-marker]:hidden">
                       <Icon aria-hidden="true" className="h-4 w-4" />
-                      일정관리
+                      {item.label}
                       <ChevronDown
                         aria-hidden="true"
                         className="ml-auto h-4 w-4 transition group-open:rotate-180"
                       />
                     </summary>
                     <div className="ml-7 grid gap-1 border-l border-white/15 pl-3">
-                      {scheduleSubmenuItems.map((subitem) => (
+                      {submenuItems.map((subitem) => (
                         <Link
                           className="rounded-md px-3 py-2 text-body-sm text-white/80 hover:bg-white/10 hover:text-white"
                           href={subitem.href}
