@@ -22,6 +22,7 @@ interface ChatThreadProps {
   myMemberUuid: string;
   forceReadonly: boolean;
   connected: boolean;
+  connectionError: string | null;
   loadingMessages: boolean;
   hasOlder: boolean;
   loadingOlder: boolean;
@@ -39,6 +40,7 @@ export function ChatThread({
   myMemberUuid,
   forceReadonly,
   connected,
+  connectionError,
   loadingMessages,
   hasOlder,
   loadingOlder,
@@ -215,7 +217,7 @@ export function ChatThread({
             ? "종료된 채팅방에서는 메시지를 보낼 수 없습니다"
             : connected
               ? "메시지를 입력하세요"
-              : "실시간 연결 중입니다…"
+              : (connectionError ?? "실시간 연결 중입니다…")
         }
         sending={false}
       />

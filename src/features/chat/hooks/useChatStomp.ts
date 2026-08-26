@@ -4,7 +4,10 @@ import { Client, type IMessage, type StompSubscription } from "@stomp/stompjs";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { mapChatMessage } from "@/features/chat/lib/map-message";
-import { resolveChatStompBrokerUrl } from "@/features/chat/lib/stomp-url";
+import {
+  adaptStompUrlForBrowser,
+  resolveChatStompBrokerUrl,
+} from "@/features/chat/lib/stomp-url";
 import type { ChatMessage } from "@/features/chat/types";
 import { getAccessToken } from "@/lib/auth/access-token";
 
@@ -100,21 +103,37 @@ export function useChatStomp({
         setError(frame.headers["message"] || "채팅 서버 오류가 발생했습니다.");
       },
       onWebSocketError: () => {
+        if (cancelled) {
+          return;
+        }
         setConnected(false);
-        setError("실시간 연결에 실패했습니다.");
+        setError(
+          typeof window !== "undefined" && window.location.protocol === "https:"
+            ? "실시간 연결에 실패했습니다. HTTPS 사이트는 wss 게이트웨이가 필요합니다."
+            : "실시간 연결에 실패했습니다."
+        );
       },
       onWebSocketClose: () => {
+        if (cancelled) {
+          return;
+        }
         setConnected(false);
+        setError((prev) => prev ?? "실시간 연결에 실패했습니다.");
       },
     });
 
     clientRef.current = client;
-    void resolveChatStompBrokerUrl().then((url) => {
+    void resolveChatStompBrokerUrl().then((rawUrl) => {
       if (cancelled) {
         return;
       }
+      const adapted = adaptStompUrlForBrowser(rawUrl);
+      if (adapted.blockedReason) {
+        setError(adapted.blockedReason);
+        return;
+      }
       ensureGlobalThis();
-      client.brokerURL = url;
+      client.brokerURL = adapted.url;
       client.activate();
     });
 

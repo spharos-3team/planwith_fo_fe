@@ -333,6 +333,7 @@ export function ChatPage() {
         >
           <ChatThread
             connected={stomp.connected}
+            connectionError={stomp.error}
             forceReadonly={forceReadonly}
             hasOlder={Boolean(messagesQuery.hasNextPage)}
             loadingMessages={messagesQuery.isLoading}
