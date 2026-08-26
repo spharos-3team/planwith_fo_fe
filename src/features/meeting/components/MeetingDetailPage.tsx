@@ -2,7 +2,6 @@
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { Badge } from "@/components/common/Badge";
@@ -13,11 +12,11 @@ import { useAuth } from "@/features/auth/context/AuthProvider";
 import { ApplyMeetingDialog } from "@/features/meeting/components/ApplyMeetingDialog";
 import { LoginRequiredDialog } from "@/features/meeting/components/LoginRequiredDialog";
 import { MeetingCoverImage } from "@/features/meeting/components/MeetingCoverImage";
+import { MeetingHostManageActions } from "@/features/meeting/components/MeetingHostManageActions";
 import { MeetingToast } from "@/features/meeting/components/MeetingToast";
-import { removeMeetingFromCachedLists } from "@/features/meeting/lib/cache";
 import {
+  canBumpByGrade,
   formatMeetingPeriod,
-  isHttpUrl,
   meetingStatusLabel,
   meetingStatusTone,
 } from "@/features/meeting/lib/format";
@@ -27,11 +26,11 @@ import type {
   MyMeetings,
   PagedMeetings,
 } from "@/features/meeting/types";
+import { ProfileAvatar } from "@/features/mypage/components/ProfileAvatar";
+import { usePublicProfile } from "@/features/mypage/hooks/usePublicProfile";
 import { useApiError } from "@/hooks/useApiError";
 import {
   applyToMeeting,
-  completeMeeting,
-  disbandMeeting,
   getMeetingDetail,
   leaveMeeting,
 } from "@/services/meeting/meetings";
@@ -42,7 +41,7 @@ interface MeetingDetailPageProps {
   meetingUuid: string;
 }
 
-type ConfirmKind = "leave" | "complete" | "disband";
+type ConfirmKind = "leave";
 
 const ACTION_LINK_PRIMARY =
   "inline-flex h-[46px] w-full items-center justify-center rounded-md bg-brand-primary px-6 text-body-md font-bold text-text-inverse hover:bg-brand-primary-hover";
@@ -83,7 +82,7 @@ function hintLines(meeting: MeetingDetail): string[] {
   }
 
   if (meeting.status === "FULL") {
-    return meeting.canEnterChat ? ["채팅방은 열람만 가능합니다"] : [];
+    return [];
   }
 
   if (meeting.canApply) {
@@ -101,7 +100,6 @@ function errorMessage(error: unknown, fallback: string): string {
 }
 
 export function MeetingDetailPage({ meetingUuid }: MeetingDetailPageProps) {
-  const router = useRouter();
   const queryClient = useQueryClient();
   const { status, isAuthenticated, profile } = useAuth();
   const [loginOpen, setLoginOpen] = useState(false);
@@ -129,6 +127,7 @@ export function MeetingDetailPage({ meetingUuid }: MeetingDetailPageProps) {
   const cachedSnapshot = findCachedSnapshot(queryClient, meetingUuid);
   const loadError = useApiError(detailQuery.error);
   const meeting = detailQuery.data;
+  const hostProfileQuery = usePublicProfile(meeting?.memberUuid);
   const scheduleQuery = useQuery({
     queryKey: ["schedules", "detail", meeting?.scheduleUuid],
     queryFn: () => getScheduleDetail(meeting?.scheduleUuid ?? ""),
@@ -199,44 +198,20 @@ export function MeetingDetailPage({ meetingUuid }: MeetingDetailPageProps) {
 
     confirmInFlight.current = true;
     setConfirming(true);
-    const kind = confirmKind;
     setConfirmError("");
 
     try {
-      if (kind === "leave") {
-        await leaveMeeting(meetingUuid);
-        patchDetail({
-          myParticipation: "LEFT",
-          myRole: null,
-          canApply: meeting?.status === "RECRUITING",
-          canEnterChat: false,
-          canViewMembers: false,
-          currentMemberCount: Math.max(
-            0,
-            (meeting?.currentMemberCount ?? 1) - 1
-          ),
-        });
-        setConfirmKind(null);
-        setToast("모임에서 나왔습니다");
-        return;
-      }
-
-      if (kind === "complete") {
-        await completeMeeting(meetingUuid);
-        patchDetail({ status: "COMPLETED", canApply: false });
-        setConfirmKind(null);
-        setToast("모집을 완료했습니다. 채팅은 열람만 가능합니다");
-        return;
-      }
-
-      await disbandMeeting(meetingUuid);
-      removeMeetingFromCachedLists(queryClient, meetingUuid);
-      queryClient.removeQueries({
-        queryKey: ["meetings", "detail", meetingUuid],
+      await leaveMeeting(meetingUuid);
+      patchDetail({
+        myParticipation: "LEFT",
+        myRole: null,
+        canApply: meeting?.status === "RECRUITING",
+        canEnterChat: false,
+        canViewMembers: false,
+        currentMemberCount: Math.max(0, (meeting?.currentMemberCount ?? 1) - 1),
       });
-      await queryClient.invalidateQueries({ queryKey: ["meetings"] });
       setConfirmKind(null);
-      router.push("/meetings");
+      setToast("모임에서 나왔습니다");
     } catch (error: unknown) {
       setConfirmError(errorMessage(error, "요청 처리 중 오류가 발생했습니다."));
     } finally {
@@ -302,9 +277,15 @@ export function MeetingDetailPage({ meetingUuid }: MeetingDetailPageProps) {
         )
       : 0;
   const hints = hintLines(meeting);
-  const hostNickname = isHost ? (profile?.nickname ?? "방장") : "모임 방장";
-  const hostIntro = isHost ? profile?.profileIntro : null;
-  const hostImage = isHost ? (profile?.profileImage ?? null) : null;
+  const hostNickname =
+    hostProfileQuery.data?.nickname ??
+    (isHost ? (profile?.nickname ?? "방장") : "방장");
+  const hostIntro = isHost
+    ? (profile?.profileIntro ?? hostProfileQuery.data?.profileIntro ?? null)
+    : (hostProfileQuery.data?.profileIntro ?? null);
+  const hostImage = isHost
+    ? (profile?.profileImage ?? hostProfileQuery.data?.profileImage ?? null)
+    : (hostProfileQuery.data?.profileImage ?? null);
   const membersHref = `/meetings/${meeting.meetingUuid}/members`;
   const chatHref = isCompleted
     ? `/chat?meetingUuid=${meeting.meetingUuid}&readonly=1`
@@ -328,26 +309,12 @@ export function MeetingDetailPage({ meetingUuid }: MeetingDetailPageProps) {
     setConfirmKind(kind);
   };
 
-  const confirmCopy =
-    confirmKind === "complete"
-      ? {
-          title: "모집을 완료할까요?",
-          description: "채팅방 입장은 가능하지만 메시지를 입력할 수 없습니다.",
-          confirm: "모집 완료",
-        }
-      : confirmKind === "disband"
-        ? {
-            title: "모임을 해체할까요?",
-            description:
-              "모임 글이 사라지고, 모든 구성원이 퇴장하며 채팅방이 종료됩니다.",
-            confirm: "해체하기",
-          }
-        : {
-            title: "모임을 나가시겠어요?",
-            description:
-              "나가면 채팅방 입장과 구성원 보기가 제한되고, 다시 참여하려면 신청이 필요합니다.",
-            confirm: "나가기",
-          };
+  const confirmCopy = {
+    title: "모임을 나가시겠어요?",
+    description:
+      "나가면 채팅방 입장과 구성원 보기가 제한되고, 다시 참여하려면 신청이 필요합니다.",
+    confirm: "나가기",
+  };
 
   return (
     <div className="bg-surface-page pb-20">
@@ -408,18 +375,12 @@ export function MeetingDetailPage({ meetingUuid }: MeetingDetailPageProps) {
             </section>
 
             <article className="mt-10 flex items-center gap-6 rounded-lg border border-line-light bg-white p-8">
-              <div className="grid size-24 shrink-0 place-items-center overflow-hidden rounded-circle bg-blue-ice text-heading-lg text-text-secondary">
-                {isHttpUrl(hostImage) ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    alt=""
-                    className="size-full object-cover"
-                    src={hostImage}
-                  />
-                ) : (
-                  hostNickname.slice(0, 1)
-                )}
-              </div>
+              <ProfileAvatar
+                memberUuid={meeting.memberUuid}
+                nickname={hostNickname}
+                size={96}
+                src={hostImage}
+              />
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
                   <p className="text-heading-lg text-text-primary">
@@ -506,22 +467,11 @@ export function MeetingDetailPage({ meetingUuid }: MeetingDetailPageProps) {
                       모임 수정
                     </Link>
                   )}
-                  {isCompleted ? null : (
-                    <Button
-                      buttonStyle="secondary"
-                      className="w-full"
-                      onClick={() => openConfirm("complete")}
-                    >
-                      모집 완료
-                    </Button>
-                  )}
-                  <Button
-                    buttonStyle="danger"
-                    className="w-full"
-                    onClick={() => openConfirm("disband")}
-                  >
-                    모임 해체
-                  </Button>
+                  <MeetingHostManageActions
+                    canBump={canBumpByGrade(profile?.grade)}
+                    meeting={meeting}
+                    onToast={setToast}
+                  />
                 </>
               ) : null}
 

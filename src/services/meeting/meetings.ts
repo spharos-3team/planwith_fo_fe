@@ -7,6 +7,7 @@ import type {
   MeetingDetail,
   MeetingMember,
   MeetingParticipation,
+  MeetingStatus,
   MeetingWriteResult,
   MyMeetings,
   PagedMeetings,
@@ -134,6 +135,26 @@ export function leaveMeeting(meetingUuid: string) {
     `/meetings/${meetingUuid}/members/me`,
     { method: "DELETE" },
     { allowEmpty: true }
+  );
+}
+
+export function bumpMeeting(meetingUuid: string) {
+  return apiClient<MeetingWriteResult>(`/meetings/${meetingUuid}/bump`, {
+    method: "POST",
+    ...jsonBody({}),
+  });
+}
+
+export function changeMeetingRecruitmentStatus(
+  meetingUuid: string,
+  status: Extract<MeetingStatus, "RECRUITING" | "FULL">
+) {
+  return apiClient<MeetingWriteResult>(
+    `/meetings/${meetingUuid}/recruitment-status`,
+    {
+      method: "PATCH",
+      ...jsonBody({ status }),
+    }
   );
 }
 

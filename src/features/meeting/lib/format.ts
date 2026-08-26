@@ -90,6 +90,10 @@ export const MY_MEETING_STATUS_ORDER: MeetingStatus[] = [
   "COMPLETED",
 ];
 
+export function canBumpByGrade(grade: string | null | undefined): boolean {
+  return grade === "ADVENTURE" || grade === "PLANWITH";
+}
+
 export function groupMeetingsByStatus<
   T extends { status: MeetingStatus | string },
 >(items: T[]): { status: MeetingStatus | string; items: T[] }[] {

@@ -2,22 +2,23 @@
 
 import { useState } from "react";
 
-import {
-  isDisplayableImageUrl,
-  nicknameInitial,
-} from "@/features/mypage/lib/profile-image";
+import { useProfileImageSrc } from "@/features/mypage/hooks/useProfileImageSrc";
+import { nicknameInitial } from "@/features/mypage/lib/profile-image";
 
 export function ProfileAvatar({
   src,
   nickname,
   size,
+  memberUuid,
 }: {
   src: string | null;
   nickname: string;
   size: number;
+  memberUuid?: string | null;
 }) {
+  const fetchedSrc = useProfileImageSrc(memberUuid, src);
   const [failedSrc, setFailedSrc] = useState<string | null>(null);
-  const imageSrc = isDisplayableImageUrl(src) && src !== failedSrc ? src : null;
+  const imageSrc = fetchedSrc && fetchedSrc !== failedSrc ? fetchedSrc : null;
 
   return (
     <div
@@ -29,7 +30,7 @@ export function ProfileAvatar({
         <img
           alt=""
           className="size-full object-cover"
-          onError={() => setFailedSrc(src)}
+          onError={() => setFailedSrc(imageSrc)}
           src={imageSrc}
         />
       ) : (

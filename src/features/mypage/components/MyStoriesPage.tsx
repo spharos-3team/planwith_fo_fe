@@ -27,6 +27,7 @@ export function MyStoriesPage() {
       <MyPageProfileSummary
         followerCount={profileQuery.data?.followerCount}
         followingCount={profileQuery.data?.followingCount}
+        memberUuid={profile.memberUuid}
         nickname={profile.nickname}
         profileImage={profile.profileImage}
         profileIntro={profile.profileIntro}

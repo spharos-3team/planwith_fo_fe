@@ -9,6 +9,8 @@ export type MyMeetingScope = "hosted" | "joined" | "pending";
 
 export interface MeetingListItem {
   meetingUuid: string;
+  hostMemberUuid?: string | null;
+  hostNickname?: string | null;
   title: string;
   coverImage: string | null;
   intro: string | null;
