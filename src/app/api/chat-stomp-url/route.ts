@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
-import { gatewayHttpToStompUrl } from "@/features/chat/lib/stomp-url";
+import { stompUrlFromGateway } from "@/features/chat/lib/stomp-url";
 
 export const dynamic = "force-dynamic";
 
@@ -11,6 +11,12 @@ function gatewayUrl(): string {
   );
 }
 
-export function GET() {
-  return NextResponse.json({ url: gatewayHttpToStompUrl(gatewayUrl()) });
+export function GET(request: NextRequest) {
+  const url = stompUrlFromGateway({
+    forwardedProto: request.headers.get("x-forwarded-proto"),
+    gatewayUrl: gatewayUrl(),
+    requestHost:
+      request.headers.get("x-forwarded-host") ?? request.headers.get("host"),
+  });
+  return NextResponse.json({ url });
 }
