@@ -890,6 +890,7 @@ function SubscriberManagementCard({
                 key={subscriber.subscriptionUuid}
               >
                 <ProfileAvatar
+                  memberUuid={subscriber.memberUuid}
                   nickname={subscriber.subscriberNickname}
                   size={40}
                   src={subscriber.subscriberProfileImage}
@@ -916,6 +917,7 @@ function SubscriberManagementCard({
                 key={subscription.subscriptionUuid}
               >
                 <ProfileAvatar
+                  memberUuid={subscription.creatorUuid}
                   nickname={subscription.creatorNickname}
                   size={40}
                   src={subscription.creatorProfileImage}

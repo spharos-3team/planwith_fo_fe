@@ -1,9 +1,62 @@
+import { authenticatedFetch } from "@/utils/apiClient";
+
 const PROFILE_IMAGE_SIZE = 400;
+const PROFILE_IMAGE_MAX_BYTES = 5 * 1024 * 1024;
 
 export function isDisplayableImageUrl(
   url: string | null | undefined
 ): url is string {
   return Boolean(url && /^(https?:|blob:|data:)/i.test(url));
+}
+
+export function profileImageRequestPath(
+  memberUuid: string | null | undefined,
+  src: string | null | undefined
+): string | null {
+  if (isDisplayableImageUrl(src)) {
+    return null;
+  }
+
+  const pathSrc = typeof src === "string" ? src : "";
+  const fromUrl = pathSrc.match(/\/members\/([^/?]+)\/profile-image(?:\?|$)/);
+  if (fromUrl) {
+    return `/members/${fromUrl[1]}/profile-image`;
+  }
+  if (memberUuid) {
+    return `/members/${memberUuid}/profile-image`;
+  }
+  return null;
+}
+
+export async function fetchProfileImageObjectUrl(
+  memberUuid: string
+): Promise<string | null> {
+  const response = await authenticatedFetch(
+    `/members/${memberUuid}/profile-image`
+  );
+  if (!response.ok) {
+    return null;
+  }
+
+  const blob = await response.blob();
+  if (blob.size === 0) {
+    return null;
+  }
+
+  const type = (
+    blob.type ||
+    response.headers.get("content-type") ||
+    ""
+  ).toLowerCase();
+  if (
+    type.includes("json") ||
+    type.includes("html") ||
+    type.includes("text/")
+  ) {
+    return null;
+  }
+
+  return URL.createObjectURL(blob);
 }
 
 export function nicknameInitial(nickname: string): string {
@@ -12,6 +65,10 @@ export function nicknameInitial(nickname: string): string {
 }
 
 export async function toProfileImageFile(file: File): Promise<File> {
+  if (file.size > PROFILE_IMAGE_MAX_BYTES) {
+    throw new Error("이미지 용량은 5MB 이하여야 합니다.");
+  }
+
   const objectUrl = URL.createObjectURL(file);
 
   try {

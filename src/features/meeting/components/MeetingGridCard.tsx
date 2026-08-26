@@ -1,3 +1,5 @@
+"use client";
+
 import { Calendar, Users } from "lucide-react";
 import Link from "next/link";
 
@@ -9,6 +11,7 @@ import {
   meetingStatusTone,
 } from "@/features/meeting/lib/format";
 import type { MeetingListItem } from "@/features/meeting/types";
+import { usePublicProfile } from "@/features/mypage/hooks/usePublicProfile";
 
 interface MeetingGridCardProps {
   meeting: MeetingListItem;
@@ -20,6 +23,8 @@ export function MeetingGridCard({
   wide = false,
 }: MeetingGridCardProps) {
   const period = formatMeetingPeriod(meeting.startDate, meeting.endDate);
+  const hostQuery = usePublicProfile(meeting.hostMemberUuid);
+  const hostNickname = hostQuery.data?.nickname ?? meeting.hostNickname ?? "";
 
   return (
     <Link
@@ -38,11 +43,9 @@ export function MeetingGridCard({
           coverImage={meeting.coverImage}
           meetingUuid={meeting.meetingUuid}
         />
-        {meeting.status === "RECRUITING" ||
-        meeting.status === "FULL" ||
-        meeting.status === "COMPLETED" ? (
+        {meeting.status ? (
           <Badge
-            className="absolute left-4 top-4"
+            className="absolute left-4 top-4 z-[2]"
             size="sm"
             tone={meetingStatusTone(meeting.status)}
             variant="solid"
@@ -53,6 +56,11 @@ export function MeetingGridCard({
       </div>
       <div className="flex flex-1 flex-col px-4 py-3.5">
         <h3 className="text-heading-lg text-text-primary">{meeting.title}</h3>
+        {hostNickname ? (
+          <p className="mt-1 text-caption text-text-secondary">
+            {hostNickname}
+          </p>
+        ) : null}
         <p className="mt-2 line-clamp-1 text-body-sm text-text-secondary">
           {meeting.intro ?? ""}
         </p>

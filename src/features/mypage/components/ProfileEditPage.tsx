@@ -330,7 +330,12 @@ export function ProfileEditPage() {
         </h1>
 
         <div className="flex w-full flex-col items-center justify-center gap-5">
-          <ProfileAvatar nickname={displayNickname} size={120} src={preview} />
+          <ProfileAvatar
+            memberUuid={profile?.memberUuid}
+            nickname={displayNickname}
+            size={120}
+            src={preview}
+          />
           <div className="flex flex-col items-center gap-2">
             <p className="text-[24px] font-bold leading-[30px] text-[#1F1F1F]">
               {displayNickname}님

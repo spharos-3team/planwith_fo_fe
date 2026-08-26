@@ -82,6 +82,7 @@ export interface SignupDraft {
   nickname: string;
   nicknameAvailable: boolean;
   profileIntro: string;
+  signedUp?: boolean;
 }
 
 export function getSignupDraft(): SignupDraft | null {

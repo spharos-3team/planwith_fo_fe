@@ -176,6 +176,7 @@ export function FollowersPage({ memberUuid }: { memberUuid: string }) {
             >
               <div className="flex min-w-0 items-center gap-3">
                 <ProfileAvatar
+                  memberUuid={item.memberUuid}
                   nickname={item.nickname}
                   size={48}
                   src={item.profileImage}

@@ -10,14 +10,54 @@ function isPagedMeetings(value: unknown): value is PagedMeetings {
   return Array.isArray((value as PagedMeetings).content);
 }
 
-export function removeMeetingFromCachedLists(
+function isPublicMeetingListQuery(queryKey: readonly unknown[]): boolean {
+  return (
+    queryKey[0] === "meetings" &&
+    queryKey[1] !== "detail" &&
+    queryKey[1] !== "me"
+  );
+}
+
+export function patchMeetingInCachedLists(
   queryClient: QueryClient,
-  meetingUuid: string
+  meetingUuid: string,
+  patch: Partial<MeetingListItem>
 ): void {
   queryClient.setQueriesData(
     {
       predicate: (query) =>
         query.queryKey[0] === "meetings" && query.queryKey[1] !== "detail",
+    },
+    (current) => {
+      if (!isPagedMeetings(current)) {
+        return current;
+      }
+
+      let changed = false;
+      const content = current.content.map((item: MeetingListItem) => {
+        if (item.meetingUuid !== meetingUuid) {
+          return item;
+        }
+        changed = true;
+        return { ...item, ...patch };
+      });
+
+      return changed ? { ...current, content } : current;
+    }
+  );
+}
+
+export function removeMeetingFromCachedLists(
+  queryClient: QueryClient,
+  meetingUuid: string,
+  scope: "all" | "public" = "all"
+): void {
+  queryClient.setQueriesData(
+    {
+      predicate: (query) =>
+        scope === "public"
+          ? isPublicMeetingListQuery(query.queryKey)
+          : query.queryKey[0] === "meetings" && query.queryKey[1] !== "detail",
     },
     (current) => {
       if (!isPagedMeetings(current)) {

@@ -8,6 +8,7 @@ import { InputField } from "@/components/common/InputField";
 import { AuthLoginLink } from "@/features/auth/components/AuthHero";
 import { SignupStepper } from "@/features/auth/components/SignupStepper";
 import { nicknameSchema } from "@/features/auth/schemas/auth";
+import { toProfileImageFile } from "@/features/mypage/lib/profile-image";
 import { useApiError } from "@/hooks/useApiError";
 import { checkNicknameAvailability } from "@/services/auth/member";
 
@@ -45,6 +46,7 @@ export function ProfileStep({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [checking, setChecking] = useState(false);
   const [nicknameMessage, setNicknameMessage] = useState("");
+  const [imageError, setImageError] = useState("");
   const apiError = useApiError(error ? new Error(error) : null);
   const nicknameValid = nicknameSchema.safeParse(nickname).success;
 
@@ -72,12 +74,24 @@ export function ProfileStep({
 
   const handleImage = (file: File | null) => {
     if (!file) {
+      setImageError("");
       onImageChange(null, null);
       return;
     }
 
-    const preview = URL.createObjectURL(file);
-    onImageChange(file, preview);
+    setImageError("");
+    void toProfileImageFile(file)
+      .then((normalized) => {
+        const preview = URL.createObjectURL(normalized);
+        onImageChange(normalized, preview);
+      })
+      .catch((imageErr: unknown) => {
+        setImageError(
+          imageErr instanceof Error
+            ? imageErr.message
+            : "프로필 이미지를 처리할 수 없습니다."
+        );
+      });
   };
 
   return (
@@ -171,9 +185,9 @@ export function ProfileStep({
         />
       </div>
 
-      {error ? (
+      {imageError || error ? (
         <p className="mt-4 text-caption text-status-error" role="alert">
-          {apiError}
+          {imageError || apiError}
         </p>
       ) : null}
 

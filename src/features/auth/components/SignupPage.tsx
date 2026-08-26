@@ -1,7 +1,13 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 
 import { ProfileStep } from "@/features/auth/components/ProfileStep";
 import { TermsStep } from "@/features/auth/components/TermsStep";
@@ -16,6 +22,7 @@ import {
   setSignupDraft,
 } from "@/features/auth/lib/storage";
 import { nameSchema } from "@/features/auth/schemas/auth";
+import { toProfileImageFile } from "@/features/mypage/lib/profile-image";
 import {
   listTerms,
   signupLocal,
@@ -42,6 +49,7 @@ interface SignupState {
   profileIntro: string;
   profileImageFile: File | null;
   profilePreview: string | null;
+  signedUp: boolean;
   submitting: boolean;
   error: string;
 }
@@ -65,6 +73,7 @@ const initialState: SignupState = {
   profileIntro: "",
   profileImageFile: null,
   profilePreview: null,
+  signedUp: false,
   submitting: false,
   error: "",
 };
@@ -76,6 +85,7 @@ export function SignupPage() {
   const { applySession, login } = useAuth();
   const pendingSocial = useMemo(() => getPendingSocialSignup(), []);
   const [state, setState] = useState<SignupState>(initialState);
+  const signedUpRef = useRef(false);
   const phoneRedirect = useSyncExternalStore(
     emptySubscribe,
     hasPhoneVerificationRedirect,
@@ -94,6 +104,7 @@ export function SignupPage() {
       ...current,
       ...draft,
     }));
+    signedUpRef.current = Boolean(draft.signedUp);
   }, []);
 
   useEffect(() => {
@@ -117,6 +128,7 @@ export function SignupPage() {
       nickname: state.nickname,
       nicknameAvailable: state.nicknameAvailable,
       profileIntro: state.profileIntro,
+      signedUp: state.signedUp,
     });
   }, [state]);
 
@@ -130,47 +142,51 @@ export function SignupPage() {
     patch({ submitting: true, error: "" });
 
     try {
-      if (!state.phoneVerified || !nameSchema.safeParse(state.name).success) {
-        throw new Error("이름과 휴대폰 본인인증을 완료해주세요.");
-      }
+      if (!signedUpRef.current) {
+        if (!state.phoneVerified || !nameSchema.safeParse(state.name).success) {
+          throw new Error("이름과 휴대폰 본인인증을 완료해주세요.");
+        }
 
-      const terms = await listTerms();
-      const agreements = terms.map((term) => ({
-        termUuid: term.termUuid,
-        agreed: Boolean(state.agreements[term.termUuid]),
-      }));
-      if (pendingSocial) {
-        const tokens = await socialSignup(pendingSocial.provider, {
-          authorizationCode: pendingSocial.authorizationCode,
-          redirectUri: pendingSocial.redirectUri,
-          state: pendingSocial.oauthState,
-          nickname: state.nickname,
-          profileIntro: state.profileIntro || null,
-          phoneNumber: state.phoneNumber,
-          name: state.name,
-          agreements,
-        });
-        await applySession(tokens);
-        setPendingSocialSignup(null);
-        setSignupDraft(null);
-      } else {
-        await signupLocal({
-          email: state.email,
-          password: state.password,
-          phoneNumber: state.phoneNumber,
-          name: state.name,
-          nickname: state.nickname,
-          profileIntro: state.profileIntro || null,
-          agreements,
-        });
-        await login(state.email, state.password);
-        setSignupDraft(null);
+        const terms = await listTerms();
+        const agreements = terms.map((term) => ({
+          termUuid: term.termUuid,
+          agreed: Boolean(state.agreements[term.termUuid]),
+        }));
+        if (pendingSocial) {
+          const tokens = await socialSignup(pendingSocial.provider, {
+            authorizationCode: pendingSocial.authorizationCode,
+            redirectUri: pendingSocial.redirectUri,
+            state: pendingSocial.oauthState,
+            nickname: state.nickname,
+            profileIntro: state.profileIntro || null,
+            phoneNumber: state.phoneNumber,
+            name: state.name,
+            agreements,
+          });
+          await applySession(tokens);
+          setPendingSocialSignup(null);
+        } else {
+          await signupLocal({
+            email: state.email,
+            password: state.password,
+            phoneNumber: state.phoneNumber,
+            name: state.name,
+            nickname: state.nickname,
+            profileIntro: state.profileIntro || null,
+            agreements,
+          });
+          await login(state.email, state.password);
+        }
+        signedUpRef.current = true;
+        patch({ signedUp: true });
       }
 
       if (state.profileImageFile) {
-        await uploadProfileImage(state.profileImageFile);
+        const image = await toProfileImageFile(state.profileImageFile);
+        await uploadProfileImage(image);
       }
 
+      setSignupDraft(null);
       redirectAfterAuth(router.replace, "home");
     } catch (error) {
       patch({

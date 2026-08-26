@@ -10,8 +10,10 @@ import { Modal } from "@/components/common/Modal";
 import { StatusMessage } from "@/components/common/StatusMessage";
 import { useAuth } from "@/features/auth/context/AuthProvider";
 import { LoginRequiredDialog } from "@/features/meeting/components/LoginRequiredDialog";
+import { MeetingHostManageActions } from "@/features/meeting/components/MeetingHostManageActions";
 import { MeetingToast } from "@/features/meeting/components/MeetingToast";
 import {
+  canBumpByGrade,
   meetingRoleLabel,
   meetingRoleTone,
 } from "@/features/meeting/lib/format";
@@ -343,6 +345,23 @@ export function MeetingMembersPage({ meetingUuid }: MeetingMembersPageProps) {
           </div>
         ) : (
           <div className="mt-8 space-y-8">
+            {isHost && meeting ? (
+              <section className="rounded-lg border border-line-light bg-surface-default p-6">
+                <h2 className="text-heading-sm text-text-primary">모임 관리</h2>
+                <p className="mt-1 text-caption text-text-secondary">
+                  끌어올리기, 모집 상태, 해체는 방장만 할 수 있습니다.
+                </p>
+                <div className="mt-4">
+                  <MeetingHostManageActions
+                    canBump={canBumpByGrade(profile?.grade)}
+                    layout="grid"
+                    meeting={meeting}
+                    onToast={setToast}
+                  />
+                </div>
+              </section>
+            ) : null}
+
             {isHost ? (
               <section className="rounded-lg border border-line-light bg-surface-default p-6">
                 <h2 className="text-heading-sm text-text-primary">모임 신청</h2>
@@ -410,6 +429,7 @@ export function MeetingMembersPage({ meetingUuid }: MeetingMembersPageProps) {
                       >
                         <div className="flex items-center gap-3">
                           <ProfileAvatar
+                            memberUuid={uuid}
                             nickname={name}
                             size={48}
                             src={member.profileImageUrl}
