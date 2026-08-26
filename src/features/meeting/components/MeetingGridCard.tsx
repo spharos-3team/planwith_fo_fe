@@ -2,9 +2,9 @@ import { Calendar, Users } from "lucide-react";
 import Link from "next/link";
 
 import { Badge } from "@/components/common/Badge";
+import { MeetingCoverImage } from "@/features/meeting/components/MeetingCoverImage";
 import {
   formatMeetingPeriod,
-  isHttpUrl,
   meetingStatusLabel,
   meetingStatusTone,
 } from "@/features/meeting/lib/format";
@@ -20,7 +20,6 @@ export function MeetingGridCard({
   wide = false,
 }: MeetingGridCardProps) {
   const period = formatMeetingPeriod(meeting.startDate, meeting.endDate);
-  const cover = isHttpUrl(meeting.coverImage) ? meeting.coverImage : null;
 
   return (
     <Link
@@ -30,21 +29,15 @@ export function MeetingGridCard({
       href={`/meetings/${meeting.meetingUuid}`}
     >
       <div className="relative h-[18.75rem] w-full overflow-hidden bg-blue-ice">
-        {cover ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            alt=""
-            className="h-full w-full object-cover object-center transition duration-300 group-hover:scale-[1.03]"
-            src={cover}
-          />
-        ) : (
-          <div
-            aria-hidden="true"
-            className="relative h-full w-full bg-[url('/images/meetings/hero-background.png')] bg-cover bg-center"
-          >
-            <div className="absolute inset-0 bg-gradient-to-t from-black/35 to-black/5" />
-          </div>
-        )}
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 bg-[url('/images/meetings/hero-background.png')] bg-cover bg-center"
+        />
+        <MeetingCoverImage
+          className="relative z-[1] h-full w-full object-cover object-center transition duration-300 group-hover:scale-[1.03]"
+          coverImage={meeting.coverImage}
+          meetingUuid={meeting.meetingUuid}
+        />
         {meeting.status === "RECRUITING" ||
         meeting.status === "FULL" ||
         meeting.status === "COMPLETED" ? (

@@ -12,7 +12,9 @@ import { StatusMessage } from "@/components/common/StatusMessage";
 import { useAuth } from "@/features/auth/context/AuthProvider";
 import { ApplyMeetingDialog } from "@/features/meeting/components/ApplyMeetingDialog";
 import { LoginRequiredDialog } from "@/features/meeting/components/LoginRequiredDialog";
+import { MeetingCoverImage } from "@/features/meeting/components/MeetingCoverImage";
 import { MeetingToast } from "@/features/meeting/components/MeetingToast";
+import { removeMeetingFromCachedLists } from "@/features/meeting/lib/cache";
 import {
   formatMeetingPeriod,
   isHttpUrl,
@@ -33,6 +35,7 @@ import {
   getMeetingDetail,
   leaveMeeting,
 } from "@/services/meeting/meetings";
+import { getScheduleDetail } from "@/services/schedule/schedules";
 import { ApiClientError } from "@/utils/apiClient";
 
 interface MeetingDetailPageProps {
@@ -126,6 +129,15 @@ export function MeetingDetailPage({ meetingUuid }: MeetingDetailPageProps) {
   const cachedSnapshot = findCachedSnapshot(queryClient, meetingUuid);
   const loadError = useApiError(detailQuery.error);
   const meeting = detailQuery.data;
+  const scheduleQuery = useQuery({
+    queryKey: ["schedules", "detail", meeting?.scheduleUuid],
+    queryFn: () => getScheduleDetail(meeting?.scheduleUuid ?? ""),
+    enabled:
+      Boolean(meeting?.scheduleUuid) &&
+      !meeting?.destination &&
+      !cachedSnapshot?.destination,
+    retry: false,
+  });
 
   useEffect(() => {
     if (!toast) {
@@ -218,6 +230,11 @@ export function MeetingDetailPage({ meetingUuid }: MeetingDetailPageProps) {
       }
 
       await disbandMeeting(meetingUuid);
+      removeMeetingFromCachedLists(queryClient, meetingUuid);
+      queryClient.removeQueries({
+        queryKey: ["meetings", "detail", meetingUuid],
+      });
+      await queryClient.invalidateQueries({ queryKey: ["meetings"] });
       setConfirmKind(null);
       router.push("/meetings");
     } catch (error: unknown) {
@@ -255,11 +272,21 @@ export function MeetingDetailPage({ meetingUuid }: MeetingDetailPageProps) {
   }
 
   const destination =
-    meeting.destination ?? cachedSnapshot?.destination ?? null;
-  const startDate = meeting.startDate ?? cachedSnapshot?.startDate ?? null;
-  const endDate = meeting.endDate ?? cachedSnapshot?.endDate ?? null;
+    meeting.destination ??
+    cachedSnapshot?.destination ??
+    scheduleQuery.data?.schedule.destination ??
+    null;
+  const startDate =
+    meeting.startDate ??
+    cachedSnapshot?.startDate ??
+    scheduleQuery.data?.schedule.startDate ??
+    null;
+  const endDate =
+    meeting.endDate ??
+    cachedSnapshot?.endDate ??
+    scheduleQuery.data?.schedule.endDate ??
+    null;
   const period = formatMeetingPeriod(startDate, endDate);
-  const cover = isHttpUrl(meeting.coverImage) ? meeting.coverImage : null;
   const isHost = meeting.myRole === "HOST";
   const isPending = meeting.myParticipation === "PENDING";
   const isJoined = meeting.myParticipation === "APPROVED";
@@ -341,19 +368,15 @@ export function MeetingDetailPage({ meetingUuid }: MeetingDetailPageProps) {
         </nav>
 
         <section className="relative mt-4 h-[37.5rem] overflow-hidden rounded-lg bg-blue-ice">
-          {cover ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              alt=""
-              className="h-full w-full object-cover object-center"
-              src={cover}
-            />
-          ) : (
-            <div
-              aria-hidden="true"
-              className="h-full w-full bg-[url('/images/meetings/hero.png')] bg-cover bg-center"
-            />
-          )}
+          <div
+            aria-hidden="true"
+            className="h-full w-full bg-[url('/images/meetings/hero.png')] bg-cover bg-center"
+          />
+          <MeetingCoverImage
+            className="absolute inset-0 h-full w-full object-cover object-center"
+            coverImage={meeting.coverImage}
+            meetingUuid={meeting.meetingUuid}
+          />
           <div
             aria-hidden="true"
             className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-black/5"

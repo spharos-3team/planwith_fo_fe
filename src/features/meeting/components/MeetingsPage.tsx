@@ -66,6 +66,7 @@ export function MeetingsPage() {
   const { status, isAuthenticated } = useAuth();
   const [tab, setTab] = useState<ListTab>("all");
   const [loginOpen, setLoginOpen] = useState(false);
+  const [loginNext, setLoginNext] = useState<string | undefined>();
   const [recruitingOnly, setRecruitingOnly] = useState(false);
   const [fromDraft, setFromDraft] = useState("");
   const [toDraft, setToDraft] = useState("");
@@ -91,6 +92,7 @@ export function MeetingsPage() {
         size: 20,
       }),
     enabled: tab === "all" && status !== "initializing",
+    refetchOnMount: "always",
   });
 
   const hostedQuery = useQuery({
@@ -98,18 +100,21 @@ export function MeetingsPage() {
     queryFn: () =>
       listMyMeetings({ scope: "hosted", page: sectionPages.hosted, size: 5 }),
     enabled: tab === "mine" && isAuthenticated,
+    refetchOnMount: "always",
   });
   const joinedQuery = useQuery({
     queryKey: ["meetings", "me", "joined", sectionPages.joined],
     queryFn: () =>
       listMyMeetings({ scope: "joined", page: sectionPages.joined, size: 5 }),
     enabled: tab === "mine" && isAuthenticated,
+    refetchOnMount: "always",
   });
   const pendingQuery = useQuery({
     queryKey: ["meetings", "me", "pending", sectionPages.pending],
     queryFn: () =>
       listMyMeetings({ scope: "pending", page: sectionPages.pending, size: 5 }),
     enabled: tab === "mine" && isAuthenticated,
+    refetchOnMount: "always",
   });
 
   const listError = useApiError(listQuery.error);
@@ -117,7 +122,7 @@ export function MeetingsPage() {
     hostedQuery.error ?? joinedQuery.error ?? pendingQuery.error
   );
 
-  const requireLogin = (nextTab?: ListTab) => {
+  const requireLogin = (nextTab?: ListTab, nextPath?: string) => {
     if (isAuthenticated) {
       if (nextTab) {
         setTab(nextTab);
@@ -125,6 +130,7 @@ export function MeetingsPage() {
       return;
     }
 
+    setLoginNext(nextPath);
     setLoginOpen(true);
   };
 
@@ -221,7 +227,11 @@ export function MeetingsPage() {
                     만들기
                   </Button>
                 ) : (
-                  <Button onClick={() => requireLogin()} pill size="sm">
+                  <Button
+                    onClick={() => requireLogin(undefined, "/meetings/new")}
+                    pill
+                    size="sm"
+                  >
                     만들기
                   </Button>
                 )}
@@ -313,7 +323,7 @@ export function MeetingsPage() {
                                   !isAuthenticated
                                 ) {
                                   event.preventDefault();
-                                  requireLogin();
+                                  requireLogin(undefined, "/meetings/new");
                                 }
 
                                 if (emptyAction.href === "/meetings") {
@@ -384,7 +394,11 @@ export function MeetingsPage() {
         </div>
       </ContentContainer>
       <LoginRequiredDialog
-        onClose={() => setLoginOpen(false)}
+        next={loginNext}
+        onClose={() => {
+          setLoginOpen(false);
+          setLoginNext(undefined);
+        }}
         open={loginOpen}
       />
     </div>
