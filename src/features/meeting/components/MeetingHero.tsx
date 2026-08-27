@@ -6,7 +6,7 @@ export function MeetingHero() {
   return (
     <section
       aria-label="함께 만드는 특별한 여행 스토리"
-      className="relative isolate h-[32rem] w-full overflow-hidden bg-surface-default text-text-primary md:h-[40rem]"
+      className="relative isolate h-[clamp(260px,26vw,500px)] w-full overflow-hidden bg-surface-default text-text-primary"
     >
       <Image
         alt="해변에서 함께 여행하는 사람들"
@@ -20,7 +20,7 @@ export function MeetingHero() {
 
       <ContentContainer className="absolute inset-0 z-[1] h-full">
         <div className="relative h-full w-full">
-          <div className="absolute left-0 right-0 top-1/2 max-w-[580px] -translate-y-1/2 sm:right-auto sm:w-[60%] md:left-[15.21%] md:top-[33.28125%] md:w-[36.77%] md:translate-y-0">
+          <div className="absolute left-0 right-0 top-1/2 max-w-[580px] -translate-y-1/2 sm:right-auto sm:w-[60%] md:left-[15.21%] md:w-[36.77%]">
             <h1 className="text-[clamp(2.25rem,2.5vw,3rem)] font-semibold leading-[1.25]">
               함께 만드는
               <br />

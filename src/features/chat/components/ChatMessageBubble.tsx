@@ -23,48 +23,68 @@ export function ChatMessageBubble({
   const body = message.deleted
     ? "삭제된 메시지입니다."
     : (message.content?.trim() ?? "");
+  const statusLabel = message.deleted
+    ? "삭제됨"
+    : message.modified
+      ? "수정됨"
+      : null;
 
   return (
-    <div className={`flex gap-2 ${mine ? "flex-row-reverse" : "flex-row"}`}>
-      {mine ? (
-        <span className="size-9 shrink-0" />
-      ) : (
-        <button
-          aria-label={`${nickname} 프로필`}
-          className="mt-5 shrink-0"
-          onClick={() => onProfileClick(message.senderUuid)}
-          type="button"
-        >
-          <ProfileAvatar
-            memberUuid={message.senderUuid}
-            nickname={nickname}
-            size={36}
-            src={profileQuery.data?.profileImage ?? null}
-          />
-        </button>
-      )}
+    <div className={`flex flex-col ${mine ? "items-end" : "items-start"}`}>
+      {showMeta && !mine ? (
+        <p className="mb-1 ml-11 px-1 text-caption-sm font-bold text-text-secondary">
+          {nickname}
+        </p>
+      ) : null}
       <div
-        className={`max-w-[min(100%,28rem)] ${mine ? "items-end" : "items-start"} flex flex-col`}
+        className={`flex max-w-[min(100%,28rem)] items-start gap-2 ${
+          mine ? "flex-row-reverse" : "flex-row"
+        }`}
       >
-        {showMeta && !mine ? (
-          <p className="mb-1 px-1 text-caption-sm font-bold text-text-secondary">
-            {nickname}
-          </p>
+        {!mine ? (
+          <div className="grid size-9 shrink-0 place-items-start">
+            {showMeta ? (
+              <button
+                aria-label={`${nickname} 프로필`}
+                className="size-9"
+                onClick={() => onProfileClick(message.senderUuid)}
+                type="button"
+              >
+                <ProfileAvatar
+                  memberUuid={message.senderUuid}
+                  nickname={nickname}
+                  size={36}
+                  src={profileQuery.data?.profileImage ?? null}
+                />
+              </button>
+            ) : null}
+          </div>
         ) : null}
         <div
-          className={`flex items-end gap-1 ${mine ? "flex-row-reverse" : ""}`}
+          className={`flex min-w-0 items-end gap-1 ${mine ? "flex-row-reverse" : ""}`}
         >
-          <p
-            className={`whitespace-pre-wrap break-words rounded-lg px-3 py-2 text-body-sm ${
-              message.deleted
-                ? "bg-surface-page text-text-disabled"
-                : mine
-                  ? "bg-brand-primary text-text-inverse"
-                  : "bg-blue-ice text-text-primary"
-            }`}
-          >
-            {body || (message.files.length > 0 ? "첨부 파일" : "")}
-          </p>
+          <div className="min-w-0">
+            <p
+              className={`whitespace-pre-wrap break-words rounded-lg px-3 py-2 text-body-sm ${
+                message.deleted
+                  ? "bg-surface-page text-text-disabled"
+                  : mine
+                    ? "bg-brand-primary text-text-inverse"
+                    : "bg-blue-ice text-text-primary"
+              }`}
+            >
+              {body || (message.files.length > 0 ? "첨부 파일" : "")}
+            </p>
+            {statusLabel ? (
+              <p
+                className={`mt-0.5 text-[10px] leading-none text-text-disabled ${
+                  mine ? "text-right" : "text-left"
+                }`}
+              >
+                {statusLabel}
+              </p>
+            ) : null}
+          </div>
           <time className="shrink-0 pb-0.5 text-caption-sm text-text-disabled">
             {formatChatClock(message.createdAt)}
           </time>

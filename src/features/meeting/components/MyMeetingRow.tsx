@@ -31,15 +31,15 @@ export function MyMeetingRow({
         className="relative h-48 w-full shrink-0 bg-blue-ice sm:h-[12.5rem] sm:w-[18.75rem]"
         href={`/community/meeting/${meeting.meetingUuid}`}
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-header-branded to-brand-primary" />
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 bg-[url('/images/meetings/hero-background.png')] bg-cover bg-center"
+        />
         <MeetingCoverImage
           className="absolute inset-0 z-[1] h-full w-full object-cover"
           coverImage={meeting.coverImage}
           meetingUuid={meeting.meetingUuid}
         />
-        <p className="relative z-0 p-4 text-heading-sm text-white">
-          {meeting.destination ?? "여행"}
-        </p>
       </Link>
       <div className="flex min-w-0 flex-1 flex-col justify-center gap-4 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
         <Link
