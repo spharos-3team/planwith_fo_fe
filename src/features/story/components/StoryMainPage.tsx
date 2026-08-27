@@ -7,6 +7,7 @@ import { InputField } from "@/components/common/InputField";
 import { ContentContainer } from "@/components/common/layout/ContentContainer";
 
 import { StoryCreateAction } from "./StoryCreateAction";
+import { StorySearchResults } from "./StorySearchResults";
 
 const storyTabs = [
   { href: "/community/stories", label: "전체", value: "all" },
@@ -294,7 +295,17 @@ function PopularCreatorsSection() {
   );
 }
 
-export function StoryMainPage({ activeSort }: { activeSort: StorySort }) {
+interface StoryMainPageProps {
+  activeSort: StorySort;
+  keyword: string;
+  page: number;
+}
+
+export function StoryMainPage({
+  activeSort,
+  keyword,
+  page,
+}: StoryMainPageProps) {
   return (
     <div className="bg-surface-default">
       <section
@@ -323,6 +334,7 @@ export function StoryMainPage({ activeSort }: { activeSort: StorySort }) {
               <InputField
                 aria-label="스토리 검색"
                 className="rounded-full border-line-light bg-surface-page pr-5"
+                defaultValue={keyword}
                 icon={Search}
                 name="keyword"
                 placeholder="여행 스토리를 검색해 보세요"
@@ -356,11 +368,17 @@ export function StoryMainPage({ activeSort }: { activeSort: StorySort }) {
             ))}
           </nav>
 
-          <div className="mt-10 grid gap-12">
-            <RecommendedStoriesSection />
-            <PopularCreatorsSection />
-            <LatestStoriesSection />
-          </div>
+          {keyword ? (
+            <div className="mt-10">
+              <StorySearchResults keyword={keyword} page={page} />
+            </div>
+          ) : (
+            <div className="mt-10 grid gap-12">
+              <RecommendedStoriesSection />
+              <PopularCreatorsSection />
+              <LatestStoriesSection />
+            </div>
+          )}
         </div>
       </ContentContainer>
     </div>
