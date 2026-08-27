@@ -1,12 +1,17 @@
 "use client";
 
 import { Camera } from "lucide-react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/common/Button";
 import { InputField } from "@/components/common/InputField";
+import { StatusMessage } from "@/components/common/StatusMessage";
 import { AuthLoginLink } from "@/features/auth/components/AuthHero";
 import { SignupStepper } from "@/features/auth/components/SignupStepper";
+import {
+  formatVerifiedRemaining,
+  remainingVerifiedSeconds,
+} from "@/features/auth/lib/verified-ttl";
 import { nicknameSchema } from "@/features/auth/schemas/auth";
 import { toProfileImageFile } from "@/features/mypage/lib/profile-image";
 import { useApiError } from "@/hooks/useApiError";
@@ -21,6 +26,9 @@ interface ProfileStepProps {
   submitting: boolean;
   error: string;
   submitLabel: string;
+  emailVerifiedUntil: number | null;
+  phoneVerifiedUntil: number | null;
+  onGoToVerification: () => void;
   onNicknameChange: (value: string) => void;
   onIntroChange: (value: string) => void;
   onNicknameChecked: (available: boolean) => void;
@@ -37,12 +45,31 @@ export function ProfileStep({
   submitting,
   error,
   submitLabel,
+  emailVerifiedUntil,
+  phoneVerifiedUntil,
+  onGoToVerification,
   onNicknameChange,
   onIntroChange,
   onNicknameChecked,
   onImageChange,
   onSubmit,
 }: ProfileStepProps) {
+  const [now, setNow] = useState(() => Date.now());
+  const emailRemaining = remainingVerifiedSeconds(emailVerifiedUntil, now);
+  const phoneRemaining = remainingVerifiedSeconds(phoneVerifiedUntil, now);
+  const emailExpired = Boolean(emailVerifiedUntil) && emailRemaining === 0;
+  const phoneExpired = Boolean(phoneVerifiedUntil) && phoneRemaining === 0;
+  const verificationExpired = emailExpired || phoneExpired;
+
+  useEffect(() => {
+    if (!emailVerifiedUntil && !phoneVerifiedUntil) {
+      return;
+    }
+    const timer = window.setInterval(() => {
+      setNow(Date.now());
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, [emailVerifiedUntil, phoneVerifiedUntil]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [checking, setChecking] = useState(false);
   const [nicknameMessage, setNicknameMessage] = useState("");
@@ -185,6 +212,35 @@ export function ProfileStep({
         />
       </div>
 
+      {emailVerifiedUntil && !emailExpired ? (
+        <p className="mt-4 text-caption text-text-tertiary" role="timer">
+          이메일 인증 유효시간 {formatVerifiedRemaining(emailRemaining)}
+        </p>
+      ) : null}
+      {phoneVerifiedUntil && !phoneExpired ? (
+        <p className="mt-1 text-caption text-text-tertiary" role="timer">
+          본인인증 유효시간 {formatVerifiedRemaining(phoneRemaining)}
+        </p>
+      ) : null}
+
+      {verificationExpired ? (
+        <div className="mt-4 w-full max-w-[440px]">
+          <StatusMessage role="alert">
+            {emailExpired
+              ? "이메일 인증 유효시간이 지났습니다. 다시 인증해 주세요."
+              : "본인인증 유효시간이 지났습니다. 다시 인증해 주세요."}
+          </StatusMessage>
+          <Button
+            buttonStyle="secondary"
+            className="mt-3 w-full"
+            onClick={onGoToVerification}
+            type="button"
+          >
+            인증 단계로
+          </Button>
+        </div>
+      ) : null}
+
       {imageError || error ? (
         <p className="mt-4 text-caption text-status-error" role="alert">
           {imageError || apiError}
@@ -193,7 +249,7 @@ export function ProfileStep({
 
       <Button
         className="mt-6 w-[200px] tracking-[1.5px]"
-        disabled={!nicknameAvailable || submitting}
+        disabled={!nicknameAvailable || submitting || verificationExpired}
         onClick={onSubmit}
       >
         {submitLabel}

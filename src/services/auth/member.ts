@@ -19,6 +19,7 @@ export interface EmailVerificationSendResult {
 export interface EmailVerificationConfirmResult {
   email: string;
   verified: boolean;
+  verifiedExpiresInSeconds?: number;
 }
 
 export interface PhoneVerificationPrepareResult {

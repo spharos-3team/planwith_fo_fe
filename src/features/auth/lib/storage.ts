@@ -77,6 +77,8 @@ export interface SignupDraft {
   name: string;
   email: string;
   emailVerified: boolean;
+  emailVerifiedUntil?: number | null;
+  phoneVerifiedUntil?: number | null;
   verificationCode: string;
   password: string;
   nickname: string;
