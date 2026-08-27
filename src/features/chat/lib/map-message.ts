@@ -1,3 +1,4 @@
+import { previewChatFileLabel } from "@/features/chat/lib/file-src";
 import type {
   ChatFileAttachment,
   ChatLastMessage,
@@ -105,5 +106,15 @@ function previewOrEmpty(message: ChatMessage): string {
   if (message.deleted) {
     return "삭제된 메시지입니다.";
   }
-  return message.content?.trim() || "";
+  const text = message.content?.trim() ?? "";
+  if (text) {
+    return text;
+  }
+  if (message.files[0]) {
+    return previewChatFileLabel(
+      message.files[0].fileType,
+      message.files[0].name
+    );
+  }
+  return "";
 }

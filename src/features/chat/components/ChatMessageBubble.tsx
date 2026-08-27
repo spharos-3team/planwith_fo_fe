@@ -1,5 +1,6 @@
 "use client";
 
+import { ChatMessageFiles } from "@/features/chat/components/ChatMessageFiles";
 import { formatChatClock } from "@/features/chat/lib/format";
 import type { ChatMessage } from "@/features/chat/types";
 import { ProfileAvatar } from "@/features/mypage/components/ProfileAvatar";
@@ -28,6 +29,7 @@ export function ChatMessageBubble({
     : message.modified
       ? "수정됨"
       : null;
+  const files = message.deleted ? [] : message.files;
 
   return (
     <div className={`flex flex-col ${mine ? "items-end" : "items-start"}`}>
@@ -64,17 +66,24 @@ export function ChatMessageBubble({
           className={`flex min-w-0 items-end gap-1 ${mine ? "flex-row-reverse" : ""}`}
         >
           <div className="min-w-0">
-            <p
-              className={`whitespace-pre-wrap break-words rounded-lg px-3 py-2 text-body-sm ${
-                message.deleted
-                  ? "bg-surface-page text-text-disabled"
-                  : mine
-                    ? "bg-brand-primary text-text-inverse"
-                    : "bg-blue-ice text-text-primary"
-              }`}
-            >
-              {body || (message.files.length > 0 ? "첨부 파일" : "")}
-            </p>
+            {files.length > 0 ? (
+              <ChatMessageFiles files={files} mine={mine} />
+            ) : null}
+            {body ? (
+              <p
+                className={`whitespace-pre-wrap break-words rounded-lg px-3 py-2 text-body-sm ${
+                  files.length > 0 ? "mt-1" : ""
+                } ${
+                  message.deleted
+                    ? "bg-surface-page text-text-disabled"
+                    : mine
+                      ? "bg-brand-primary text-text-inverse"
+                      : "bg-blue-ice text-text-primary"
+                }`}
+              >
+                {body}
+              </p>
+            ) : null}
             {statusLabel ? (
               <p
                 className={`mt-0.5 text-[10px] leading-none text-text-disabled ${

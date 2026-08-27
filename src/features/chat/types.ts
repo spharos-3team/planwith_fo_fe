@@ -72,3 +72,15 @@ export interface ListChatMessagesQuery {
   before?: string;
   size?: number;
 }
+
+export interface ChatFileUploadResult {
+  fileUuid: string;
+  fileType: ChatFileType | string;
+  url: string;
+  name: string | null;
+}
+
+export interface ChatSendPayload {
+  content: string;
+  files: File[];
+}
