@@ -22,10 +22,13 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { useOptionalAuth } from "@/features/auth/context/AuthProvider";
+import { ProfileAvatar } from "@/features/mypage/components/ProfileAvatar";
 import { useTokenBalance } from "@/features/payment/hooks/usePaymentSummary";
 
 import { BrandLogo } from "./BrandLogo";
 import { ContentContainer, HeroContentContainer } from "./ContentContainer";
+import { HeaderChatInbox } from "./HeaderChatInbox";
+import { HeaderProfileMenu } from "./HeaderProfileMenu";
 
 interface HeaderProps {
   authenticated?: boolean;
@@ -85,7 +88,6 @@ const headerAssets = {
   chevronActive: "/images/header/chevron-down-active.svg",
   message: "/images/header/message.svg",
   notification: "/images/header/notification.svg",
-  profile: "/images/header/profile.svg",
   token: "/images/header/token.svg",
 } as const;
 
@@ -331,13 +333,7 @@ export function Header({
             {isAuthenticated ? (
               <>
                 <div className="flex items-center gap-4">
-                  <Link
-                    aria-current={
-                      pathname.startsWith("/chat") ? "page" : undefined
-                    }
-                    aria-label="채팅"
-                    href="/chat"
-                  >
+                  <HeaderChatInbox>
                     <Image
                       alt=""
                       className="size-[30px]"
@@ -345,7 +341,7 @@ export function Header({
                       src={headerAssets.message}
                       width={30}
                     />
-                  </Link>
+                  </HeaderChatInbox>
                   <Link aria-label="알림" href="/notifications">
                     <Image
                       alt=""
@@ -369,22 +365,25 @@ export function Header({
                   />
                   {formattedTokenBalance}
                 </span>
-                <Link
-                  aria-label="사용자 프로필"
-                  className="flex items-center"
-                  href="/mypage"
-                >
-                  <span className="p-2.5 text-label-sm text-text-inverse">
-                    {nickname ? `${nickname}님` : "회원님"}
-                  </span>
-                  <Image
-                    alt=""
-                    className="size-9"
-                    height={36}
-                    src={headerAssets.profile}
-                    width={36}
-                  />
-                </Link>
+                <HeaderProfileMenu
+                  memberUuid={memberUuid}
+                  nickname={nickname || "회원"}
+                  profileImage={auth?.profile?.profileImage ?? null}
+                  trigger={
+                    <>
+                      <span className="p-2.5 text-label-sm text-text-inverse">
+                        {nickname ? `${nickname}님` : "회원님"}
+                      </span>
+                      <ProfileAvatar
+                        className="ring-1 ring-white/30"
+                        memberUuid={memberUuid}
+                        nickname={nickname || "회원"}
+                        size={36}
+                        src={auth?.profile?.profileImage ?? null}
+                      />
+                    </>
+                  }
+                />
               </>
             ) : (
               <Link
@@ -494,16 +493,9 @@ export function Header({
                   토큰 {formattedTokenBalance}
                 </span>
                 <div className="flex items-center gap-3">
-                  <Link
-                    aria-current={
-                      pathname.startsWith("/chat") ? "page" : undefined
-                    }
-                    aria-label="채팅"
-                    href="/chat"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
+                  <HeaderChatInbox onNavigate={() => setMobileMenuOpen(false)}>
                     <MessageCircle aria-hidden="true" className="h-5 w-5" />
-                  </Link>
+                  </HeaderChatInbox>
                   <Link
                     aria-label="알림"
                     href="/notifications"
@@ -511,6 +503,21 @@ export function Header({
                   >
                     <Bell aria-hidden="true" className="h-5 w-5" />
                   </Link>
+                  <HeaderProfileMenu
+                    memberUuid={memberUuid}
+                    nickname={nickname || "회원"}
+                    onNavigate={() => setMobileMenuOpen(false)}
+                    profileImage={auth?.profile?.profileImage ?? null}
+                    trigger={
+                      <ProfileAvatar
+                        className="ring-1 ring-white/30"
+                        memberUuid={memberUuid}
+                        nickname={nickname || "회원"}
+                        size={32}
+                        src={auth?.profile?.profileImage ?? null}
+                      />
+                    }
+                  />
                 </div>
               </div>
             ) : (
