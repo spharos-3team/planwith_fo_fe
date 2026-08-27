@@ -6,6 +6,8 @@ import { Button } from "@/components/common/Button";
 import { InputField } from "@/components/common/InputField";
 import { ContentContainer } from "@/components/common/layout/ContentContainer";
 
+import { StoryCreateAction } from "./StoryCreateAction";
+
 const storyTabs = [
   { href: "/community/stories", label: "전체", value: "all" },
   {
@@ -311,25 +313,28 @@ export function StoryMainPage({ activeSort }: { activeSort: StorySort }) {
 
       <ContentContainer as="section" className="py-section-y">
         <div className="mx-auto w-full max-w-[1200px]">
-          <form
-            action="/community/stories"
-            className="mx-auto w-full max-w-[440px]"
-            method="get"
-            role="search"
-          >
-            <InputField
-              aria-label="스토리 검색"
-              className="rounded-full border-line-light bg-surface-page pr-5"
-              icon={Search}
-              name="keyword"
-              placeholder="여행 스토리를 검색해 보세요"
-              showLabel={false}
-              type="search"
-            />
-            <Button className="sr-only" type="submit">
-              검색
-            </Button>
-          </form>
+          <div className="relative flex flex-col items-center">
+            <form
+              action="/community/stories"
+              className="w-full max-w-[440px]"
+              method="get"
+              role="search"
+            >
+              <InputField
+                aria-label="스토리 검색"
+                className="rounded-full border-line-light bg-surface-page pr-5"
+                icon={Search}
+                name="keyword"
+                placeholder="여행 스토리를 검색해 보세요"
+                showLabel={false}
+                type="search"
+              />
+              <Button className="sr-only" type="submit">
+                검색
+              </Button>
+            </form>
+            <StoryCreateAction />
+          </div>
 
           <nav
             aria-label="스토리 정렬"
