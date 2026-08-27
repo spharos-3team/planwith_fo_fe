@@ -13,7 +13,12 @@ import {
   remainingVerifiedSeconds,
 } from "@/features/auth/lib/verified-ttl";
 import { nicknameSchema } from "@/features/auth/schemas/auth";
-import { toProfileImageFile } from "@/features/mypage/lib/profile-image";
+import { ProfileAvatar } from "@/features/mypage/components/ProfileAvatar";
+import {
+  PROFILE_IMAGE_ACCEPT,
+  PROFILE_IMAGE_HINT,
+  toProfileImageFile,
+} from "@/features/mypage/lib/profile-image";
 import { useApiError } from "@/hooks/useApiError";
 import { checkNicknameAvailability } from "@/services/auth/member";
 
@@ -132,16 +137,11 @@ export function ProfileStep({
       </p>
 
       <div className="relative mt-10">
-        <div className="size-20 overflow-hidden rounded-circle bg-line-light">
-          {profilePreview ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              alt="프로필 미리보기"
-              className="size-full object-cover"
-              src={profilePreview}
-            />
-          ) : null}
-        </div>
+        <ProfileAvatar
+          nickname={nickname || "?"}
+          size={80}
+          src={profilePreview}
+        />
         <button
           aria-label="프로필 이미지 선택"
           className="absolute -bottom-1 -right-1 grid size-[30px] place-items-center rounded-circle bg-header-nav-active text-text-inverse"
@@ -151,13 +151,20 @@ export function ProfileStep({
           <Camera aria-hidden="true" className="size-3.5" />
         </button>
         <input
-          accept="image/jpeg,image/png,image/webp"
+          accept={PROFILE_IMAGE_ACCEPT}
           className="hidden"
-          onChange={(event) => handleImage(event.target.files?.[0] ?? null)}
+          onChange={(event) => {
+            const file = event.target.files?.[0] ?? null;
+            event.target.value = "";
+            handleImage(file);
+          }}
           ref={fileInputRef}
           type="file"
         />
       </div>
+      <p className="mt-3 text-center text-caption text-text-tertiary">
+        {PROFILE_IMAGE_HINT}
+      </p>
 
       <div className="mt-6 w-full max-w-[440px]">
         {email ? <InputField disabled label="이메일" value={email} /> : null}

@@ -11,7 +11,7 @@ import { useApiError } from "@/hooks/useApiError";
 import { getPublicProfile } from "@/services/member/mypage";
 
 export function MyPageOverviewPage() {
-  const { profile } = useAuth();
+  const { profile, profileRevision } = useAuth();
   const memberUuid = profile?.memberUuid ?? "";
   const profileQuery = useQuery({
     queryKey: ["members", memberUuid, "public-profile"],
@@ -33,6 +33,7 @@ export function MyPageOverviewPage() {
         nickname={profile.nickname}
         profileImage={profile.profileImage}
         profileIntro={profile.profileIntro}
+        revision={profileRevision}
       />
 
       {error ? <StatusMessage role="alert">{error}</StatusMessage> : null}

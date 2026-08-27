@@ -1,12 +1,24 @@
 import { authenticatedFetch } from "@/utils/apiClient";
 
-const PROFILE_IMAGE_SIZE = 400;
-const PROFILE_IMAGE_MAX_BYTES = 5 * 1024 * 1024;
+export const PROFILE_IMAGE_MIN_PX = 512;
+export const PROFILE_IMAGE_MAX_PX = 1024;
+export const PROFILE_IMAGE_MAX_BYTES = 5 * 1024 * 1024;
+export const PROFILE_IMAGE_ACCEPT =
+  "image/jpeg,image/jpg,image/png,image/webp,.jpg,.jpeg,.png,.webp";
+export const PROFILE_IMAGE_HINT =
+  "JPG, JPEG, PNG, WebP · 최대 5MB · 권장 512×512px";
+
+const ALLOWED_TYPES = new Set([
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+]);
 
 export function isDisplayableImageUrl(
   url: string | null | undefined
 ): url is string {
-  return Boolean(url && /^(https?:|blob:|data:)/i.test(url));
+  return Boolean(url && /^(blob:|data:)/i.test(url));
 }
 
 export function profileImageRequestPath(
@@ -29,10 +41,16 @@ export function profileImageRequestPath(
 }
 
 export async function fetchProfileImageObjectUrl(
-  memberUuid: string
+  memberUuid: string,
+  revision?: number | string
 ): Promise<string | null> {
+  const query =
+    revision === undefined || revision === ""
+      ? ""
+      : `?t=${encodeURIComponent(String(revision))}`;
   const response = await authenticatedFetch(
-    `/members/${memberUuid}/profile-image`
+    `/members/${memberUuid}/profile-image${query}`,
+    { cache: "no-store" }
   );
   if (!response.ok) {
     return null;
@@ -69,34 +87,44 @@ export async function toProfileImageFile(file: File): Promise<File> {
     throw new Error("이미지 용량은 5MB 이하여야 합니다.");
   }
 
+  const contentType = resolveImageType(file);
   const objectUrl = URL.createObjectURL(file);
 
   try {
     const image = await loadImage(objectUrl);
+    const sourceSize = Math.min(image.width, image.height);
+    if (sourceSize <= 0) {
+      throw new Error("실제 이미지 파일이 아닙니다.");
+    }
+
+    const storedSize = Math.min(
+      PROFILE_IMAGE_MAX_PX,
+      Math.max(PROFILE_IMAGE_MIN_PX, sourceSize)
+    );
     const canvas = document.createElement("canvas");
-    canvas.width = PROFILE_IMAGE_SIZE;
-    canvas.height = PROFILE_IMAGE_SIZE;
+    canvas.width = storedSize;
+    canvas.height = storedSize;
     const context = canvas.getContext("2d");
 
     if (!context) {
       throw new Error("프로필 이미지를 처리할 수 없습니다.");
     }
 
-    const scale = Math.max(
-      PROFILE_IMAGE_SIZE / image.width,
-      PROFILE_IMAGE_SIZE / image.height
-    );
-    const drawWidth = image.width * scale;
-    const drawHeight = image.height * scale;
+    const cropX = (image.width - sourceSize) / 2;
+    const cropY = (image.height - sourceSize) / 2;
     context.drawImage(
       image,
-      (PROFILE_IMAGE_SIZE - drawWidth) / 2,
-      (PROFILE_IMAGE_SIZE - drawHeight) / 2,
-      drawWidth,
-      drawHeight
+      cropX,
+      cropY,
+      sourceSize,
+      sourceSize,
+      0,
+      0,
+      storedSize,
+      storedSize
     );
 
-    const blob = await canvasToBlob(canvas, file.type);
+    const blob = await canvasToBlob(canvas, contentType);
     const extension = extensionOf(blob.type);
 
     return new File([blob], `profile.${extension}`, { type: blob.type });
@@ -105,12 +133,31 @@ export async function toProfileImageFile(file: File): Promise<File> {
   }
 }
 
+function resolveImageType(file: File): string {
+  const type = (file.type || "").toLowerCase();
+  if (ALLOWED_TYPES.has(type)) {
+    return type === "image/jpg" ? "image/jpeg" : type;
+  }
+
+  const name = file.name.toLowerCase();
+  if (name.endsWith(".jpg") || name.endsWith(".jpeg")) {
+    return "image/jpeg";
+  }
+  if (name.endsWith(".png")) {
+    return "image/png";
+  }
+  if (name.endsWith(".webp")) {
+    return "image/webp";
+  }
+
+  throw new Error("JPG, JPEG, PNG, WebP만 업로드할 수 있습니다.");
+}
+
 function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const image = new Image();
     image.onload = () => resolve(image);
-    image.onerror = () =>
-      reject(new Error("프로필 이미지를 읽을 수 없습니다."));
+    image.onerror = () => reject(new Error("실제 이미지 파일이 아닙니다."));
     image.src = src;
   });
 }

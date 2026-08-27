@@ -8,6 +8,7 @@ interface MyPageProfileSummaryProps {
   postCount?: number;
   followerCount?: number;
   followingCount?: number;
+  revision?: number;
 }
 
 function Stat({ label, value }: { label: string; value?: number }) {
@@ -29,6 +30,7 @@ export function MyPageProfileSummary({
   postCount,
   followerCount,
   followingCount,
+  revision,
 }: MyPageProfileSummaryProps) {
   return (
     <section className="w-full rounded-[24px] border-[1.5px] border-blue-ice bg-surface-default p-6 sm:p-8">
@@ -36,6 +38,7 @@ export function MyPageProfileSummary({
         <ProfileAvatar
           memberUuid={memberUuid}
           nickname={nickname}
+          revision={revision}
           size={120}
           src={profileImage}
         />
