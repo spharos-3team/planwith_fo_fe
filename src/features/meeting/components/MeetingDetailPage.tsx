@@ -1,11 +1,13 @@
 "use client";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { Badge } from "@/components/common/Badge";
 import { Button } from "@/components/common/Button";
+import { ContentContainer } from "@/components/common/layout/ContentContainer";
 import { Modal } from "@/components/common/Modal";
 import { StatusMessage } from "@/components/common/StatusMessage";
 import { useAuth } from "@/features/auth/context/AuthProvider";
@@ -222,15 +224,15 @@ export function MeetingDetailPage({ meetingUuid }: MeetingDetailPageProps) {
 
   if (status === "initializing" || detailQuery.isLoading) {
     return (
-      <div className="mx-auto w-full max-w-[1224px] px-6 py-16 sm:px-10">
+      <ContentContainer className="py-16">
         <StatusMessage>모임을 불러오는 중입니다.</StatusMessage>
-      </div>
+      </ContentContainer>
     );
   }
 
   if (loadError || !meeting) {
     return (
-      <div className="mx-auto w-full max-w-[1224px] px-6 py-16 sm:px-10">
+      <ContentContainer className="py-16">
         <StatusMessage role="alert">
           {loadError || "모임을 찾을 수 없습니다."}
         </StatusMessage>
@@ -242,7 +244,7 @@ export function MeetingDetailPage({ meetingUuid }: MeetingDetailPageProps) {
             모임 목록으로 돌아가기
           </Link>
         </div>
-      </div>
+      </ContentContainer>
     );
   }
 
@@ -290,10 +292,6 @@ export function MeetingDetailPage({ meetingUuid }: MeetingDetailPageProps) {
   const chatHref = isCompleted
     ? `/chat?meetingUuid=${meeting.meetingUuid}&readonly=1`
     : `/chat?meetingUuid=${meeting.meetingUuid}`;
-  const memberCountLabel = isFull
-    ? `${meeting.currentMemberCount}/${meeting.maxMemberCount}명 (${meetingStatusLabel(meeting.status)})`
-    : `${meeting.currentMemberCount}/${meeting.maxMemberCount}명`;
-
   const openApply = () => {
     if (!isAuthenticated) {
       setLoginOpen(true);
@@ -318,7 +316,7 @@ export function MeetingDetailPage({ meetingUuid }: MeetingDetailPageProps) {
 
   return (
     <div className="bg-surface-page pb-20">
-      <div className="mx-auto w-full max-w-[1224px] px-6 pt-8 sm:px-10">
+      <ContentContainer className="pt-8">
         <nav
           aria-label="breadcrumb"
           className="flex items-center gap-2 text-caption text-text-secondary"
@@ -334,7 +332,7 @@ export function MeetingDetailPage({ meetingUuid }: MeetingDetailPageProps) {
           <span className="text-text-primary">모임상세</span>
         </nav>
 
-        <section className="relative mt-4 h-[37.5rem] overflow-hidden rounded-lg bg-blue-ice">
+        <section className="relative mt-4 h-[20rem] overflow-hidden rounded-lg bg-blue-ice sm:h-[24rem] lg:h-[28rem]">
           <div
             aria-hidden="true"
             className="h-full w-full bg-[url('/images/meetings/hero.png')] bg-cover bg-center"
@@ -363,10 +361,13 @@ export function MeetingDetailPage({ meetingUuid }: MeetingDetailPageProps) {
           </div>
         </section>
 
-        <div className="mt-10 grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
-          <div>
-            <section>
-              <h2 className="border-b border-line-light pb-3 text-heading-lg text-text-primary">
+        <div className="mt-6 grid gap-8 lg:grid-cols-[minmax(0,1fr)_328px] lg:items-start">
+          <main>
+            <section aria-labelledby="meeting-introduction">
+              <h2
+                className="text-heading-lg text-text-primary"
+                id="meeting-introduction"
+              >
                 모임 소개
               </h2>
               <p className="mt-6 whitespace-pre-wrap text-body-sm leading-7 text-text-secondary">
@@ -374,16 +375,39 @@ export function MeetingDetailPage({ meetingUuid }: MeetingDetailPageProps) {
               </p>
             </section>
 
-            <article className="mt-10 flex items-center gap-6 rounded-lg border border-line-light bg-white p-8">
+            <section
+              aria-label="모임 핵심 정보"
+              className="mt-8 grid grid-cols-1 gap-4 border-t border-line-light pt-5 sm:grid-cols-2"
+            >
+              <dl className="rounded-lg border border-line-light bg-surface-default px-card py-5">
+                <dt className="text-caption text-text-disabled">여행 목적지</dt>
+                <dd className="mt-1 text-heading-md text-text-primary">
+                  {destination || "미정"}
+                </dd>
+              </dl>
+              <dl className="rounded-lg border border-line-light bg-surface-default px-card py-5">
+                <dt className="text-caption text-text-disabled">여행 기간</dt>
+                <dd className="mt-1 text-heading-md text-text-primary">
+                  {period || "미정"}
+                </dd>
+              </dl>
+            </section>
+          </main>
+
+          <aside className="grid gap-4 lg:sticky lg:top-24">
+            <section
+              aria-label="모임 방장"
+              className="flex items-center gap-4 rounded-lg border border-line-light bg-surface-default p-card"
+            >
               <ProfileAvatar
                 memberUuid={meeting.memberUuid}
                 nickname={hostNickname}
-                size={96}
+                size={56}
                 src={hostImage}
               />
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
-                  <p className="text-heading-lg text-text-primary">
+                  <p className="text-heading-md text-text-primary">
                     {hostNickname}
                   </p>
                   <Badge size="sm" tone="blue">
@@ -396,126 +420,116 @@ export function MeetingDetailPage({ meetingUuid }: MeetingDetailPageProps) {
                   </p>
                 ) : null}
               </div>
-            </article>
-          </div>
+            </section>
 
-          <aside className="rounded-lg border border-line-light bg-white p-8 lg:sticky lg:top-24">
-            <dl className="grid gap-6">
+            <section className="rounded-lg border border-line-light bg-surface-default p-card">
               <div>
-                <dt className="text-caption text-text-disabled">여행 목적지</dt>
-                <dd className="mt-1 text-body-sm font-semibold text-text-primary">
-                  {destination || "미정"}
-                </dd>
-              </div>
-              <div>
-                <dt className="text-caption text-text-disabled">여행 기간</dt>
-                <dd className="mt-1 text-body-sm font-semibold text-text-primary">
-                  {period || "미정"}
-                </dd>
-              </div>
-              <div>
-                <dt className="text-caption text-text-disabled">모임 인원</dt>
-                <dd className="mt-1 text-body-sm font-semibold text-text-primary">
-                  {memberCountLabel}
-                </dd>
-              </div>
-            </dl>
-
-            <hr className="my-6 border-line-light" />
-
-            <div>
-              <div className="flex items-center justify-between">
-                <h3 className="text-heading-sm text-text-primary">참여 멤버</h3>
-                <p className="text-caption text-text-secondary">
-                  {isFull || isCompleted
-                    ? meetingStatusLabel(meeting.status)
-                    : `${meeting.currentMemberCount} / ${meeting.maxMemberCount}명 참여 중`}
-                </p>
-              </div>
-              <div className="mt-3 h-3 overflow-hidden rounded-full bg-blue-ice">
-                <div
-                  className="h-full rounded-full bg-brand-primary"
-                  style={{ width: `${progress}%` }}
-                />
-              </div>
-              {hints.length > 0 ? (
-                <div className="mt-3 text-center text-caption leading-5 text-text-secondary">
-                  {hints.map((line) => (
-                    <p key={line}>{line}</p>
-                  ))}
+                <div className="flex items-center justify-between">
+                  <h3 className="text-heading-sm text-text-primary">
+                    참여 멤버
+                  </h3>
+                  <p className="text-caption text-text-secondary">
+                    {isFull || isCompleted
+                      ? meetingStatusLabel(meeting.status)
+                      : `${meeting.currentMemberCount} / ${meeting.maxMemberCount}명 참여 중`}
+                  </p>
                 </div>
-              ) : null}
-            </div>
-
-            <div className="mt-6 grid gap-3">
-              {meeting.canEnterChat ? (
-                <Link className={ACTION_LINK_PRIMARY} href={chatHref}>
-                  채팅방 입장
-                </Link>
-              ) : null}
-
-              {isHost ? (
-                <>
-                  <Link className={ACTION_LINK_SECONDARY} href={membersHref}>
-                    모임 구성원 관리
-                  </Link>
-                  {isCompleted ? null : (
-                    <Link
-                      className={ACTION_LINK_SECONDARY}
-                      href={`/community/meeting/${meeting.meetingUuid}/edit`}
-                    >
-                      모임 수정
-                    </Link>
-                  )}
-                  <MeetingHostManageActions
-                    canBump={canBumpByGrade(profile?.grade)}
-                    meeting={meeting}
-                    onToast={setToast}
+                <div className="mt-3 h-3 overflow-hidden rounded-full bg-blue-ice">
+                  <div
+                    className="h-full rounded-full bg-brand-primary"
+                    style={{ width: `${progress}%` }}
                   />
-                </>
-              ) : null}
+                </div>
+                {hints.length > 0 ? (
+                  <div className="mt-3 text-center text-caption leading-5 text-text-secondary">
+                    {hints.map((line) => (
+                      <p key={line}>{line}</p>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
 
-              {!isHost && meeting.canApply ? (
-                <Button className="w-full" onClick={openApply}>
-                  모임 신청
-                </Button>
-              ) : null}
+              <div className="mt-6 grid gap-3">
+                {meeting.canEnterChat ? (
+                  <Link className={ACTION_LINK_PRIMARY} href={chatHref}>
+                    채팅방 입장
+                  </Link>
+                ) : null}
 
-              {isPending ? (
-                <Button className="w-full" disabled>
-                  승인 대기중
-                </Button>
-              ) : null}
+                {isHost ? (
+                  <>
+                    <Link className={ACTION_LINK_SECONDARY} href={membersHref}>
+                      모임 구성원 관리
+                    </Link>
+                    <details className="group rounded-md border border-line-default bg-surface-default">
+                      <summary className="flex h-[46px] cursor-pointer list-none items-center justify-between px-6 text-body-md font-bold text-text-primary marker:content-none [&::-webkit-details-marker]:hidden">
+                        모임 관리
+                        <ChevronDown
+                          aria-hidden="true"
+                          className="size-4 transition-transform group-open:rotate-180"
+                        />
+                      </summary>
+                      <div className="grid gap-3 border-t border-line-light p-3">
+                        {isCompleted ? null : (
+                          <Link
+                            className={ACTION_LINK_SECONDARY}
+                            href={`/community/meeting/${meeting.meetingUuid}/edit`}
+                          >
+                            모임 수정
+                          </Link>
+                        )}
+                        <MeetingHostManageActions
+                          canBump={canBumpByGrade(profile?.grade)}
+                          meeting={meeting}
+                          onToast={setToast}
+                        />
+                      </div>
+                    </details>
+                  </>
+                ) : null}
 
-              {!isHost &&
-              !isJoined &&
-              !isPending &&
-              !meeting.canApply &&
-              (isFull || isCompleted) ? (
-                <Button className="w-full" disabled>
-                  {meetingStatusLabel(meeting.status)}
-                </Button>
-              ) : null}
+                {!isHost && meeting.canApply ? (
+                  <Button className="w-full" onClick={openApply}>
+                    모임 신청
+                  </Button>
+                ) : null}
 
-              {!isHost && isJoined ? (
-                <Link className={ACTION_LINK_SECONDARY} href={membersHref}>
-                  모임 구성원 보기
-                </Link>
-              ) : null}
+                {isPending ? (
+                  <Button className="w-full" disabled>
+                    승인 대기중
+                  </Button>
+                ) : null}
 
-              {!isHost && isJoined ? (
-                <button
-                  className="mt-1 text-center text-caption font-semibold text-text-secondary"
-                  onClick={() => openConfirm("leave")}
-                  type="button"
-                >
-                  모임 나가기
-                </button>
-              ) : null}
-            </div>
+                {!isHost &&
+                !isJoined &&
+                !isPending &&
+                !meeting.canApply &&
+                (isFull || isCompleted) ? (
+                  <Button className="w-full" disabled>
+                    {meetingStatusLabel(meeting.status)}
+                  </Button>
+                ) : null}
+
+                {!isHost && isJoined ? (
+                  <Link className={ACTION_LINK_SECONDARY} href={membersHref}>
+                    모임 구성원 보기
+                  </Link>
+                ) : null}
+
+                {!isHost && isJoined ? (
+                  <button
+                    className="mt-1 text-center text-caption font-semibold text-text-secondary"
+                    onClick={() => openConfirm("leave")}
+                    type="button"
+                  >
+                    모임 나가기
+                  </button>
+                ) : null}
+              </div>
+            </section>
           </aside>
         </div>
-      </div>
+      </ContentContainer>
 
       <LoginRequiredDialog
         onClose={() => setLoginOpen(false)}
