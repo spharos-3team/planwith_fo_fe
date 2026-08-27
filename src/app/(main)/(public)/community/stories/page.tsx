@@ -11,17 +11,28 @@ export const metadata: Metadata = {
 };
 
 interface StoryMainRoutePageProps {
-  searchParams: Promise<{ sort?: string }>;
+  searchParams: Promise<{ keyword?: string; page?: string; sort?: string }>;
 }
 
 function resolveStorySort(sort?: string): StorySort {
   return sort === "popular" || sort === "latest" ? sort : "all";
 }
 
+function resolvePage(page?: string): number {
+  const parsedPage = Number(page);
+  return Number.isInteger(parsedPage) && parsedPage >= 0 ? parsedPage : 0;
+}
+
 export default async function StoryMainRoutePage({
   searchParams,
 }: StoryMainRoutePageProps) {
-  const { sort } = await searchParams;
+  const { keyword, page, sort } = await searchParams;
 
-  return <StoryMainPage activeSort={resolveStorySort(sort)} />;
+  return (
+    <StoryMainPage
+      activeSort={resolveStorySort(sort)}
+      keyword={keyword?.trim() ?? ""}
+      page={resolvePage(page)}
+    />
+  );
 }
