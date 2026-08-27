@@ -15,6 +15,7 @@ import {
   loadAiGenerateResult,
   markAiApplicationCompleted,
 } from "@/features/schedule/lib/ai-application";
+import { formatScheduleClock } from "@/features/schedule/lib/calendar";
 import {
   formatApproxCost,
   formatFigmaPeriod,
@@ -117,7 +118,7 @@ function TimelineItem({ item }: { item: AiGeneratedItem }) {
     <li className="grid min-h-[135px] grid-cols-[60px_minmax(0,1fr)] gap-5">
       <div className="pt-1 text-center">
         <time className="text-[15px] font-bold leading-[26px] text-text-primary">
-          {item.scheduleTime ?? "-"}
+          {formatScheduleClock(item.scheduleTime) || "-"}
         </time>
         <span
           aria-hidden="true"

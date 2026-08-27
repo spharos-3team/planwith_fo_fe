@@ -184,6 +184,20 @@ export interface CalendarSlotEvent {
   title: string;
   timeLabel: string;
   hour: number | null;
+  endHour: number | null;
+  category: ScheduleCategoryId;
+  calendarColor: string | null;
+}
+
+export const MONTH_EVENT_LANES = 2;
+
+export interface MonthEventSegment {
+  key: string;
+  scheduleUuid: string;
+  title: string;
+  startCol: number;
+  span: number;
+  lane: number;
   category: ScheduleCategoryId;
   calendarColor: string | null;
 }
@@ -262,20 +276,38 @@ export function slotEventsForDate(
         title: schedule.title,
         timeLabel: "종일",
         hour: null,
+        endHour: null,
         category,
         calendarColor: schedule.calendarColor,
       });
       return;
     }
 
-    dayItems.forEach((item) => {
+    const orderedItems = [...dayItems].sort((left, right) =>
+      (left.scheduleTime ?? "").localeCompare(right.scheduleTime ?? "")
+    );
+
+    orderedItems.forEach((item, index) => {
       const hour = parseScheduleHour(item.scheduleTime);
+      const nextHour = orderedItems
+        .slice(index + 1)
+        .map((candidate) => parseScheduleHour(candidate.scheduleTime))
+        .find((value) => value != null);
+      const endHour =
+        hour == null
+          ? null
+          : nextHour != null && nextHour > hour
+            ? nextHour
+            : hour + 1;
+
       events.push({
         key: `${schedule.scheduleUuid}-${item.scheduleItemId}`,
         scheduleUuid: schedule.scheduleUuid,
         title: item.subtitle ?? item.placeName ?? schedule.title,
         timeLabel: formatScheduleClock(item.scheduleTime) || "종일",
         hour,
+        endHour:
+          endHour == null ? null : Math.min(endHour, TIMELINE_END_HOUR + 1),
         category,
         calendarColor: schedule.calendarColor,
       });
@@ -294,6 +326,87 @@ export function eventsInHour(
 
 export function allDayEvents(events: CalendarSlotEvent[]): CalendarSlotEvent[] {
   return events.filter((event) => event.hour == null);
+}
+
+export function timedEvents(events: CalendarSlotEvent[]): CalendarSlotEvent[] {
+  return events.filter((event) => event.hour != null);
+}
+
+export function slotEventTop(
+  event: CalendarSlotEvent,
+  hourHeight: number
+): number {
+  return (
+    ((event.hour ?? TIMELINE_START_HOUR) - TIMELINE_START_HOUR) * hourHeight
+  );
+}
+
+export function slotEventHeight(
+  event: CalendarSlotEvent,
+  hourHeight: number
+): number {
+  const start = event.hour ?? TIMELINE_START_HOUR;
+  const end = event.endHour ?? start + 1;
+  return Math.max(end - start, 1) * hourHeight;
+}
+
+export function monthWeekEventLayout(
+  weekDates: Date[],
+  schedules: CalendarSchedule[]
+): { segments: MonthEventSegment[]; extraByCol: number[] } {
+  const weekStart = isoDate(weekDates[0]);
+  const weekEnd = isoDate(weekDates[6]);
+  const overlapping = schedules
+    .filter((item) => item.startDate <= weekEnd && item.endDate >= weekStart)
+    .sort((left, right) => {
+      const start = left.startDate.localeCompare(right.startDate);
+      return start !== 0 ? start : right.endDate.localeCompare(left.endDate);
+    });
+
+  const laneEnds: string[] = [];
+  const segments: MonthEventSegment[] = [];
+  const extraByCol = Array.from({ length: 7 }, () => 0);
+
+  overlapping.forEach((event) => {
+    const visibleStart =
+      event.startDate > weekStart ? event.startDate : weekStart;
+    const visibleEnd = event.endDate < weekEnd ? event.endDate : weekEnd;
+    const startCol = weekDates.findIndex(
+      (date) => isoDate(date) === visibleStart
+    );
+    const endCol = weekDates.findIndex((date) => isoDate(date) === visibleEnd);
+    if (startCol < 0 || endCol < 0 || endCol < startCol) {
+      return;
+    }
+
+    let lane = laneEnds.findIndex((end) => visibleStart > end);
+    if (lane < 0) {
+      lane = laneEnds.length;
+      laneEnds.push(visibleEnd);
+    } else {
+      laneEnds[lane] = visibleEnd;
+    }
+
+    if (lane >= MONTH_EVENT_LANES) {
+      for (let col = startCol; col <= endCol; col += 1) {
+        extraByCol[col] += 1;
+      }
+      return;
+    }
+
+    segments.push({
+      key: `${event.scheduleUuid}-${weekStart}-${startCol}`,
+      scheduleUuid: event.scheduleUuid,
+      title: event.title,
+      startCol,
+      span: endCol - startCol + 1,
+      lane,
+      category: creatorCategory(event.creatorType),
+      calendarColor: event.calendarColor,
+    });
+  });
+
+  return { segments, extraByCol };
 }
 
 export function colorIndex(calendarColor: string | null | undefined): number {

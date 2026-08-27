@@ -24,6 +24,7 @@ import {
   categoryTone,
   creatorCategory,
   formatKoreanDate,
+  formatScheduleClock,
   parseIsoDate,
   scheduleOpenPath,
 } from "@/features/schedule/lib/calendar";
@@ -249,7 +250,8 @@ export function ScheduleDetailPage({ scheduleId }: ScheduleDetailPageProps) {
                             <span className="absolute -left-[2rem] top-1 size-2.5 rounded-circle bg-brand-primary" />
                             <div className="flex flex-wrap items-center gap-3">
                               <time className="text-body-sm font-semibold text-brand-primary">
-                                {activity.scheduleTime ?? "-"}
+                                {formatScheduleClock(activity.scheduleTime) ||
+                                  "-"}
                               </time>
                               {badge ? (
                                 <Badge tone="gray">{badge}</Badge>
