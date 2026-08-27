@@ -8,7 +8,7 @@ import {
   adaptStompUrlForBrowser,
   resolveChatStompBrokerUrl,
 } from "@/features/chat/lib/stomp-url";
-import type { ChatMessage } from "@/features/chat/types";
+import type { ChatFileAttachment, ChatMessage } from "@/features/chat/types";
 import { getAccessToken } from "@/lib/auth/access-token";
 
 function ensureGlobalThis(): void {
@@ -157,24 +157,36 @@ export function useChatStomp({
     subscribe(client, chatRoomUuid);
   }, [chatRoomUuid, connected, subscribe]);
 
-  const sendText = useCallback((content: string) => {
-    const client = clientRef.current;
-    const roomUuid = chatRoomUuidRef.current;
-    const trimmed = content.trim();
-    if (!client?.connected || !roomUuid || !trimmed) {
-      return false;
-    }
-    client.publish({
-      destination: `/app/chat/${roomUuid}/messages`,
-      body: JSON.stringify({
-        messageType: "TEXT",
-        content: trimmed,
-        files: [],
-      }),
-      headers: { "content-type": "application/json" },
-    });
-    return true;
-  }, []);
+  const sendMessage = useCallback(
+    (content: string, files: ChatFileAttachment[] = []) => {
+      const client = clientRef.current;
+      const roomUuid = chatRoomUuidRef.current;
+      const trimmed = content.trim();
+      if (!client?.connected || !roomUuid || (!trimmed && files.length === 0)) {
+        return false;
+      }
+      client.publish({
+        destination: `/app/chat/${roomUuid}/messages`,
+        body: JSON.stringify({
+          messageType: files.length > 0 && !trimmed ? "FILE" : "TEXT",
+          content: trimmed || null,
+          files: files.map((file) => ({
+            fileType: file.fileType,
+            url: file.url,
+            name: file.name,
+          })),
+        }),
+        headers: { "content-type": "application/json" },
+      });
+      return true;
+    },
+    []
+  );
 
-  return { connected, error, sendText };
+  const sendText = useCallback(
+    (content: string) => sendMessage(content, []),
+    [sendMessage]
+  );
+
+  return { connected, error, sendText, sendMessage };
 }

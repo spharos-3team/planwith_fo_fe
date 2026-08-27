@@ -1,4 +1,5 @@
 import type {
+  ChatFileUploadResult,
   ChatMessageListPage,
   ChatRoomByMeeting,
   ChatRoomListPage,
@@ -59,5 +60,14 @@ export function markChatRoomRead(
   return apiClient<ChatRoomReadResult>(`/chat-rooms/${chatRoomUuid}/read`, {
     method: "POST",
     body: JSON.stringify(lastReadMessageUuid ? { lastReadMessageUuid } : {}),
+  });
+}
+
+export function uploadChatFile(chatRoomUuid: string, file: File) {
+  const body = new FormData();
+  body.append("file", file, file.name || "file");
+  return apiClient<ChatFileUploadResult>(`/chat-rooms/${chatRoomUuid}/files`, {
+    method: "POST",
+    body,
   });
 }

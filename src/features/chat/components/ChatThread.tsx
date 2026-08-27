@@ -11,7 +11,11 @@ import {
   isChatRoomReadonly,
   isSameDay,
 } from "@/features/chat/lib/format";
-import type { ChatMessage, ChatRoomListItem } from "@/features/chat/types";
+import type {
+  ChatMessage,
+  ChatRoomListItem,
+  ChatSendPayload,
+} from "@/features/chat/types";
 import { formatMeetingPeriod } from "@/features/meeting/lib/format";
 import type { MeetingDetail } from "@/features/meeting/types";
 
@@ -28,9 +32,10 @@ interface ChatThreadProps {
   loadingOlder: boolean;
   onBack: () => void;
   onLoadOlder: () => void;
-  onSend: (content: string) => boolean;
+  onSend: (payload: ChatSendPayload) => boolean | Promise<boolean>;
   onDeleteRoom: () => void;
   onReport: (memberUuid: string) => void;
+  sending: boolean;
 }
 
 export function ChatThread({
@@ -49,6 +54,7 @@ export function ChatThread({
   onSend,
   onDeleteRoom,
   onReport,
+  sending,
 }: ChatThreadProps) {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const stickToBottomRef = useRef(true);
@@ -219,7 +225,7 @@ export function ChatThread({
               ? "메시지를 입력하세요"
               : (connectionError ?? "실시간 연결 중입니다…")
         }
-        sending={false}
+        sending={sending}
       />
     </div>
   );
