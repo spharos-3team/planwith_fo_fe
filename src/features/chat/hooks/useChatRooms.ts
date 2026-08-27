@@ -6,9 +6,11 @@ import { listChatRooms } from "@/services/chat/chat-rooms";
 
 export const chatRoomsQueryKey = ["chat-rooms"] as const;
 
-export function useChatRooms() {
+export function useChatRooms(options?: { enabled?: boolean }) {
   return useInfiniteQuery({
     queryKey: chatRoomsQueryKey,
+    enabled: options?.enabled ?? true,
+    refetchOnWindowFocus: true,
     queryFn: ({ pageParam }) =>
       listChatRooms({
         cursorAt: pageParam?.cursorAt,

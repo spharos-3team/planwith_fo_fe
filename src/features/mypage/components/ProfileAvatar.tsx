@@ -10,11 +10,13 @@ export function ProfileAvatar({
   nickname,
   size,
   memberUuid,
+  className,
 }: {
   src: string | null;
   nickname: string;
   size: number;
   memberUuid?: string | null;
+  className?: string;
 }) {
   const fetchedSrc = useProfileImageSrc(memberUuid, src);
   const [failedSrc, setFailedSrc] = useState<string | null>(null);
@@ -22,7 +24,7 @@ export function ProfileAvatar({
 
   return (
     <div
-      className="grid shrink-0 place-items-center overflow-hidden rounded-circle bg-blue-ice text-text-secondary"
+      className={`grid shrink-0 place-items-center overflow-hidden rounded-circle bg-blue-ice text-text-secondary ${className ?? ""}`}
       style={{ width: size, height: size, fontSize: Math.max(14, size / 3) }}
     >
       {imageSrc ? (
