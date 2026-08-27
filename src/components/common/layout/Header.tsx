@@ -22,6 +22,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { useOptionalAuth } from "@/features/auth/context/AuthProvider";
+import { ProfileAvatar } from "@/features/mypage/components/ProfileAvatar";
 import { useTokenBalance } from "@/features/payment/hooks/usePaymentSummary";
 
 import { BrandLogo } from "./BrandLogo";
@@ -85,7 +86,6 @@ const headerAssets = {
   chevronActive: "/images/header/chevron-down-active.svg",
   message: "/images/header/message.svg",
   notification: "/images/header/notification.svg",
-  profile: "/images/header/profile.svg",
   token: "/images/header/token.svg",
 } as const;
 
@@ -377,12 +377,13 @@ export function Header({
                   <span className="p-2.5 text-label-sm text-text-inverse">
                     {nickname ? `${nickname}님` : "회원님"}
                   </span>
-                  <Image
-                    alt=""
-                    className="size-9"
-                    height={36}
-                    src={headerAssets.profile}
-                    width={36}
+                  <ProfileAvatar
+                    className="ring-1 ring-white/30"
+                    memberUuid={memberUuid}
+                    nickname={nickname || "회원"}
+                    revision={auth?.profileRevision}
+                    size={36}
+                    src={auth?.profile?.profileImage ?? null}
                   />
                 </Link>
               </>
@@ -494,6 +495,20 @@ export function Header({
                   토큰 {formattedTokenBalance}
                 </span>
                 <div className="flex items-center gap-3">
+                  <Link
+                    aria-label="사용자 프로필"
+                    href="/mypage"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <ProfileAvatar
+                      className="ring-1 ring-white/30"
+                      memberUuid={memberUuid}
+                      nickname={nickname || "회원"}
+                      revision={auth?.profileRevision}
+                      size={32}
+                      src={auth?.profile?.profileImage ?? null}
+                    />
+                  </Link>
                   <Link
                     aria-current={
                       pathname.startsWith("/chat") ? "page" : undefined

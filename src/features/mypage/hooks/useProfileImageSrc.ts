@@ -10,12 +10,15 @@ import {
 
 export function useProfileImageSrc(
   memberUuid: string | null | undefined,
-  src: string | null | undefined
+  src: string | null | undefined,
+  revision?: number | string
 ): string | null {
   const requestPath = profileImageRequestPath(memberUuid, src);
-  const [fetched, setFetched] = useState<{ path: string; url: string } | null>(
-    null
-  );
+  const [fetched, setFetched] = useState<{
+    path: string;
+    revision: number | string | undefined;
+    url: string;
+  } | null>(null);
 
   useEffect(() => {
     if (!requestPath) {
@@ -30,7 +33,7 @@ export function useProfileImageSrc(
     let cancelled = false;
     let objectUrl: string | null = null;
 
-    void fetchProfileImageObjectUrl(uuid).then((next) => {
+    void fetchProfileImageObjectUrl(uuid, revision).then((next) => {
       if (cancelled) {
         if (next?.startsWith("blob:")) {
           URL.revokeObjectURL(next);
@@ -38,10 +41,11 @@ export function useProfileImageSrc(
         return;
       }
       if (!next) {
+        setFetched(null);
         return;
       }
       objectUrl = next.startsWith("blob:") ? next : null;
-      setFetched({ path: requestPath, url: next });
+      setFetched({ path: requestPath, revision, url: next });
     });
 
     return () => {
@@ -50,13 +54,17 @@ export function useProfileImageSrc(
         URL.revokeObjectURL(objectUrl);
       }
     };
-  }, [requestPath]);
+  }, [requestPath, revision]);
 
   if (isDisplayableImageUrl(src) && src) {
     return src;
   }
 
-  if (requestPath && fetched?.path === requestPath) {
+  if (
+    requestPath &&
+    fetched?.path === requestPath &&
+    fetched.revision === revision
+  ) {
     return fetched.url;
   }
 

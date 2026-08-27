@@ -27,6 +27,7 @@ interface AuthContextValue {
   status: AuthStatus;
   isAuthenticated: boolean;
   profile: MemberProfile | null;
+  profileRevision: number;
   login: (email: string, password: string) => Promise<void>;
   applySession: (tokens: TokenResponse) => Promise<void>;
   refreshProfile: () => Promise<void>;
@@ -46,19 +47,29 @@ async function loadProfile(): Promise<MemberProfile | null> {
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<AuthStatus>("initializing");
   const [profile, setProfile] = useState<MemberProfile | null>(null);
+  const [profileRevision, setProfileRevision] = useState(0);
   const statusRef = useRef<AuthStatus>("initializing");
 
-  const applySession = useCallback(async (tokens: TokenResponse) => {
-    statusRef.current = "authenticated";
-    setAccessToken(tokens.accessToken);
-    const nextProfile = await loadProfile();
+  const commitProfile = useCallback((nextProfile: MemberProfile | null) => {
     setProfile(nextProfile);
-    setStatus("authenticated");
+    setProfileRevision((current) => current + 1);
   }, []);
+
+  const applySession = useCallback(
+    async (tokens: TokenResponse) => {
+      statusRef.current = "authenticated";
+      setAccessToken(tokens.accessToken);
+      const nextProfile = await loadProfile();
+      commitProfile(nextProfile);
+      setStatus("authenticated");
+    },
+    [commitProfile]
+  );
 
   const clearSession = useCallback(() => {
     setAccessToken(null);
     setProfile(null);
+    setProfileRevision(0);
     statusRef.current = "unauthenticated";
     setStatus("unauthenticated");
   }, []);
@@ -85,7 +96,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return;
         }
 
-        setProfile(nextProfile);
+        commitProfile(nextProfile);
         statusRef.current = "authenticated";
         setStatus("authenticated");
       })
@@ -98,7 +109,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, [clearSession]);
+  }, [clearSession, commitProfile]);
 
   const login = useCallback(
     async (email: string, password: string) => {
@@ -110,8 +121,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const refreshProfile = useCallback(async () => {
     const nextProfile = await loadProfile();
-    setProfile(nextProfile);
-  }, []);
+    commitProfile(nextProfile);
+  }, [commitProfile]);
 
   const logout = useCallback(async () => {
     try {
@@ -126,12 +137,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       status,
       isAuthenticated: status === "authenticated",
       profile,
+      profileRevision,
       login,
       applySession,
       refreshProfile,
       logout,
     }),
-    [applySession, login, logout, profile, refreshProfile, status]
+    [
+      applySession,
+      login,
+      logout,
+      profile,
+      profileRevision,
+      refreshProfile,
+      status,
+    ]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

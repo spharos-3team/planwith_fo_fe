@@ -10,7 +10,11 @@ import { nicknameSchema } from "@/features/auth/schemas/auth";
 import type { MemberMe } from "@/features/auth/types";
 import { MyPageCard } from "@/features/mypage/components/MyPageCard";
 import { ProfileAvatar } from "@/features/mypage/components/ProfileAvatar";
-import { toProfileImageFile } from "@/features/mypage/lib/profile-image";
+import {
+  PROFILE_IMAGE_ACCEPT,
+  PROFILE_IMAGE_HINT,
+  toProfileImageFile,
+} from "@/features/mypage/lib/profile-image";
 import { useApiError } from "@/hooks/useApiError";
 import {
   checkNicknameAvailability,
@@ -105,7 +109,7 @@ function SaveButton({
 
 export function ProfileEditPage() {
   const router = useRouter();
-  const { profile, refreshProfile, logout } = useAuth();
+  const { profile, profileRevision, refreshProfile, logout } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [member, setMember] = useState<MemberMe | null>(null);
   const [nickname, setNickname] = useState(profile?.nickname ?? "");
@@ -333,6 +337,7 @@ export function ProfileEditPage() {
           <ProfileAvatar
             memberUuid={profile?.memberUuid}
             nickname={displayNickname}
+            revision={imageFile ? "preview" : profileRevision}
             size={120}
             src={preview}
           />
@@ -351,12 +356,17 @@ export function ProfileEditPage() {
           >
             프로필 변경
           </button>
+          <p className="text-center text-[11px] leading-[14px] text-[#848484]">
+            {PROFILE_IMAGE_HINT}
+          </p>
           <input
-            accept="image/jpeg,image/png,image/webp"
+            accept={PROFILE_IMAGE_ACCEPT}
             className="hidden"
-            onChange={(event) =>
-              void handleImage(event.target.files?.[0] ?? null)
-            }
+            onChange={(event) => {
+              const file = event.target.files?.[0] ?? null;
+              event.target.value = "";
+              void handleImage(file);
+            }}
             ref={fileInputRef}
             type="file"
           />
@@ -418,6 +428,14 @@ export function ProfileEditPage() {
         <div className="flex w-full flex-col gap-3.5 pt-3.5">
           <div className="h-px w-full bg-[#EAF0F6]" />
           <div className="flex items-center justify-end gap-2.5">
+            {apiError ? (
+              <p
+                className="text-[14px] leading-[18px] text-[#FF4B4B]"
+                role="alert"
+              >
+                {apiError}
+              </p>
+            ) : null}
             {profileSuccess ? (
               <p className="text-[14px] leading-[18px] text-[#5FA37F]">
                 {profileSuccess}
@@ -531,6 +549,11 @@ export function ProfileEditPage() {
           탈퇴 시 여행 스토리, 일정, 팔로우 정보가 모두 삭제되며 복구할 수
           없어요. 신중하게 선택해 주세요.
         </p>
+        {apiError ? (
+          <p className="text-[14px] text-[#FF4B4B]" role="alert">
+            {apiError}
+          </p>
+        ) : null}
         <button
           className="w-full text-right text-[14px] font-bold leading-[18px] text-[#FF4B4B] underline"
           onClick={() => setWithdrawOpen(true)}
@@ -539,12 +562,6 @@ export function ProfileEditPage() {
           회원 탈퇴하기
         </button>
       </section>
-
-      {apiError ? (
-        <p className="text-[14px] text-[#FF4B4B]" role="alert">
-          {apiError}
-        </p>
-      ) : null}
 
       <Dialog
         description="탈퇴하면 여행 스토리, 일정, 팔로우 정보가 모두 삭제되며 복구할 수 없습니다."
