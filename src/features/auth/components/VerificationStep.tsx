@@ -14,6 +14,7 @@ import {
   preloadPortOneSdk,
   resumePhoneVerificationIfRedirected,
 } from "@/features/auth/lib/phone-verification";
+import { verifiedUntilFromExpiresIn } from "@/features/auth/lib/verified-ttl";
 import {
   nameSchema,
   passwordSchema,
@@ -34,6 +35,7 @@ interface VerificationStepProps {
   phoneVerified: boolean;
   emailVerified: boolean;
   requireLocalCredentials: boolean;
+  error?: string;
   onChange: (patch: {
     name?: string;
     phoneNumber?: string;
@@ -41,7 +43,9 @@ interface VerificationStepProps {
     verificationCode?: string;
     password?: string;
     phoneVerified?: boolean;
+    phoneVerifiedUntil?: number | null;
     emailVerified?: boolean;
+    emailVerifiedUntil?: number | null;
     identityVerificationId?: string;
   }) => void;
   onNext: () => void;
@@ -56,6 +60,7 @@ export function VerificationStep({
   phoneVerified,
   emailVerified,
   requireLocalCredentials,
+  error,
   onChange,
   onNext,
 }: VerificationStepProps) {
@@ -65,7 +70,9 @@ export function VerificationStep({
     emailSent: false,
     modal: "" as "" | "phone" | "email",
   });
-  const apiError = useApiError(request.error ? new Error(request.error) : null);
+  const apiError = useApiError(
+    request.error || error ? new Error(request.error || error) : null
+  );
   const nameValid = nameSchema.safeParse(name).success;
   const phoneValid = phoneSchema.safeParse(phoneNumber).success;
 
@@ -94,6 +101,7 @@ export function VerificationStep({
 
         onChange({
           phoneVerified: true,
+          phoneVerifiedUntil: verifiedUntilFromExpiresIn(),
           name: confirmed.name,
           phoneNumber: confirmed.phoneNumber,
         });
@@ -170,6 +178,7 @@ export function VerificationStep({
 
       onChange({
         phoneVerified: true,
+        phoneVerifiedUntil: verifiedUntilFromExpiresIn(),
         name,
         phoneNumber: confirmed.phoneNumber || phoneNumber,
       });
@@ -179,7 +188,11 @@ export function VerificationStep({
   const sendEmailCode = () =>
     run(async () => {
       const sent = await sendEmailVerification(email);
-      onChange({ email: sent.email, emailVerified: false });
+      onChange({
+        email: sent.email,
+        emailVerified: false,
+        emailVerifiedUntil: null,
+      });
       return { modal: "email" as const };
     });
 
@@ -189,7 +202,13 @@ export function VerificationStep({
       if (!confirmed.verified) {
         throw new Error("이메일 인증에 실패했습니다.");
       }
-      onChange({ email: confirmed.email, emailVerified: true });
+      onChange({
+        email: confirmed.email,
+        emailVerified: true,
+        emailVerifiedUntil: verifiedUntilFromExpiresIn(
+          confirmed.verifiedExpiresInSeconds
+        ),
+      });
     });
 
   const handleNext = () =>
@@ -202,7 +221,13 @@ export function VerificationStep({
         if (!confirmed.verified) {
           throw new Error("이메일 인증에 실패했습니다.");
         }
-        onChange({ email: confirmed.email, emailVerified: true });
+        onChange({
+          email: confirmed.email,
+          emailVerified: true,
+          emailVerifiedUntil: verifiedUntilFromExpiresIn(
+            confirmed.verifiedExpiresInSeconds
+          ),
+        });
       }
       onNext();
     });
