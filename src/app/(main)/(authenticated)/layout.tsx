@@ -18,7 +18,9 @@ export default function MainAuthenticatedLayout({
     ? "/mypage"
     : pathname.startsWith("/chat")
       ? "/chat"
-      : "/schedules";
+      : pathname.startsWith("/community")
+        ? "/community"
+        : "/schedules";
 
   return (
     <SiteLayout
