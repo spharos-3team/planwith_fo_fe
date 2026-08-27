@@ -387,27 +387,20 @@ export function Header({
                 </Link>
               </>
             ) : (
-              <div className="flex items-center gap-3">
-                <Link
-                  className="px-3 py-2 text-body-md text-white/90 transition hover:text-white"
-                  href="/login"
-                >
-                  로그인
-                </Link>
-                <Link
-                  className="header-glass-cta group block h-[46px] w-[129px] overflow-hidden rounded-[333px] font-sans text-[15px] font-medium leading-normal focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-                  href="/schedules/ai/new"
-                >
-                  <span className="header-cta-slider relative z-[2] block h-[86px] w-full">
-                    <span className="absolute left-0 top-0 flex h-[45px] w-full items-center justify-center px-6 py-3 uppercase text-white">
-                      <span className="translate-y-px">여행 하기</span>
-                    </span>
-                    <span className="absolute left-0 top-[44px] flex h-[42px] w-full items-center justify-center text-center text-[rgb(47_47_47_/_0.7)]">
-                      Login
-                    </span>
+              <Link
+                aria-label="로그인"
+                className="header-glass-cta group block h-[46px] w-[129px] overflow-hidden rounded-[333px] font-sans text-[15px] font-medium leading-normal focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                href="/login"
+              >
+                <span className="header-cta-slider relative z-[2] block h-[86px] w-full">
+                  <span className="absolute left-0 top-0 flex h-[45px] w-full items-center justify-center px-6 py-3 uppercase text-white">
+                    <span className="translate-y-px">여행 하기</span>
                   </span>
-                </Link>
-              </div>
+                  <span className="absolute left-0 top-[44px] flex h-[42px] w-full items-center justify-center text-center text-[rgb(47_47_47_/_0.7)]">
+                    Login
+                  </span>
+                </span>
+              </Link>
             )}
           </div>
 
@@ -521,22 +514,13 @@ export function Header({
                 </div>
               </div>
             ) : (
-              <>
-                <Link
-                  className="mt-3 rounded-full border border-white/35 px-5 py-3 text-center font-semibold"
-                  href="/login"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  로그인
-                </Link>
-                <Link
-                  className="mt-2 rounded-full bg-white px-5 py-3 text-center font-semibold text-black"
-                  href="/schedules/ai/new"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  여행 하기
-                </Link>
-              </>
+              <Link
+                className="mt-3 rounded-full bg-white px-5 py-3 text-center font-semibold text-black"
+                href="/login"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                여행 하기
+              </Link>
             )}
           </ContentContainer>
         </nav>
