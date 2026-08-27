@@ -62,11 +62,6 @@ const MY_SECTIONS: {
   },
 ];
 
-function isWideCard(index: number): boolean {
-  const wideFirst = Math.floor(index / 2) % 2 === 0;
-  return index % 2 === 0 ? wideFirst : !wideFirst;
-}
-
 export function MeetingsPage() {
   const router = useRouter();
   const { status, isAuthenticated } = useAuth();
@@ -165,7 +160,7 @@ export function MeetingsPage() {
     <div className="bg-surface-page">
       <MeetingHero />
       <ContentContainer as="section" className="pb-20 pt-[6.25rem]">
-        <div className="mx-auto w-full max-w-[1200px]">
+        <div className="mx-auto w-full">
           <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
             <div
               aria-label="모임 목록 탭"
@@ -282,12 +277,11 @@ export function MeetingsPage() {
                 ) : (listQuery.data?.content.length ?? 0) === 0 ? (
                   <StatusMessage>아직 표시할 모임이 없습니다.</StatusMessage>
                 ) : (
-                  <div className="grid grid-cols-1 gap-x-14 gap-y-6 md:grid-cols-3">
-                    {listQuery.data?.content.map((meeting, index) => (
+                  <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,380px),1fr))] gap-6">
+                    {listQuery.data?.content.map((meeting) => (
                       <MeetingGridCard
                         key={meeting.meetingUuid}
                         meeting={meeting}
-                        wide={isWideCard(index)}
                       />
                     ))}
                   </div>
