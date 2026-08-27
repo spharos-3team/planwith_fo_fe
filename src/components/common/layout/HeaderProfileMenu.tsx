@@ -58,7 +58,7 @@ export function HeaderProfileMenu({
         aria-expanded={open}
         aria-haspopup="menu"
         aria-label="사용자 메뉴"
-        className="flex items-center"
+        className="flex items-center gap-2"
         onClick={() => setOpen((current) => !current)}
         type="button"
       >

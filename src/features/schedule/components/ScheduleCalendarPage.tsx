@@ -27,20 +27,22 @@ import {
   categoryLabel,
   categoryTone,
   creatorCategory,
-  eventsInHour,
   formatHourLabel,
   formatKoreanDate,
   formatMonthTitle,
-  formatTimeRange,
+  formatScheduleClock,
   formatWeekTitle,
   isoDate,
   monthGrid,
+  monthWeekEventLayout,
   queryRangeForMonth,
   scheduleOpenPath,
-  schedulesOnDate,
+  slotEventHeight,
   slotEventsForDate,
+  slotEventTop,
   startOfToday,
   startOfWeekSunday,
+  timedEvents,
   TIMELINE_HOURS,
   WEEKDAY_LABELS,
 } from "@/features/schedule/lib/calendar";
@@ -239,52 +241,6 @@ function CategoryFilter({
   );
 }
 
-function TimelineEvent({
-  event,
-  selected,
-  onSelect,
-  compact = false,
-}: {
-  event: CalendarSchedule;
-  selected: boolean;
-  onSelect: (scheduleUuid: string) => void;
-  compact?: boolean;
-}) {
-  const category = creatorCategory(event.creatorType);
-  const tone = categoryTone(category);
-  const color = event.calendarColor?.startsWith("#")
-    ? event.calendarColor
-    : undefined;
-
-  return (
-    <button
-      className={`w-full border-l-4 text-left transition hover:brightness-95 ${
-        compact ? "px-2 py-1" : "px-4 py-3"
-      } ${toneSurfaceClasses[tone]} ${
-        selected ? "ring-2 ring-brand-primary/40" : ""
-      }`}
-      onClick={() => onSelect(event.scheduleUuid)}
-      style={color ? { borderLeftColor: color } : undefined}
-      type="button"
-    >
-      {compact ? (
-        <span className="block truncate text-caption-sm font-semibold">
-          {event.title}
-        </span>
-      ) : (
-        <>
-          <span className="block text-caption-sm">
-            {formatTimeRange(event.startDate, event.endDate)}
-          </span>
-          <span className="mt-1 block text-body-sm font-semibold">
-            {event.title}
-          </span>
-        </>
-      )}
-    </button>
-  );
-}
-
 function SlotEventCard({
   event,
   selected,
@@ -303,7 +259,7 @@ function SlotEventCard({
 
   return (
     <button
-      className={`w-full min-w-0 border-l-4 text-left transition hover:brightness-95 ${
+      className={`h-full w-full min-w-0 overflow-hidden border-l-4 text-left transition hover:brightness-95 ${
         compact ? "px-1.5 py-1" : "px-3 py-2"
       } ${toneSurfaceClasses[tone]} ${
         selected ? "ring-2 ring-brand-primary/40" : ""
@@ -326,6 +282,42 @@ function SlotEventCard({
   );
 }
 
+function TimedEventLayer({
+  events,
+  hourHeight,
+  compact,
+  selectedUuid,
+  onSelect,
+}: {
+  events: CalendarSlotEvent[];
+  hourHeight: number;
+  compact: boolean;
+  selectedUuid: string | null;
+  onSelect: (scheduleUuid: string) => void;
+}) {
+  return (
+    <div className="pointer-events-none absolute inset-0">
+      {timedEvents(events).map((event) => (
+        <div
+          className="pointer-events-auto absolute inset-x-0.5 min-w-0 overflow-hidden"
+          key={event.key}
+          style={{
+            top: slotEventTop(event, hourHeight),
+            height: slotEventHeight(event, hourHeight) - 2,
+          }}
+        >
+          <SlotEventCard
+            compact={compact}
+            event={event}
+            onSelect={onSelect}
+            selected={event.scheduleUuid === selectedUuid}
+          />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function DayCalendar({
   date,
   slotEvents,
@@ -338,6 +330,7 @@ function DayCalendar({
   onSelect: (scheduleUuid: string) => void;
 }) {
   const allDay = allDayEvents(slotEvents);
+  const hourHeight = 62;
 
   return (
     <div className="overflow-hidden rounded-lg border border-line-light bg-surface-default">
@@ -364,29 +357,35 @@ function DayCalendar({
           </div>
         </div>
       ) : null}
-      {TIMELINE_HOURS.map((hour) => {
-        const hourEvents = eventsInHour(slotEvents, hour);
-        return (
-          <div
-            className="grid min-h-[62px] grid-cols-[72px_minmax(0,1fr)]"
-            key={hour}
-          >
-            <time className="border-r border-line-light px-3 pt-2 text-caption-sm text-text-disabled">
+      <div className="grid grid-cols-[72px_minmax(0,1fr)]">
+        <div>
+          {TIMELINE_HOURS.map((hour) => (
+            <time
+              className="block border-r border-b border-line-light px-3 pt-2 text-caption-sm text-text-disabled"
+              key={hour}
+              style={{ height: hourHeight }}
+            >
               {formatHourLabel(hour)}
             </time>
-            <div className="grid content-start gap-1 border-b border-line-light p-1">
-              {hourEvents.map((event) => (
-                <SlotEventCard
-                  event={event}
-                  key={event.key}
-                  onSelect={onSelect}
-                  selected={event.scheduleUuid === selectedUuid}
-                />
-              ))}
-            </div>
-          </div>
-        );
-      })}
+          ))}
+        </div>
+        <div className="relative">
+          {TIMELINE_HOURS.map((hour) => (
+            <div
+              className="border-b border-line-light"
+              key={hour}
+              style={{ height: hourHeight }}
+            />
+          ))}
+          <TimedEventLayer
+            compact={false}
+            events={slotEvents}
+            hourHeight={hourHeight}
+            onSelect={onSelect}
+            selectedUuid={selectedUuid}
+          />
+        </div>
+      </div>
     </div>
   );
 }
@@ -404,6 +403,8 @@ function WeekCalendar({
 }) {
   const dates = Array.from({ length: 7 }, (_, index) => addDays(start, index));
   const today = startOfToday();
+  const hourHeight = 52;
+  const timelineHeight = TIMELINE_HOURS.length * hourHeight;
 
   return (
     <div className="max-h-[720px] overflow-auto rounded-lg border border-line-light bg-surface-default">
@@ -431,7 +432,7 @@ function WeekCalendar({
           const dayEvents = allDayEvents(eventsByDate.get(isoDate(date)) ?? []);
           return (
             <div
-              className="min-h-16 min-w-0 border-b border-r border-line-light p-1"
+              className="min-h-16 min-w-0 overflow-hidden border-b border-r border-line-light p-1"
               key={`all-day-${isoDate(date)}`}
             >
               <div className="grid gap-1">
@@ -448,35 +449,37 @@ function WeekCalendar({
             </div>
           );
         })}
-        {TIMELINE_HOURS.map((hour) => (
-          <div className="contents" key={hour}>
-            <time className="border-b border-r border-line-light px-2 py-2 text-caption-sm text-text-disabled">
+        <div>
+          {TIMELINE_HOURS.map((hour) => (
+            <time
+              className="block border-b border-r border-line-light px-2 py-2 text-caption-sm text-text-disabled"
+              key={hour}
+              style={{ height: hourHeight }}
+            >
               {formatHourLabel(hour)}
             </time>
-            {dates.map((date) => {
-              const hourEvents = eventsInHour(
-                eventsByDate.get(isoDate(date)) ?? [],
-                hour
-              );
-              return (
-                <div
-                  className="min-h-[52px] min-w-0 border-b border-r border-line-light p-0.5"
-                  key={`${isoDate(date)}-${hour}`}
-                >
-                  <div className="grid gap-0.5">
-                    {hourEvents.map((event) => (
-                      <SlotEventCard
-                        compact
-                        event={event}
-                        key={event.key}
-                        onSelect={onSelect}
-                        selected={event.scheduleUuid === selectedUuid}
-                      />
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
+          ))}
+        </div>
+        {dates.map((date) => (
+          <div
+            className="relative min-w-0 overflow-hidden border-r border-line-light"
+            key={`timed-${isoDate(date)}`}
+            style={{ height: timelineHeight }}
+          >
+            {TIMELINE_HOURS.map((hour) => (
+              <div
+                className="border-b border-line-light"
+                key={hour}
+                style={{ height: hourHeight }}
+              />
+            ))}
+            <TimedEventLayer
+              compact
+              events={eventsByDate.get(isoDate(date)) ?? []}
+              hourHeight={hourHeight}
+              onSelect={onSelect}
+              selectedUuid={selectedUuid}
+            />
           </div>
         ))}
       </div>
@@ -498,6 +501,9 @@ function MonthCalendar({
   onSelectEvent: (scheduleUuid: string) => void;
 }) {
   const cells = monthGrid(cursor.getFullYear(), cursor.getMonth());
+  const weeks = Array.from({ length: 6 }, (_, index) =>
+    cells.slice(index * 7, index * 7 + 7)
+  );
 
   return (
     <div className="overflow-hidden rounded-lg border border-line-light bg-surface-default">
@@ -510,50 +516,92 @@ function MonthCalendar({
             {day}
           </div>
         ))}
-        {cells.map((cell) => {
-          const dayEvents = schedulesOnDate(events, cell.date);
-          const selected = isoDate(cell.date) === isoDate(cursor);
-          const isToday = isoDate(cell.date) === isoDate(startOfToday());
-          return (
-            <div
-              className={`min-h-32 min-w-0 border-b border-r border-line-light p-2 text-left ${
-                cell.outside ? "bg-surface-page/60" : ""
-              }`}
-              key={isoDate(cell.date)}
-            >
-              <button
-                className={`grid size-7 place-items-center rounded-circle text-caption ${
-                  selected
-                    ? "bg-blue-ice font-bold text-brand-primary"
-                    : cell.outside
-                      ? "text-text-disabled"
-                      : "text-text-secondary"
-                } ${isToday && !selected ? "ring-1 ring-brand-primary/40" : ""}`}
-                onClick={() => onSelectDate(cell.date)}
-                type="button"
-              >
-                {cell.date.getDate()}
-              </button>
-              <div className="mt-2 grid gap-1">
-                {dayEvents.slice(0, 2).map((event) => (
-                  <TimelineEvent
-                    compact
-                    event={event}
-                    key={event.scheduleUuid}
-                    onSelect={onSelectEvent}
-                    selected={event.scheduleUuid === selectedUuid}
-                  />
-                ))}
-                {dayEvents.length > 2 ? (
-                  <span className="text-caption-sm text-text-disabled">
-                    +{dayEvents.length - 2}
-                  </span>
-                ) : null}
-              </div>
-            </div>
-          );
-        })}
       </div>
+      {weeks.map((week) => {
+        const weekDates = week.map((cell) => cell.date);
+        const { segments, extraByCol } = monthWeekEventLayout(
+          weekDates,
+          events
+        );
+        const laneCount = segments.reduce(
+          (max, segment) => Math.max(max, segment.lane + 1),
+          0
+        );
+
+        return (
+          <div
+            className="grid grid-cols-7 border-b border-line-light"
+            key={isoDate(weekDates[0])}
+          >
+            {week.map((cell, col) => {
+              const selected = isoDate(cell.date) === isoDate(cursor);
+              const isToday = isoDate(cell.date) === isoDate(startOfToday());
+              return (
+                <div
+                  className={`min-h-16 min-w-0 overflow-hidden border-r border-line-light p-2 text-left ${
+                    cell.outside ? "bg-surface-page/60" : ""
+                  }`}
+                  key={isoDate(cell.date)}
+                >
+                  <button
+                    className={`grid size-7 place-items-center rounded-circle text-caption ${
+                      selected
+                        ? "bg-blue-ice font-bold text-brand-primary"
+                        : cell.outside
+                          ? "text-text-disabled"
+                          : "text-text-secondary"
+                    } ${isToday && !selected ? "ring-1 ring-brand-primary/40" : ""}`}
+                    onClick={() => onSelectDate(cell.date)}
+                    type="button"
+                  >
+                    {cell.date.getDate()}
+                  </button>
+                  {extraByCol[col] > 0 ? (
+                    <p className="mt-1 text-caption-sm text-text-disabled">
+                      +{extraByCol[col]}
+                    </p>
+                  ) : null}
+                </div>
+              );
+            })}
+            <div
+              className="col-span-7 grid grid-cols-7 gap-y-1 pb-2"
+              style={{
+                gridTemplateRows:
+                  laneCount > 0 ? `repeat(${laneCount}, 1.75rem)` : undefined,
+              }}
+            >
+              {segments.map((segment) => {
+                const category = segment.category;
+                const tone = categoryTone(category);
+                const color = segment.calendarColor?.startsWith("#")
+                  ? segment.calendarColor
+                  : undefined;
+
+                return (
+                  <button
+                    className={`mx-0.5 min-w-0 overflow-hidden truncate rounded-sm border-l-4 px-2 text-left text-caption-sm font-semibold ${toneSurfaceClasses[tone]} ${
+                      selectedUuid === segment.scheduleUuid
+                        ? "ring-2 ring-brand-primary/40"
+                        : ""
+                    }`}
+                    key={segment.key}
+                    onClick={() => onSelectEvent(segment.scheduleUuid)}
+                    style={{
+                      gridColumn: `${segment.startCol + 1} / span ${segment.span}`,
+                      gridRow: segment.lane + 1,
+                      ...(color ? { borderLeftColor: color } : {}),
+                    }}
+                    type="button"
+                  >
+                    {segment.title}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -637,7 +685,8 @@ function SchedulePreview({
                 <li className="relative pb-5" key={item.scheduleItemId}>
                   <span className="absolute -left-[1.55rem] top-1 size-2.5 rounded-circle bg-brand-primary" />
                   <time className="text-caption text-text-disabled">
-                    {item.scheduleTime ?? `DAY ${item.dayNumber}`}
+                    {formatScheduleClock(item.scheduleTime) ||
+                      `DAY ${item.dayNumber}`}
                   </time>
                   <p className="mt-1 text-body-sm font-semibold text-text-primary">
                     {item.subtitle ?? item.placeName ?? "일정"}

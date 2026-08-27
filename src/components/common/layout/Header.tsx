@@ -371,9 +371,6 @@ export function Header({
                   profileImage={auth?.profile?.profileImage ?? null}
                   trigger={
                     <>
-                      <span className="p-2.5 text-label-sm text-text-inverse">
-                        {nickname ? `${nickname}님` : "회원님"}
-                      </span>
                       <ProfileAvatar
                         className="ring-1 ring-white/30"
                         memberUuid={memberUuid}
@@ -381,6 +378,9 @@ export function Header({
                         size={36}
                         src={auth?.profile?.profileImage ?? null}
                       />
+                      <span className="p-2.5 text-label-sm text-text-inverse">
+                        {nickname ? `${nickname}님` : "회원님"}
+                      </span>
                     </>
                   }
                 />
