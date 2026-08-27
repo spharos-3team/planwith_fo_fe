@@ -52,6 +52,7 @@ import { MeetingToast } from "@/features/meeting/components/MeetingToast";
 import {
   getChatRoomByMeeting,
   markChatRoomRead,
+  uploadChatFile,
 } from "@/services/chat/chat-rooms";
 import { getMeetingDetail } from "@/services/meeting/meetings";
 import { ApiClientError } from "@/utils/apiClient";
@@ -87,6 +88,7 @@ export function ChatPage() {
   );
   const [reportMemberUuid, setReportMemberUuid] = useState<string | null>(null);
   const [reportDone, setReportDone] = useState(false);
+  const [sending, setSending] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const selectedRef = useRef<string | null>(null);
 
@@ -347,14 +349,33 @@ export function ChatPage() {
               void messagesQuery.fetchNextPage();
             }}
             onReport={setReportMemberUuid}
-            onSend={(content) => {
-              if (!stomp.sendText(content)) {
-                setToast(stomp.error ?? "메시지를 보내지 못했습니다.");
+            onSend={async ({ content, files }) => {
+              setSending(true);
+              try {
+                const uploaded = [];
+                for (const file of files) {
+                  uploaded.push(
+                    await uploadChatFile(selectedRoom.chatRoomUuid, file)
+                  );
+                }
+                if (!stomp.sendMessage(content, uploaded)) {
+                  setToast(stomp.error ?? "메시지를 보내지 못했습니다.");
+                  return false;
+                }
+                return true;
+              } catch (error) {
+                setToast(
+                  error instanceof ApiClientError
+                    ? error.message
+                    : "파일을 올리지 못했습니다."
+                );
                 return false;
+              } finally {
+                setSending(false);
               }
-              return true;
             }}
             room={selectedRoom}
+            sending={sending}
           />
         </div>
       ) : meetingUuidParam &&

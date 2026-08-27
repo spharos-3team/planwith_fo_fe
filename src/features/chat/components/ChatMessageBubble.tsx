@@ -1,5 +1,6 @@
 "use client";
 
+import { ChatMessageFiles } from "@/features/chat/components/ChatMessageFiles";
 import { formatChatClock } from "@/features/chat/lib/format";
 import type { ChatMessage } from "@/features/chat/types";
 import { ProfileAvatar } from "@/features/mypage/components/ProfileAvatar";
@@ -23,6 +24,7 @@ export function ChatMessageBubble({
   const body = message.deleted
     ? "삭제된 메시지입니다."
     : (message.content?.trim() ?? "");
+  const files = message.deleted ? [] : message.files;
 
   return (
     <div className={`flex gap-2 ${mine ? "flex-row-reverse" : "flex-row"}`}>
@@ -54,17 +56,26 @@ export function ChatMessageBubble({
         <div
           className={`flex items-end gap-1 ${mine ? "flex-row-reverse" : ""}`}
         >
-          <p
-            className={`whitespace-pre-wrap break-words rounded-lg px-3 py-2 text-body-sm ${
-              message.deleted
-                ? "bg-surface-page text-text-disabled"
-                : mine
-                  ? "bg-brand-primary text-text-inverse"
-                  : "bg-blue-ice text-text-primary"
-            }`}
-          >
-            {body || (message.files.length > 0 ? "첨부 파일" : "")}
-          </p>
+          <div className="min-w-0">
+            {files.length > 0 ? (
+              <ChatMessageFiles files={files} mine={mine} />
+            ) : null}
+            {body ? (
+              <p
+                className={`whitespace-pre-wrap break-words rounded-lg px-3 py-2 text-body-sm ${
+                  files.length > 0 ? "mt-1" : ""
+                } ${
+                  message.deleted
+                    ? "bg-surface-page text-text-disabled"
+                    : mine
+                      ? "bg-brand-primary text-text-inverse"
+                      : "bg-blue-ice text-text-primary"
+                }`}
+              >
+                {body}
+              </p>
+            ) : null}
+          </div>
           <time className="shrink-0 pb-0.5 text-caption-sm text-text-disabled">
             {formatChatClock(message.createdAt)}
           </time>
